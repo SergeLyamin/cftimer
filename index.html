@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн таймер для кроссфита - ТАБАТА, ЕМОМ, АМРАП</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Главное меню -->
+        <div id="main-menu" class="screen">
+            <button class="menu-item" data-timer="clock">ЧАСЫ</button>
+            <button class="menu-item" data-timer="tabata">TABATA</button>
+            <button class="menu-item" data-timer="fortime">НА ВРЕМЯ</button>
+            <button class="menu-item" data-timer="emom">EMOM</button>
+            <button class="menu-item" data-timer="amrap">AMRAP</button>
+        </div>
+
+        <!-- Экраны таймеров -->
+        <div id="timer-screens">
+            <!-- Каждый экран будет добавляться динамически -->
+        </div>
+    </div>
+
+    <script src="timer.js"></script>
+</body>
+
+</html>
