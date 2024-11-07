@@ -1,0 +1,89 @@
+<!-- Новый файл для страницы управления на телефоне -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таймер для кроссфита - Удаленное управление</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Главное меню -->
+        <div id="main-menu" class="screen">
+            <button class="menu-item" data-timer="clock">ЧАСЫ</button>
+            <button class="menu-item" data-timer="tabata">TABATA</button>
+            <button class="menu-item" data-timer="fortime">НА ВРЕМЯ</button>
+            <button class="menu-item" data-timer="emom">EMOM</button>
+            <button class="menu-item" data-timer="amrap">AMRAP</button>
+        </div>
+
+        <!-- Экраны таймеров -->
+        <div id="timer-screens"></div>
+    </div>
+
+    <script>
+        // Получаем roomId из URL
+        const roomId = window.location.pathname.split('/').pop();
+        const ws = new WebSocket(`ws://${window.location.host}/timer/${roomId}`);
+        
+        // При получении обновления от основного экрана
+        ws.onmessage = (event) => {
+            const state = JSON.parse(event.data);
+            
+            // Обновляем состояние таймера
+            if (state.screen !== currentScreen) {
+                showScreen(state.screen);
+            }
+            
+            // Обновляем дисплей таймера
+            const display = document.querySelector('.timer-display');
+            if (display) {
+                display.textContent = formatTime(state.time);
+            }
+            
+            // Обновляем состояние кнопок
+            updateButtons(state.isRunning);
+        };
+
+        // Обработчики кликов по кнопкам отправляют команды на сервер
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.menu-item')) {
+                ws.send(JSON.stringify({
+                    action: 'changeTimer',
+                    timerType: e.target.dataset.timer
+                }));
+            }
+            
+            if (e.target.matches('.start-button')) {
+                ws.send(JSON.stringify({ action: 'start' }));
+            }
+            
+            if (e.target.matches('.reset-button')) {
+                ws.send(JSON.stringify({ action: 'reset' }));
+            }
+        });
+
+        // Функции для работы с интерфейсом
+        function showScreen(screenName) {
+            // Такая же логика как в основном таймере
+            currentScreen = screenName;
+            // ...
+        }
+
+        function updateButtons(isRunning) {
+            const startButton = document.querySelector('.start-button');
+            if (startButton) {
+                startButton.textContent = isRunning ? 'ПАУЗА' : 'СТАРТ';
+            }
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html> 

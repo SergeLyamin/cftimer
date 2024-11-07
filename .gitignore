@@ -1,1 +1,5 @@
 cf-herro.zip
+.DS_Store
+cf-herro/
+node_modules/
+public/fonts/
