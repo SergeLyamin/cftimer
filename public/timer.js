@@ -285,59 +285,72 @@ class Timer {
     updateIntervalTimer() {
         if (!this.isRunning) return;
         
-        const settings = this.settings.interval;
         const timerDisplay = document.querySelector('.timer-display');
         
-        if (this.phase === 'countdown' && this.remainingTime <= 3 && this.remainingTime > 0) {
+        if (this.phase === 'countdown' && this.remainingTime <= 3 && this.remainingTime > 1) {
             this.playSound('beep');
         }
         
-        const minutes = Math.floor(this.remainingTime / 60);
-        const seconds = this.remainingTime % 60;
-        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (this.remainingTime === 1) {
-            setTimeout(() => {
-                this.remainingTime--;
-                this.handlePhaseChange();
-            }, 1000);
-        } else {
-            this.remainingTime--;
-            this.handlePhaseChange();
-        }
-    }
-
-    handlePhaseChange() {
-        if (this.remainingTime < 0) {
-            const settings = this.settings.interval;
+        if (this.remainingTime === 1 && !this.isTransitioning) {
+            this.isTransitioning = true;
+            
+            timerDisplay.textContent = '00:01';
             
             switch (this.phase) {
                 case 'countdown':
-                    this.phase = 'work';
-                    this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
-                    this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
                     this.playSound('start');
                     break;
-                    
                 case 'work':
-                    if (this.currentRound >= settings.rounds && this.isWorkPhase) {
-                        this.finishInterval();
-                        return;
-                    }
-                    this.phase = 'rest';
-                    this.remainingTime = settings.restMinutes * 60 + settings.restSeconds;
-                    this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'ОТДЫХ');
                     this.playSound('rest');
                     break;
-                    
                 case 'rest':
-                    this.currentRound++;
-                    this.phase = 'work';
-                    this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
-                    this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
                     this.playSound('start');
                     break;
             }
+            
+            setTimeout(() => {
+                this.isTransitioning = false;
+                this.switchToNextPhase();
+            }, 1000);
+            
+            return;
+        }
+        
+        if (!this.isTransitioning) {
+            const minutes = Math.floor(this.remainingTime / 60);
+            const seconds = this.remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            this.remainingTime--;
+        }
+    }
+
+    switchToNextPhase() {
+        const settings = this.settings.interval;
+        
+        switch (this.phase) {
+            case 'countdown':
+                this.phase = 'work';
+                this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
+                this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
+                break;
+                
+            case 'work':
+                if (this.currentRound >= settings.rounds && this.isWorkPhase) {
+                    this.finishInterval();
+                    return;
+                }
+                this.phase = 'rest';
+                this.remainingTime = settings.restMinutes * 60 + settings.restSeconds;
+                this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'ОТДЫХ');
+                break;
+                
+            case 'rest':
+                this.currentRound++;
+                this.phase = 'work';
+                this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
+                this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
+                break;
         }
     }
 
