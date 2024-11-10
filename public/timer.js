@@ -1,247 +1,68 @@
 class Timer {
     constructor() {
+        this.createMainMenu = this.createMainMenu.bind(this);
+        this.createClockScreen = this.createClockScreen.bind(this);
+        this.createIntervalScreen = this.createIntervalScreen.bind(this);
+        this.createForTimeScreen = this.createForTimeScreen.bind(this);
+        this.createAmrapScreen = this.createAmrapScreen.bind(this);
+
+        this.screens = {
+            'main-menu': this.createMainMenu,
+            'clock': this.createClockScreen,
+            'interval': this.createIntervalScreen,
+            'fortime': this.createForTimeScreen,
+            'amrap': this.createAmrapScreen
+        };
+
         this.currentScreen = 'main-menu';
         this.interval = null;
         this.time = 0;
         this.isRunning = false;
-        
-        this.screens = {
-            'main-menu': this.createMainMenu.bind(this),
-            'clock': this.createClockScreen.bind(this),
-            'tabata': this.createTabataScreen.bind(this),
-            'fortime': this.createForTimeScreen.bind(this),
-            'emom': this.createEmomScreen.bind(this),
-            'amrap': this.createAmrapScreen.bind(this)
+        this.settings = {
+            interval: {
+                rounds: 8,
+                workMinutes: 0,
+                workSeconds: 20,
+                restMinutes: 0,
+                restSeconds: 10,
+                countdownSeconds: 10
+            },
+            fortime: {
+                targetMinutes: 0,
+                targetSeconds: 0,
+                countdownSeconds: 10
+            },
+            amrap: {
+                targetMinutes: 10,
+                targetSeconds: 0,
+                countdownSeconds: 10
+            }
         };
 
         this.translations = {
             'CLOCK': 'ЧАСЫ',
+            'INTERVAL': 'EMOM / TABATA',
             'FOR TIME': 'НА ВРЕМЯ',
             'START': 'СТАРТ',
             'PAUSE': 'ПАУЗА',
             'RESET': 'СБРОС',
+            'RESTART': 'ПЕРЕЗАПУСК',
+            'ROUNDS': 'РАУНДОВ',
+            'WORK': 'РАБОТА',
+            'REST': 'ОТДЫХ',
+            'MINUTES': 'МИНУТ',
+            'SECONDS': 'СЕКУНД',
+            'COUNTDOWN': 'ОТСЧЕТ'
+        };
+
+        this.sounds = {
+            beep: new Audio('sound/beep.mp3'),
+            start: new Audio('sound/start.mp3'),
+            rest: new Audio('sound/rest.mp3'),
+            finish: new Audio('sound/finish.mp3')
         };
 
         this.init();
-        this.initWebSocket();
-    }
-
-    initWebSocket() {
-        // Обработка команд от удаленного управления
-        if (window.ws) {
-            window.ws.onmessage = (event) => {
-                const command = JSON.parse(event.data);
-                switch(command.action) {
-                    case 'changeTimer':
-                        this.showScreen(command.timerType);
-                        break;
-                    case 'start':
-                        this.toggleTimer();
-                        break;
-                    case 'reset':
-                        this.resetTimer();
-                        break;
-                }
-            };
-        }
-    }
-
-    init() {
-        // Инициализация обработчиков событий
-        document.querySelectorAll('.menu-item').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const timerType = e.target.dataset.timer;
-                this.showScreen(timerType);
-            });
-        });
-    }
-
-    showScreen(screenName) {
-        // Очищаем текущий экран
-        const timerScreens = document.getElementById('timer-screens');
-        timerScreens.innerHTML = '';
-        
-        // Скрываем все экраны
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.style.display = 'none';
-        });
-
-        // Показываем нужный экран
-        if (screenName === 'main-menu') {
-            document.getElementById('main-menu').style.display = 'flex';
-        } else {
-            const screen = this.screens[screenName]();
-            timerScreens.appendChild(screen);
-        }
-        
-        this.currentScreen = screenName;
-
-        // Отправляем состояние через WebSocket
-        this.broadcastState();
-    }
-
-    broadcastState() {
-        if (window.ws && window.ws.readyState === WebSocket.OPEN) {
-            window.ws.send(JSON.stringify({
-                screen: this.currentScreen,
-                time: this.time,
-                isRunning: this.isRunning
-            }));
-        }
-    }
-
-    createMainMenu() {
-        const menu = document.createElement('div');
-        menu.className = 'screen';
-        return menu;
-    }
-
-    createClockScreen() {
-        const screen = document.createElement('div');
-        screen.className = 'screen';
-
-        const display = document.createElement('div');
-        display.className = 'timer-display';
-        display.textContent = '00:00:00';
-
-        const controlPanel = document.createElement('div');
-        controlPanel.className = 'control-panel';
-
-        const backButton = document.createElement('button');
-        backButton.className = 'back-button';
-        backButton.textContent = '←';
-        backButton.onclick = () => this.showScreen('main-menu');
-
-        screen.appendChild(backButton);
-        screen.appendChild(display);
-        screen.appendChild(controlPanel);
-
-        // Запускаем часы
-        this.startClock();
-
-        return screen;
-    }
-
-    createTabataScreen() {
-        const screen = document.createElement('div');
-        screen.className = 'screen';
-
-        // Верхняя панель с заголовком и кнопками
-        const header = document.createElement('div');
-        header.className = 'header-panel';
-
-        // Левая часть с кнопкой назад и заголовком
-        const leftHeader = document.createElement('div');
-        leftHeader.className = 'header-left';
-
-        const backButton = document.createElement('button');
-        backButton.className = 'back-button';
-        backButton.innerHTML = '←';
-        backButton.onclick = () => this.showScreen('main-menu');
-
-        const title = document.createElement('h2');
-        title.className = 'timer--header';
-        title.textContent = 'TABATA';
-
-        leftHeader.appendChild(backButton);
-        leftHeader.appendChild(title);
-
-        // Кнопка полноэкранного режима
-        const fullscreenButton = document.createElement('button');
-        fullscreenButton.className = 'fullscreen-button';
-        fullscreenButton.innerHTML = '⤢';
-        fullscreenButton.onclick = () => this.toggleFullscreen();
-
-        header.appendChild(leftHeader);
-        header.appendChild(fullscreenButton);
-
-        // Настройки таймера
-        const settings = document.createElement('div');
-        settings.className = 'timer--settings';
-        settings.innerHTML = `
-            <div class="timer--settingField">
-                <label>
-                    <span class="tr">FOR</span>
-                    <div class="timer--input-container">
-                        <input type="number" name="rounds" value="8" min="1" class="timer--input">
-                    </div>
-                    <span class="tl">ROUND</span>
-                </label>
-            </div>
-            <div class="timer--settingField">
-                <label>
-                    <span class="tr">WORK</span>
-                    <div class="timer--input-container">
-                        <input type="number" name="work" value="20" min="1" class="timer--input">
-                    </div>
-                    <span class="tl">SECONDS</span>
-                </label>
-            </div>
-            <div class="timer--settingField">
-                <label>
-                    <span class="tr">REST</span>
-                    <div class="timer--input-container">
-                        <input type="number" name="rest" value="10" min="1" class="timer--input">
-                    </div>
-                    <span class="tl">SECONDS</span>
-                </label>
-            </div>
-        `;
-
-        // Дисплей таймера (изначально скрыт)
-        const display = document.createElement('div');
-        display.className = 'timer-display';
-        display.style.display = 'none';
-
-        // Информация о текущем раунде
-        const roundInfo = document.createElement('div');
-        roundInfo.className = 'round-info';
-        roundInfo.style.display = 'none';
-
-        // Кнопка старт
-        const startButton = document.createElement('button');
-        startButton.className = 'menu-item start-button';
-        startButton.textContent = this.translations.START;
-        startButton.onclick = () => {
-            if (!this.isRunning) {
-                const rounds = parseInt(settings.querySelector('[name="rounds"]').value);
-                const work = parseInt(settings.querySelector('[name="work"]').value);
-                const rest = parseInt(settings.querySelector('[name="rest"]').value);
-                
-                settings.style.display = 'none';
-                display.style.display = 'block';
-                startButton.style.display = 'none';
-                
-                // Начинаем обратный отсчет
-                this.startCountdown(() => {
-                    roundInfo.style.display = 'block';
-                    this.startTabata(rounds, work, rest);
-                });
-            }
-        };
-
-        screen.appendChild(header);
-        screen.appendChild(settings);
-        screen.appendChild(display);
-        screen.appendChild(roundInfo);
-        screen.appendChild(startButton);
-
-        return screen;
-    }
-
-    createForTimeScreen() {
-        // Аналогично TabataScreen
-        return this.createTabataScreen();
-    }
-
-    createEmomScreen() {
-        // Аналогично TabataScreen
-        return this.createTabataScreen();
-    }
-
-    createAmrapScreen() {
-        // Аналогично TabataScreen
-        return this.createTabataScreen();
     }
 
     startClock() {
@@ -249,7 +70,7 @@ class Timer {
             clearInterval(this.interval);
         }
 
-        this.interval = setInterval(() => {
+        const updateClock = () => {
             const now = new Date();
             const display = document.querySelector('.timer-display');
             if (display) {
@@ -258,151 +79,365 @@ class Timer {
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 display.textContent = `${hours}:${minutes}:${seconds}`;
             }
-        }, 1000);
+        };
+
+        updateClock();
+        this.interval = setInterval(updateClock, 1000);
     }
 
-    toggleTimer() {
-        this.isRunning = !this.isRunning;
-        const startButton = document.querySelector('.start-button');
-        if (startButton) {
-            startButton.textContent = this.isRunning ? 
-                this.translations.PAUSE : 
-                this.translations.START;
-        }
-    }
+    init() {
+        document.querySelectorAll('.menu-item').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const timerType = e.target.dataset.timer;
+                if (timerType) {
+                    this.showScreen(timerType);
+                }
+            });
+        });
 
-    resetTimer() {
-        this.isRunning = false;
-        const display = document.querySelector('.timer-display');
-        if (display) {
-            display.textContent = '00:00';
-            display.classList.remove('countdown', 'running');
-        }
-        const startButton = document.querySelector('.start-button');
-        if (startButton) {
-            startButton.textContent = this.translations.START;
-        }
-    }
-
-    // Добавим методы для работы с Tabata таймером
-    startTabata(rounds, workTime, restTime) {
-        let currentRound = 1;
-        let timeLeft = workTime;
-        let isWorkPhase = true;
-        
-        const roundInfo = document.querySelector('.round-info');
-        const display = document.querySelector('.timer-display');
-        
-        display.addEventListener('click', () => {
-            this.isRunning = !this.isRunning;
-            if (!this.isRunning) {
-                this.playBeep(true);
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('back-button')) {
+                this.showScreen('main-menu');
+            }
+            if (e.target.classList.contains('fullscreen-button')) {
+                this.toggleFullscreen();
             }
         });
-        
-        this.interval = setInterval(() => {
-            if (!this.isRunning) return;
+    }
 
-            if (timeLeft > 0) {
-                timeLeft--;
-                display.textContent = this.formatTime(timeLeft);
-                roundInfo.textContent = `Round ${currentRound}/${rounds} - ${isWorkPhase ? 'WORK' : 'REST'}`;
-            } else {
-                this.playBeep(true);
-                
-                if (isWorkPhase) {
-                    timeLeft = restTime;
-                    isWorkPhase = false;
-                } else {
-                    currentRound++;
-                    if (currentRound > rounds) {
-                        this.resetTimer();
-                        display.classList.remove('running');
+    createTimeInputs(label, minutesName, secondsName, defaultMinutes = 0, defaultSeconds = 0) {
+        return `
+            <div class="timer--settingField">
+                <label>
+                    <span>${label}</span>
+                    <div class="timer--input-container">
+                        <input type="number" 
+                               name="${minutesName}" 
+                               value="${defaultMinutes}" 
+                               min="0" 
+                               max="59" 
+                               class="timer--input">
+                        <span>:</span>
+                        <input type="number" 
+                               name="${secondsName}" 
+                               value="${defaultSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="timer--input">
+                    </div>
+                </label>
+            </div>
+        `;
+    }
+
+    createHeader(title, details = '') {
+        return `
+            <div class="header-panel">
+                <div class="header-left">
+                    <button class="back-button">←</button>
+                    <h2 class="timer--header">${title}${details ? ' – ' + details : ''}</h2>
+                </div>
+                <button class="fullscreen-button">⛶</button>
+            </div>
+        `;
+    }
+
+    showScreen(screenName) {
+        const timerScreens = document.getElementById('timer-screens');
+        timerScreens.innerHTML = '';
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.style.display = 'none';
+        });
+
+        if (screenName === 'main-menu') {
+            document.getElementById('main-menu').style.display = 'flex';
+        } else if (this.screens[screenName]) {
+            const screen = this.screens[screenName]();
+            timerScreens.appendChild(screen);
+            screen.style.display = 'flex';
+        }
+
+        this.currentScreen = screenName;
+
+        if (screenName === 'clock') {
+            this.startClock();
+        }
+    }
+
+    createIntervalScreen() {
+        const screen = document.createElement('div');
+        screen.className = 'screen';
+
+        screen.innerHTML = `
+            ${this.createHeader('EMOM / TABATA')}
+            <div class="timer--settings">
+                <div class="timer--settingField">
+                    <label>
+                        <span>${this.translations.ROUNDS}</span>
+                        <div class="timer--input-container">
+                            <input type="number" 
+                                   name="rounds" 
+                                   value="${this.settings.interval.rounds}" 
+                                   min="1" 
+                                   class="timer--input">
+                        </div>
+                    </label>
+                </div>
+                ${this.createTimeInputs(
+                    this.translations.WORK,
+                    'workMinutes',
+                    'workSeconds',
+                    this.settings.interval.workMinutes,
+                    this.settings.interval.workSeconds
+                )}
+                ${this.createTimeInputs(
+                    this.translations.REST,
+                    'restMinutes',
+                    'restSeconds',
+                    this.settings.interval.restMinutes,
+                    this.settings.interval.restSeconds
+                )}
+                ${this.createTimeInputs(
+                    this.translations.COUNTDOWN,
+                    'countdownMinutes',
+                    'countdownSeconds',
+                    0,
+                    this.settings.interval.countdownSeconds
+                )}
+                <button class="menu-item start-button">
+                    ${this.translations.START}
+                </button>
+            </div>
+            <div class="timer-container" style="display: none;">
+                <div class="round-number"></div>
+                <div class="timer-display"></div>
+            </div>
+        `;
+
+        const startButton = screen.querySelector('.start-button');
+        startButton.addEventListener('click', () => this.startInterval());
+
+        screen.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', () => this.saveIntervalSettings(screen));
+        });
+
+        const timerDisplay = screen.querySelector('.timer-display');
+        timerDisplay.addEventListener('click', () => this.togglePause());
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && this.currentScreen === 'interval') {
+                e.preventDefault();
+                this.togglePause();
+            }
+        });
+
+        return screen;
+    }
+
+    saveIntervalSettings(screen) {
+        try {
+            const settings = {
+                rounds: parseInt(screen.querySelector('[name="rounds"]').value) || 8,
+                workMinutes: parseInt(screen.querySelector('[name="workMinutes"]').value) || 0,
+                workSeconds: parseInt(screen.querySelector('[name="workSeconds"]').value) || 20,
+                restMinutes: parseInt(screen.querySelector('[name="restMinutes"]').value) || 0,
+                restSeconds: parseInt(screen.querySelector('[name="restSeconds"]').value) || 10,
+                countdownSeconds: parseInt(screen.querySelector('[name="countdownSeconds"]').value) || 10
+            };
+
+            this.settings.interval = settings;
+        } catch (error) {
+            console.error('Ошибка сохранения настроек:', error);
+        }
+    }
+
+    startInterval() {
+        try {
+            const screen = document.querySelector('#timer-screens .screen');
+            if (!screen) {
+                console.error('Экран таймера не найден');
+                return;
+            }
+
+            const settings = this.settings.interval;
+            const timerSettings = screen.querySelector('.timer--settings');
+            const timerContainer = screen.querySelector('.timer-container');
+            
+            this.saveIntervalSettings(screen);
+            
+            timerSettings.style.display = 'none';
+            timerContainer.style.display = 'flex';
+            
+            this.currentRound = 1;
+            this.isWorkPhase = true;
+            this.remainingTime = settings.countdownSeconds;
+            this.phase = 'countdown';
+            
+            this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'ПОДГОТОВКА');
+            
+            this.interval = setInterval(() => this.updateIntervalTimer(), 1000);
+            this.isRunning = true;
+        } catch (error) {
+            console.error('Ошибка запуска таймера:', error);
+        }
+    }
+
+    updateIntervalTimer() {
+        if (!this.isRunning) return;
+        
+        const settings = this.settings.interval;
+        const timerDisplay = document.querySelector('.timer-display');
+        
+        if (this.phase === 'countdown' && this.remainingTime <= 3 && this.remainingTime > 0) {
+            this.playSound('beep');
+        }
+        
+        const minutes = Math.floor(this.remainingTime / 60);
+        const seconds = this.remainingTime % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (this.remainingTime === 1) {
+            setTimeout(() => {
+                this.remainingTime--;
+                this.handlePhaseChange();
+            }, 1000);
+        } else {
+            this.remainingTime--;
+            this.handlePhaseChange();
+        }
+    }
+
+    handlePhaseChange() {
+        if (this.remainingTime < 0) {
+            const settings = this.settings.interval;
+            
+            switch (this.phase) {
+                case 'countdown':
+                    this.phase = 'work';
+                    this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
+                    this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
+                    this.playSound('start');
+                    break;
+                    
+                case 'work':
+                    if (this.currentRound >= settings.rounds && this.isWorkPhase) {
+                        this.finishInterval();
                         return;
                     }
-                    timeLeft = workTime;
-                    isWorkPhase = true;
-                }
+                    this.phase = 'rest';
+                    this.remainingTime = settings.restMinutes * 60 + settings.restSeconds;
+                    this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'ОТДЫХ');
+                    this.playSound('rest');
+                    break;
+                    
+                case 'rest':
+                    this.currentRound++;
+                    this.phase = 'work';
+                    this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
+                    this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
+                    this.playSound('start');
+                    break;
             }
-        }, 1000);
+        }
     }
 
-    formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
-
-    playBeep(isLong = false) {
-        const event = new CustomEvent('playBeep', { 
-            detail: { isLong } 
-        });
-        document.dispatchEvent(event);
-    }
-
-    // Добавим метод для обратного отсчета
-    startCountdown(callback) {
-        let count = 10;
-        const display = document.querySelector('.timer-display');
-        display.style.display = 'block';
-        display.classList.add('countdown');
+    finishInterval() {
+        clearInterval(this.interval);
+        this.isRunning = false;
         
-        const countdown = setInterval(() => {
-            display.textContent = count;
-            
-            if (count <= 3) {
-                this.playBeep(count === 1);
-            }
-            
-            count--;
-            
-            if (count < 0) {
-                clearInterval(countdown);
-                this.isRunning = true;
-                display.classList.remove('countdown');
-                display.classList.add('running');
-                callback();
-            }
-        }, 1000);
+        this.playSound('finish');
+        
+        const timerContainer = document.querySelector('.timer-container');
+        timerContainer.innerHTML = `
+            <div class="finish-message">${this.settings.interval.rounds} раундов выполены</div>
+            <button class="menu-item restart-button">${this.translations.RESTART}</button>
+        `;
+        
+        const restartButton = timerContainer.querySelector('.restart-button');
+        restartButton.addEventListener('click', () => this.showScreen('interval'));
     }
 
-    // Обновим метод toggleFullscreen
+    updateHeader(title, details = '') {
+        const header = document.querySelector('.timer--header');
+        header.textContent = details ? `${title} – ${details}` : title;
+    }
+
+    togglePause() {
+        this.isRunning = !this.isRunning;
+        if (this.isRunning) {
+            this.interval = setInterval(() => this.updateIntervalTimer(), 1000);
+        } else {
+            clearInterval(this.interval);
+        }
+    }
+
+    playSound(soundName) {
+        const sound = this.sounds[soundName];
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log('Ошибка воспроизведения звука:', e));
+        }
+    }
+
     toggleFullscreen() {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log('Ошибка переключения в полноэкранный режим:', err);
+            });
         } else {
-            document.exitFullscreen();
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
         }
+    }
+
+    createMainMenu() {
+        const menu = document.createElement('div');
+        menu.className = 'screen';
+        menu.innerHTML = `
+            <button class="menu-item" data-timer="clock">ЧАСЫ</button>
+            <button class="menu-item" data-timer="interval">EMOM / TABATA</button>
+            <button class="menu-item" data-timer="fortime">НА ВРЕМЯ</button>
+            <button class="menu-item" data-timer="amrap">AMRAP</button>
+        `;
+        return menu;
+    }
+
+    createClockScreen() {
+        const screen = document.createElement('div');
+        screen.className = 'screen';
+        screen.innerHTML = `
+            ${this.createHeader('ЧАСЫ')}
+            <div class="timer-display"></div>
+        `;
+        return screen;
+    }
+
+    createForTimeScreen() {
+        const screen = document.createElement('div');
+        screen.className = 'screen';
+        screen.innerHTML = `
+            ${this.createHeader('НА ВРЕМЯ')}
+            <div class="timer-display">
+                В разработке...
+            </div>
+        `;
+        return screen;
+    }
+
+    createAmrapScreen() {
+        const screen = document.createElement('div');
+        screen.className = 'screen';
+        screen.innerHTML = `
+            ${this.createHeader('AMRAP')}
+            <div class="timer-display">
+                В разработке...
+            </div>
+        `;
+        return screen;
     }
 }
 
-// Создаем экземпляр таймера при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     window.timer = new Timer();
 });
-
-// Добавляем обработчик кликов и нажатия пробела
-function initializeTimerControls() {
-    const timerArea = document.querySelector('.timer-clickable-area');
-    
-    // Обработчик клика
-    timerArea.addEventListener('click', toggleTimer);
-    
-    // Обработчик нажатия пробела
-    document.addEventListener('keydown', (event) => {
-        if (event.code === 'Space') {
-            event.preventDefault(); // Предотвращаем прокрутку страницы
-            toggleTimer();
-        }
-    });
-}
-
-function toggleTimer() {
-    // Здесь логика паузы/возобновления таймера
-    const isRunning = timer.isRunning;
-    if (isRunning) {
-        timer.pause();
-    } else {
-        timer.resume();
-    }
-}
