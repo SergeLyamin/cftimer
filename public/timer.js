@@ -143,8 +143,16 @@ class Timer {
     }
 
     showScreen(screenName) {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        this.isRunning = false;
+        this.isTransitioning = false;
+        
         const timerScreens = document.getElementById('timer-screens');
         timerScreens.innerHTML = '';
+        
         document.querySelectorAll('.screen').forEach(screen => {
             screen.style.display = 'none';
         });
@@ -155,13 +163,13 @@ class Timer {
             const screen = this.screens[screenName]();
             timerScreens.appendChild(screen);
             screen.style.display = 'flex';
+            
+            if (screenName === 'clock') {
+                this.startClock();
+            }
         }
 
         this.currentScreen = screenName;
-
-        if (screenName === 'clock') {
-            this.startClock();
-        }
     }
 
     createIntervalScreen() {
@@ -286,6 +294,12 @@ class Timer {
         if (!this.isRunning) return;
         
         const timerDisplay = document.querySelector('.timer-display');
+        if (!timerDisplay) {
+            clearInterval(this.interval);
+            this.interval = null;
+            this.isRunning = false;
+            return;
+        }
         
         if (this.phase === 'countdown' && this.remainingTime <= 3 && this.remainingTime > 1) {
             this.playSound('beep');
@@ -355,19 +369,26 @@ class Timer {
     }
 
     finishInterval() {
-        clearInterval(this.interval);
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
         this.isRunning = false;
-        
-        this.playSound('finish');
+        this.isTransitioning = false;
         
         const timerContainer = document.querySelector('.timer-container');
-        timerContainer.innerHTML = `
-            <div class="finish-message">${this.settings.interval.rounds} раундов выполены</div>
-            <button class="menu-item restart-button">${this.translations.RESTART}</button>
-        `;
-        
-        const restartButton = timerContainer.querySelector('.restart-button');
-        restartButton.addEventListener('click', () => this.showScreen('interval'));
+        if (timerContainer) {
+            this.playSound('finish');
+            timerContainer.innerHTML = `
+                <div class="finish-message">${this.settings.interval.rounds} раундов выполнены</div>
+                <button class="menu-item restart-button">${this.translations.RESTART}</button>
+            `;
+            
+            const restartButton = timerContainer.querySelector('.restart-button');
+            if (restartButton) {
+                restartButton.addEventListener('click', () => this.showScreen('interval'));
+            }
+        }
     }
 
     updateHeader(title, details = '') {
@@ -377,10 +398,15 @@ class Timer {
 
     togglePause() {
         this.isRunning = !this.isRunning;
-        if (this.isRunning) {
+        const timerDisplay = document.querySelector('.timer-display');
+        
+        if (this.isRunning && timerDisplay) {
             this.interval = setInterval(() => this.updateIntervalTimer(), 1000);
         } else {
-            clearInterval(this.interval);
+            if (this.interval) {
+                clearInterval(this.interval);
+                this.interval = null;
+            }
         }
     }
 
