@@ -524,11 +524,66 @@ class Timer {
         screen.className = 'screen';
         screen.innerHTML = `
             ${this.createHeader('AMRAP')}
-            <div class="timer-display">
-                В разработке...
+            <div class="timer--settings">
+                ${this.createTimeInputs(
+                    'ВРЕМЯ',
+                    'targetMinutes',
+                    'targetSeconds',
+                    this.settings.amrap.targetMinutes,
+                    this.settings.amrap.targetSeconds
+                )}
+                <div class="timer--settingField">
+                    <label>
+                        <span>${this.translations.COUNTDOWN}</span>
+                        <div class="timer--input-container">
+                            <input type="number" 
+                                   name="countdownSeconds" 
+                                   value="${this.settings.amrap.countdownSeconds}" 
+                                   min="0" 
+                                   max="59" 
+                                   class="timer--input">
+                        </div>
+                    </label>
+                </div>
+                <button class="menu-item start-button">${this.translations.START}</button>
+            </div>
+            <div class="timer-container" style="display: none;">
+                <div class="timer-display"></div>
             </div>
         `;
+
+        const startButton = screen.querySelector('.start-button');
+        startButton.addEventListener('click', () => this.startAmrap());
+
+        screen.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', () => this.saveAmrapSettings(screen));
+        });
+
+        const timerDisplay = screen.querySelector('.timer-display');
+        timerDisplay.addEventListener('click', () => this.togglePause());
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && this.currentScreen === 'amrap') {
+                e.preventDefault();
+                this.togglePause();
+            }
+        });
+
         return screen;
+    }
+
+    saveAmrapSettings(screen) {
+        try {
+            const settings = {
+                targetMinutes: parseInt(screen.querySelector('[name="targetMinutes"]').value) || 0,
+                targetSeconds: parseInt(screen.querySelector('[name="targetSeconds"]').value) || 0,
+                countdownSeconds: parseInt(screen.querySelector('[name="countdownSeconds"]').value) || 10
+            };
+
+            this.settings.amrap = settings;
+        } catch (error) {
+            console.error('Ошибка сохранения настроек:', error);
+        }
     }
 
     startForTime() {
@@ -631,6 +686,115 @@ class Timer {
             const restartButton = timerContainer.querySelector('.restart-button');
             if (restartButton) {
                 restartButton.addEventListener('click', () => this.showScreen('fortime'));
+            }
+        }
+    }
+
+    startAmrap() {
+        try {
+            const screen = document.querySelector('#timer-screens .screen');
+            if (!screen) {
+                console.error('Экран таймера не найден');
+                return;
+            }
+
+            const settings = this.settings.amrap;
+            const timerSettings = screen.querySelector('.timer--settings');
+            const timerContainer = screen.querySelector('.timer-container');
+            
+            this.saveAmrapSettings(screen);
+            
+            timerSettings.style.display = 'none';
+            timerContainer.style.display = 'flex';
+            
+            this.remainingTime = settings.countdownSeconds;
+            this.elapsedTime = 0;
+            this.phase = 'countdown';
+            this.targetTime = settings.targetMinutes * 60 + settings.targetSeconds;
+            
+            this.updateHeader('AMRAP', 'ПОДГОТОВКА');
+            
+            this.interval = setInterval(() => this.updateAmrapTimer(), 1000);
+            this.isRunning = true;
+        } catch (error) {
+            console.error('Ошибка запуска таймера:', error);
+        }
+    }
+
+    updateAmrapTimer() {
+        if (!this.isRunning) return;
+        
+        const timerDisplay = document.querySelector('.timer-display');
+        if (!timerDisplay) {
+            clearInterval(this.interval);
+            this.interval = null;
+            this.isRunning = false;
+            return;
+        }
+        
+        if (this.phase === 'countdown') {
+            if (this.remainingTime <= 3 && this.remainingTime > 1) {
+                this.playSound('beep');
+            }
+            
+            if (this.remainingTime === 1 && !this.isTransitioning) {
+                this.isTransitioning = true;
+                timerDisplay.textContent = '00:01';
+                this.playSound('start');
+                
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                    this.phase = 'work';
+                    this.remainingTime = this.targetTime;
+                    this.updateHeader('AMRAP', `${Math.floor(this.targetTime / 60)}:${(this.targetTime % 60).toString().padStart(2, '0')}`);
+                }, 1000);
+                return;
+            }
+            
+            if (!this.isTransitioning) {
+                timerDisplay.textContent = `00:${this.remainingTime.toString().padStart(2, '0')}`;
+                this.remainingTime--;
+            }
+        } else {
+            if (this.remainingTime === 1 && !this.isTransitioning) {
+                this.isTransitioning = true;
+                timerDisplay.textContent = '00:01';
+                
+                setTimeout(() => {
+                    this.finishAmrap();
+                }, 1000);
+                return;
+            }
+            
+            if (!this.isTransitioning) {
+                const minutes = Math.floor(this.remainingTime / 60);
+                const seconds = this.remainingTime % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                this.remainingTime--;
+            }
+        }
+    }
+
+    finishAmrap() {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        this.isRunning = false;
+        this.isTransitioning = false;
+        
+        const timerContainer = document.querySelector('.timer-container');
+        if (timerContainer) {
+            this.playSound('finish');
+            const minutes = Math.floor(this.targetTime / 60);
+            timerContainer.innerHTML = `
+                <div class="finish-message">${minutes} минут выполнены</div>
+                <button class="menu-item restart-button">${this.translations.RESTART}</button>
+            `;
+            
+            const restartButton = timerContainer.querySelector('.restart-button');
+            if (restartButton) {
+                restartButton.addEventListener('click', () => this.showScreen('amrap'));
             }
         }
     }
