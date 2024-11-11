@@ -60,7 +60,4 @@ npm run deploy
 - `BASE_URL`: базовый URL для продакшена
 - `NODE_ENV`: окружение (development/production)
 
-## Лицензия
-
-MIT
 
