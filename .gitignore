@@ -1,7 +1,10 @@
 cf-herro.zip
+.env
 .DS_Store
+*.log
 cf-herro/
 node_modules/
 public/fonts/
 public/sound
-
+plan.md
+plan-relis.md

@@ -1,11 +1,12 @@
 {
   "name": "crossfit-timer",
   "version": "1.0.0",
-  "description": "Crossfit Timer with remote control",
+  "description": "Online timer for CrossFit",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "deploy": "bash deploy.sh"
   },
   "dependencies": {
     "express": "^4.17.1",

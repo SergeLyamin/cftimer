@@ -63,6 +63,79 @@ class Timer {
         };
 
         this.init();
+
+        this.initWebSocket();
+    }
+
+    initWebSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        this.ws = new WebSocket(`${protocol}//${window.location.host}`);
+        
+        this.ws.onopen = () => {
+            this.ws.send(JSON.stringify({ type: 'init' }));
+        };
+        
+        this.ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            switch(data.type) {
+                case 'qr':
+                    this.showQRCode(data.qrCode);
+                    break;
+                    
+                case 'controller-connected':
+                    console.log('Контроллер подключен');
+                    break;
+                    
+                case 'controller-disconnected':
+                    console.log('Контроллер отключен');
+                    break;
+                    
+                case 'command':
+                    this.handleRemoteCommand(data.action);
+                    break;
+            }
+        };
+        
+        this.ws.onclose = () => {
+            console.log('WebSocket соединение закрыто');
+            setTimeout(() => this.initWebSocket(), 5000);
+        };
+    }
+
+    showQRCode(qrDataUrl) {
+        const qrContainer = document.getElementById('qr-container');
+        qrContainer.innerHTML = `
+            <img src="${qrDataUrl}" alt="QR Code">
+            <p>Сканируйте для удаленного управления</p>
+        `;
+        qrContainer.style.display = 'block';
+    }
+
+    handleRemoteCommand(action) {
+        switch(action) {
+            case 'start':
+                switch(this.currentScreen) {
+                    case 'interval':
+                        this.startInterval();
+                        break;
+                    case 'fortime':
+                        this.startForTime();
+                        break;
+                    case 'amrap':
+                        this.startAmrap();
+                        break;
+                }
+                break;
+                
+            case 'pause':
+                this.togglePause();
+                break;
+                
+            case 'reset':
+                this.showScreen(this.currentScreen);
+                break;
+        }
     }
 
     startClock() {
@@ -170,6 +243,13 @@ class Timer {
         }
 
         this.currentScreen = screenName;
+
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+                type: 'screen-change',
+                screen: screenName
+            }));
+        }
     }
 
     createIntervalScreen() {
@@ -407,6 +487,13 @@ class Timer {
                 clearInterval(this.interval);
                 this.interval = null;
             }
+        }
+
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+                type: 'state-change',
+                state: this.isRunning ? 'running' : 'paused'
+            }));
         }
     }
 
