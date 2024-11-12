@@ -8,3 +8,5 @@ plan.md
 plan-relis.md
 cgi-bin/
 log/
+~log/
+/log/
