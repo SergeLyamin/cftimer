@@ -34,7 +34,7 @@ wss.on('connection', (ws) => {
                     ws.timerId = timerId;
                     
                     // Генерируем QR код
-                    const controlUrl = `${config.baseUrl}/control.html?id=${timerId}`;
+                    const controlUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/control.html?id=${timerId}`;
                     QRCode.toDataURL(controlUrl)
                         .then(url => {
                             ws.send(JSON.stringify({
@@ -42,7 +42,8 @@ wss.on('connection', (ws) => {
                                 qrCode: url,
                                 timerId: timerId
                             }));
-                        });
+                        })
+                        .catch(err => console.error('Ошибка генерации QR кода:', err));
                     break;
 
                 case 'connect':
