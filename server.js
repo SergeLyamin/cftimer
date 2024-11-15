@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 const path = require('path');
 const QRCode = require('qrcode');
 const config = require('./config');
+const debug = require('debug')('timer:websocket');
 
 const app = express();
 const server = http.createServer(app);
@@ -22,9 +23,13 @@ function generateTimerId() {
 
 // Обработка WebSocket соединений
 wss.on('connection', (ws) => {
+    debug('Новое WebSocket соединение');
+    
     ws.on('message', (message) => {
+        debug('Получено сообщение:', message.toString());
         try {
             const data = JSON.parse(message);
+            debug('Обработка сообщения типа:', data.type);
             
             switch(data.type) {
                 case 'init':
@@ -73,7 +78,7 @@ wss.on('connection', (ws) => {
                     break;
             }
         } catch (error) {
-            console.error('Ошибка обработки сообщения:', error);
+            debug('Ошибка обработки сообщения:', error);
         }
     });
 
