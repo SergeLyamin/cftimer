@@ -115,7 +115,17 @@ class Timer {
     handleRemoteCommand(action) {
         switch(action) {
             case 'start':
-                if (this.isRunning) return;
+                if (this.isRunning || this.isTransitioning) {
+                    return;
+                }
+                
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+                
+                this.isRunning = false;
+                this.isTransitioning = false;
                 
                 switch(this.currentScreen) {
                     case 'interval':
@@ -131,6 +141,9 @@ class Timer {
                 break;
                 
             case 'pause':
+                if (this.isTransitioning) {
+                    return;
+                }
                 this.togglePause();
                 break;
                 
@@ -486,6 +499,10 @@ class Timer {
     }
 
     togglePause() {
+        if (this.isTransitioning) {
+            return;
+        }
+
         if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;
@@ -510,7 +527,8 @@ class Timer {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({
                 type: 'state-change',
-                state: this.isRunning ? 'running' : 'paused'
+                state: this.isRunning ? 'running' : 'paused',
+                screen: this.currentScreen
             }));
         }
     }
