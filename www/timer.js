@@ -41,7 +41,7 @@ class Timer {
 
         this.translations = {
             'CLOCK': 'ЧАСЫ',
-            'INTERVAL': 'EMOM / TABATA',
+            'INTERVAL': 'ИНТЕРВАЛЫ',
             'FOR TIME': 'НА ВРЕМЯ',
             'START': 'СТАРТ',
             'PAUSE': 'ПАУЗА',
@@ -52,7 +52,7 @@ class Timer {
             'REST': 'ОТДЫХ',
             'MINUTES': 'МИНУТ',
             'SECONDS': 'СЕКУНД',
-            'COUNTDOWN': 'ОТСЧЕТ'
+            'COUNTDOWN': 'ОБРАТНЫЙ ОТСЧЕТ'
         };
 
         this.sounds = {
