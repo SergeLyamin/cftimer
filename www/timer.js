@@ -115,6 +115,8 @@ class Timer {
     handleRemoteCommand(action) {
         switch(action) {
             case 'start':
+                if (this.isRunning) return;
+                
                 switch(this.currentScreen) {
                     case 'interval':
                         this.startInterval();
@@ -133,6 +135,13 @@ class Timer {
                 break;
                 
             case 'reset':
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+                this.isRunning = false;
+                this.isTransitioning = false;
+                
                 this.showScreen(this.currentScreen);
                 break;
         }
@@ -477,15 +486,24 @@ class Timer {
     }
 
     togglePause() {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+
         this.isRunning = !this.isRunning;
-        const timerDisplay = document.querySelector('.timer-display');
         
-        if (this.isRunning && timerDisplay) {
-            this.interval = setInterval(() => this.updateIntervalTimer(), 1000);
-        } else {
-            if (this.interval) {
-                clearInterval(this.interval);
-                this.interval = null;
+        if (this.isRunning) {
+            switch(this.currentScreen) {
+                case 'interval':
+                    this.interval = setInterval(() => this.updateIntervalTimer(), 1000);
+                    break;
+                case 'fortime':
+                    this.interval = setInterval(() => this.updateForTimeTimer(), 1000);
+                    break;
+                case 'amrap':
+                    this.interval = setInterval(() => this.updateAmrapTimer(), 1000);
+                    break;
             }
         }
 
