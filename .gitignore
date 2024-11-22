@@ -10,3 +10,5 @@ cgi-bin/
 log/
 ~log/
 /log/
+design/
+rings/  

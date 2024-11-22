@@ -246,18 +246,31 @@ class Timer {
         this.isTransitioning = false;
         
         const timerScreens = document.getElementById('timer-screens');
-        timerScreens.innerHTML = '';
         
+        // Плавно скрываем текущий экран
         document.querySelectorAll('.screen').forEach(screen => {
-            screen.style.display = 'none';
+            screen.classList.remove('active');
+            setTimeout(() => {
+                screen.style.display = 'none';
+            }, 300);
         });
 
+        // Показываем новый экран
         if (screenName === 'main-menu') {
-            document.getElementById('main-menu').style.display = 'flex';
+            const mainMenu = document.getElementById('main-menu');
+            mainMenu.style.display = 'flex';
+            setTimeout(() => {
+                mainMenu.classList.add('active');
+            }, 10);
         } else if (this.screens[screenName]) {
+            timerScreens.innerHTML = '';
             const screen = this.screens[screenName]();
             timerScreens.appendChild(screen);
             screen.style.display = 'flex';
+            
+            setTimeout(() => {
+                screen.classList.add('active');
+            }, 10);
             
             if (screenName === 'clock') {
                 this.startClock();
@@ -408,6 +421,18 @@ class Timer {
         }
         
         if (this.remainingTime === 1 && !this.isTransitioning) {
+            const timerDisplay = document.querySelector('.timer-display');
+            timerDisplay.classList.add('phase-change');
+            
+            setTimeout(() => {
+                timerDisplay.classList.remove('phase-change');
+            }, 300);
+            
+            // Обновляем классы для цветов фаз
+            const container = document.querySelector('.timer-container');
+            container.classList.remove('phase-work', 'phase-rest', 'phase-countdown');
+            container.classList.add(`phase-${this.phase}`);
+            
             this.isTransitioning = true;
             
             timerDisplay.textContent = '00:01';
