@@ -247,30 +247,20 @@ class Timer {
         
         const timerScreens = document.getElementById('timer-screens');
         
-        // Плавно скрываем текущий экран
+        // Просто скрываем все экраны
         document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-            setTimeout(() => {
-                screen.style.display = 'none';
-            }, 300);
+            screen.style.display = 'none';
         });
 
-        // Показываем новый экран
+        // Показываем нужный экран
         if (screenName === 'main-menu') {
             const mainMenu = document.getElementById('main-menu');
             mainMenu.style.display = 'flex';
-            setTimeout(() => {
-                mainMenu.classList.add('active');
-            }, 10);
         } else if (this.screens[screenName]) {
             timerScreens.innerHTML = '';
             const screen = this.screens[screenName]();
             timerScreens.appendChild(screen);
             screen.style.display = 'flex';
-            
-            setTimeout(() => {
-                screen.classList.add('active');
-            }, 10);
             
             if (screenName === 'clock') {
                 this.startClock();
@@ -292,7 +282,7 @@ class Timer {
         screen.className = 'screen';
 
         screen.innerHTML = `
-            ${this.createHeader('EMOM / TABATA')}
+            ${this.createHeader('Интервалы')}
             <div class="timer--settings">
                 <div class="timer--settingField">
                     <label>
@@ -421,21 +411,7 @@ class Timer {
         }
         
         if (this.remainingTime === 1 && !this.isTransitioning) {
-            const timerDisplay = document.querySelector('.timer-display');
-            timerDisplay.classList.add('phase-change');
-            
-            setTimeout(() => {
-                timerDisplay.classList.remove('phase-change');
-            }, 300);
-            
-            // Обновляем классы для цветов фаз
-            const container = document.querySelector('.timer-container');
-            container.classList.remove('phase-work', 'phase-rest', 'phase-countdown');
-            container.classList.add(`phase-${this.phase}`);
-            
             this.isTransitioning = true;
-            
-            timerDisplay.textContent = '00:01';
             
             switch (this.phase) {
                 case 'countdown':
@@ -582,9 +558,9 @@ class Timer {
         const menu = document.createElement('div');
         menu.className = 'screen';
         menu.innerHTML = `
-            <button class="menu-item" data-timer="clock">ЧАСЫ</button>
-            <button class="menu-item" data-timer="interval">EMOM / TABATA</button>
-            <button class="menu-item" data-timer="fortime">НА ВРЕМЯ</button>
+            <button class="menu-item" data-timer="clock">Часы</button>
+            <button class="menu-item" data-timer="interval">Интервалы</button>
+            <button class="menu-item" data-timer="fortime">На время</button>
             <button class="menu-item" data-timer="amrap">AMRAP</button>
         `;
         return menu;
