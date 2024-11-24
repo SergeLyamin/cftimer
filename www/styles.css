@@ -92,18 +92,22 @@ input[type="number"] {
     padding: 10px;
     border-radius: 4px;
     text-align: center;
-    display: none;
+    z-index: 9999;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 .qr-code img {
     width: 150px;
     height: 150px;
+    display: block;
+    margin-bottom: 5px;
 }
 
 .qr-code p {
     margin: 5px 0 0;
     color: black;
     font-size: 14px;
+    white-space: nowrap;
 }
 
 /* Добавим новые стили */

@@ -69,17 +69,23 @@ class Timer {
 
     initWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.ws = new WebSocket(`${protocol}//${window.location.host}`);
+        const wsUrl = `${protocol}//${window.location.host}`;
+        console.log('Connecting to WebSocket:', wsUrl);
+
+        this.ws = new WebSocket(wsUrl);
         
         this.ws.onopen = () => {
+            console.log('WebSocket connected, sending init');
             this.ws.send(JSON.stringify({ type: 'init' }));
         };
         
         this.ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
+            console.log('WebSocket message received:', data);
             
             switch(data.type) {
                 case 'qr':
+                    console.log('QR code received, showing QR code');
                     this.showQRCode(data.qrCode);
                     break;
                     
@@ -101,15 +107,30 @@ class Timer {
             console.log('WebSocket соединение закрыто');
             setTimeout(() => this.initWebSocket(), 5000);
         };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
     }
 
     showQRCode(qrDataUrl) {
-        const qrContainer = document.getElementById('qr-container');
+        console.log('Showing QR code, data URL length:', qrDataUrl.length);
+        
+        let qrContainer = document.getElementById('qr-container');
+        if (!qrContainer) {
+            console.log('Creating new QR container');
+            qrContainer = document.createElement('div');
+            qrContainer.id = 'qr-container';
+            qrContainer.className = 'qr-code';
+            document.body.appendChild(qrContainer);
+        }
+        
         qrContainer.innerHTML = `
             <img src="${qrDataUrl}" alt="QR Code">
             <p>Сканируйте для удаленного управления</p>
         `;
         qrContainer.style.display = 'block';
+        console.log('QR container updated and displayed');
     }
 
     handleRemoteCommand(action) {
@@ -247,12 +268,15 @@ class Timer {
         
         const timerScreens = document.getElementById('timer-screens');
         
-        // Просто скрываем все экраны
+        const qrContainer = document.getElementById('qr-container');
+        if (qrContainer) {
+            qrContainer.style.display = 'block';
+        }
+        
         document.querySelectorAll('.screen').forEach(screen => {
             screen.style.display = 'none';
         });
 
-        // Показываем нужный экран
         if (screenName === 'main-menu') {
             const mainMenu = document.getElementById('main-menu');
             mainMenu.style.display = 'flex';
