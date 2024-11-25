@@ -69,17 +69,23 @@ class Timer {
 
     initWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.ws = new WebSocket(`${protocol}//${window.location.host}`);
+        const wsUrl = `${protocol}//${window.location.host}`;
+        console.log('Connecting to WebSocket:', wsUrl);
+
+        this.ws = new WebSocket(wsUrl);
         
         this.ws.onopen = () => {
+            console.log('WebSocket connected, sending init');
             this.ws.send(JSON.stringify({ type: 'init' }));
         };
         
         this.ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
+            console.log('WebSocket message received:', data);
             
             switch(data.type) {
                 case 'qr':
+                    console.log('QR code received, showing QR code');
                     this.showQRCode(data.qrCode);
                     break;
                     
@@ -101,15 +107,30 @@ class Timer {
             console.log('WebSocket соединение закрыто');
             setTimeout(() => this.initWebSocket(), 5000);
         };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
     }
 
     showQRCode(qrDataUrl) {
-        const qrContainer = document.getElementById('qr-container');
+        console.log('Showing QR code, data URL length:', qrDataUrl.length);
+        
+        let qrContainer = document.getElementById('qr-container');
+        if (!qrContainer) {
+            console.log('Creating new QR container');
+            qrContainer = document.createElement('div');
+            qrContainer.id = 'qr-container';
+            qrContainer.className = 'qr-code';
+            document.body.appendChild(qrContainer);
+        }
+        
         qrContainer.innerHTML = `
             <img src="${qrDataUrl}" alt="QR Code">
             <p>Сканируйте для удаленного управления</p>
         `;
         qrContainer.style.display = 'block';
+        console.log('QR container updated and displayed');
     }
 
     handleRemoteCommand(action) {
@@ -247,30 +268,23 @@ class Timer {
         
         const timerScreens = document.getElementById('timer-screens');
         
-        // Плавно скрываем текущий экран
+        const qrContainer = document.getElementById('qr-container');
+        if (qrContainer) {
+            qrContainer.style.display = 'block';
+        }
+        
         document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-            setTimeout(() => {
-                screen.style.display = 'none';
-            }, 300);
+            screen.style.display = 'none';
         });
 
-        // Показываем новый экран
         if (screenName === 'main-menu') {
             const mainMenu = document.getElementById('main-menu');
             mainMenu.style.display = 'flex';
-            setTimeout(() => {
-                mainMenu.classList.add('active');
-            }, 10);
         } else if (this.screens[screenName]) {
             timerScreens.innerHTML = '';
             const screen = this.screens[screenName]();
             timerScreens.appendChild(screen);
             screen.style.display = 'flex';
-            
-            setTimeout(() => {
-                screen.classList.add('active');
-            }, 10);
             
             if (screenName === 'clock') {
                 this.startClock();
@@ -292,7 +306,7 @@ class Timer {
         screen.className = 'screen';
 
         screen.innerHTML = `
-            ${this.createHeader('EMOM / TABATA')}
+            ${this.createHeader('Интервалы')}
             <div class="timer--settings">
                 <div class="timer--settingField">
                     <label>
@@ -421,21 +435,7 @@ class Timer {
         }
         
         if (this.remainingTime === 1 && !this.isTransitioning) {
-            const timerDisplay = document.querySelector('.timer-display');
-            timerDisplay.classList.add('phase-change');
-            
-            setTimeout(() => {
-                timerDisplay.classList.remove('phase-change');
-            }, 300);
-            
-            // Обновляем классы для цветов фаз
-            const container = document.querySelector('.timer-container');
-            container.classList.remove('phase-work', 'phase-rest', 'phase-countdown');
-            container.classList.add(`phase-${this.phase}`);
-            
             this.isTransitioning = true;
-            
-            timerDisplay.textContent = '00:01';
             
             switch (this.phase) {
                 case 'countdown':
@@ -582,9 +582,9 @@ class Timer {
         const menu = document.createElement('div');
         menu.className = 'screen';
         menu.innerHTML = `
-            <button class="menu-item" data-timer="clock">ЧАСЫ</button>
-            <button class="menu-item" data-timer="interval">EMOM / TABATA</button>
-            <button class="menu-item" data-timer="fortime">НА ВРЕМЯ</button>
+            <button class="menu-item" data-timer="clock">Часы</button>
+            <button class="menu-item" data-timer="interval">Интервалы</button>
+            <button class="menu-item" data-timer="fortime">На время</button>
             <button class="menu-item" data-timer="amrap">AMRAP</button>
         `;
         return menu;

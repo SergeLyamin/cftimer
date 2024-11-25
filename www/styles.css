@@ -41,11 +41,15 @@ body {
     border: 2px solid white;
     cursor: pointer;
     font-family: 'TimerFont', monospace;
+    text-transform: uppercase;
 }
 
 .timer-display {
     font-size: 18vw;
+    font-weight: 600;
     margin: 40px 0;
+    min-height: 144px;
+    text-align: center;
 }
 
 .control-panel {
@@ -88,18 +92,22 @@ input[type="number"] {
     padding: 10px;
     border-radius: 4px;
     text-align: center;
-    display: none;
+    z-index: 9999;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 .qr-code img {
     width: 150px;
     height: 150px;
+    display: block;
+    margin-bottom: 5px;
 }
 
 .qr-code p {
     margin: 5px 0 0;
     color: black;
     font-size: 14px;
+    white-space: nowrap;
 }
 
 /* Добавим новые стили */
@@ -190,13 +198,6 @@ input[type="number"] {
     margin-top: 40px;
     width: auto;
     min-width: 200px;
-}
-
-.timer-display {
-    font-size: 18vw;
-    font-weight: 600;
-    margin: 40px 0;
-    min-height: 144px;
 }
 
 .round-info {
@@ -335,4 +336,23 @@ input[type="number"] {
     align-items: center;
     width: 100%;
     min-height: 300px; /* Увеличиваем область для клика */
+}
+
+/* Добавим начальное состояние для всех таймеров */
+.timer-section {
+    display: none;
+}
+
+/* Главное меню показываем по умолчанию */
+.main-menu {
+    display: flex;
+}
+
+/* Удалим все стили анимации */
+.timer-display.phase-change {
+    animation: none;
+}
+
+.phase-work, .phase-rest, .phase-countdown {
+    animation: none;
 }

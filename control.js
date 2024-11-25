@@ -6,7 +6,7 @@ class TimerControl {
         
         this.translations = {
             'CLOCK': 'ЧАСЫ',
-            'INTERVAL': 'EMOM / TABATA',
+            'INTERVAL': 'ИНТЕРВАЛЫ',
             'FOR TIME': 'НА ВРЕМЯ',
             'START': 'СТАРТ',
             'PAUSE': 'ПАУЗА',
