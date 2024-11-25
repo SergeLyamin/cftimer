@@ -2,13 +2,11 @@
 .DS_Store
 *.log
 node_modules/
-public/fonts/
-public/sound
-plan.md
-plan-relis.md
+www/fonts/
 cgi-bin/
 log/
 ~log/
 /log/
 design/
 rings/  
+SOP/
