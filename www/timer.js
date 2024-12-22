@@ -625,11 +625,15 @@ class Timer {
 
     createClockScreen() {
         const screen = document.createElement('div');
-        screen.className = 'screen';
+        screen.className = 'screen flex flex-col items-center relative w-full';
+
         screen.innerHTML = `
             ${this.createHeader('ЧАСЫ')}
-            <div class="timer-display"></div>
+            <div class="flex-1 w-full flex justify-center items-center">
+                <div class="timer-display text-[18vw] font-semibold text-center"></div>
+            </div>
         `;
+
         return screen;
     }
 
@@ -721,34 +725,50 @@ class Timer {
 
     createAmrapScreen() {
         const screen = document.createElement('div');
-        screen.className = 'screen';
+        screen.className = 'screen flex flex-col items-center relative w-full pt-20';
+
         screen.innerHTML = `
             ${this.createHeader('AMRAP')}
-            <div class="timer--settings">
-                ${this.createTimeInputs(
-                    'ВРЕМЯ',
-                    'targetMinutes',
-                    'targetSeconds',
-                    this.settings.amrap.targetMinutes,
-                    this.settings.amrap.targetSeconds
-                )}
-                <div class="timer--settingField">
-                    <label>
-                        <span>${this.translations.COUNTDOWN}</span>
-                        <div class="timer--input-container">
-                            <input type="number" 
-                                   name="countdownSeconds" 
-                                   value="${this.settings.amrap.countdownSeconds}" 
-                                   min="0" 
-                                   max="59" 
-                                   class="timer--input">
-                        </div>
-                    </label>
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-md">
+                <div class="grid grid-cols-[150px,1fr] gap-5 w-full">
+                    <label class="text-right self-center text-2xl">${this.translations.MINUTES}</label>
+                    <div class="flex items-center border-2 border-white p-3">
+                        <input type="number" 
+                               name="targetMinutes" 
+                               value="${this.settings.amrap.targetMinutes}" 
+                               min="0" 
+                               max="59" 
+                               class="w-20 bg-transparent border-none text-2xl text-center">
+                    </div>
+
+                    <label class="text-right self-center text-2xl">${this.translations.SECONDS}</label>
+                    <div class="flex items-center border-2 border-white p-3">
+                        <input type="number" 
+                               name="targetSeconds" 
+                               value="${this.settings.amrap.targetSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="w-20 bg-transparent border-none text-2xl text-center">
+                    </div>
+
+                    <label class="text-right self-center text-2xl">${this.translations.COUNTDOWN}</label>
+                    <div class="flex items-center border-2 border-white p-3">
+                        <input type="number" 
+                               name="countdownSeconds" 
+                               value="${this.settings.amrap.countdownSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="w-20 bg-transparent border-none text-2xl text-center">
+                    </div>
                 </div>
-                <button class="menu-item start-button">${this.translations.START}</button>
+                
+                <button class="start-button ml-[150px] w-[calc(100%-150px)] text-2xl bg-transparent border-2 border-white p-4 cursor-pointer uppercase">
+                    ${this.translations.START}
+                </button>
             </div>
-            <div class="timer-container" style="display: none;">
-                <div class="timer-display"></div>
+            
+            <div class="timer-container hidden w-full flex justify-center items-center relative">
+                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
             </div>
         `;
 
@@ -761,13 +781,6 @@ class Timer {
 
         const timerDisplay = screen.querySelector('.timer-display');
         timerDisplay.addEventListener('click', () => this.togglePause());
-
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && this.currentScreen === 'amrap') {
-                e.preventDefault();
-                this.togglePause();
-            }
-        });
 
         return screen;
     }
