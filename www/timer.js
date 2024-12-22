@@ -75,47 +75,54 @@ class Timer {
     initWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}`;
-        console.log('Connecting to WebSocket:', wsUrl);
-
-        this.ws = new WebSocket(wsUrl);
         
-        this.ws.onopen = () => {
-            console.log('WebSocket connected, sending init');
-            this.ws.send(JSON.stringify({ type: 'init' }));
-        };
-        
-        this.ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('WebSocket message received:', data);
+        const connect = () => {
+            console.log('Connecting to WebSocket:', wsUrl);
+            this.ws = new WebSocket(wsUrl);
             
-            switch(data.type) {
-                case 'qr':
-                    console.log('QR code received, showing QR code');
-                    this.showQRCode(data.qrCode);
-                    break;
-                    
-                case 'controller-connected':
-                    console.log('Контроллер подключен');
-                    break;
-                    
-                case 'controller-disconnected':
-                    console.log('Контроллер отключен');
-                    break;
-                    
-                case 'command':
-                    this.handleRemoteCommand(data.action);
-                    break;
-            }
+            this.ws.onopen = () => {
+                console.log('WebSocket connected, sending init');
+                this.ws.send(JSON.stringify({ 
+                    type: 'init',
+                    isController: false 
+                }));
+            };
+            
+            this.ws.onclose = () => {
+                console.log('WebSocket connection closed, reconnecting...');
+                setTimeout(connect, 1000);
+            };
+            
+            this.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('WebSocket message received:', data);
+                
+                switch(data.type) {
+                    case 'qr':
+                        console.log('QR code received, showing QR code');
+                        this.showQRCode(data.qrCode);
+                        break;
+                        
+                    case 'controller-connected':
+                        console.log('Контроллер подключен');
+                        break;
+                        
+                    case 'controller-disconnected':
+                        console.log('Контроллер отключен');
+                        break;
+                        
+                    case 'command':
+                        this.handleRemoteCommand(data.action);
+                        break;
+                }
+            };
+            
+            this.ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
         };
         
-        this.ws.onclose = () => {
-            console.log('WebSocket соединение закрыто');
-            setTimeout(() => this.initWebSocket(), 5000);
-        };
-
-        this.ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
+        connect();
     }
 
     showQRCode(qrDataUrl) {
@@ -262,7 +269,7 @@ class Timer {
         return `
             <div class="header-panel fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-black">
                 <div class="flex items-center gap-4">
-                    <button class="back-button text-4xl bg-transparent border-none text-white cursor-pointer">←</button>
+                    <button class="back-button text-4xl bg-transparent border-none text-white cursor-pointer">��</button>
                     <h2 class="timer--header text-4xl font-normal m-0">${title}${details ? ' – ' + details : ''}</h2>
                 </div>
                 <button class="fullscreen-button text-4xl bg-transparent border-none text-white cursor-pointer">⛶</button>
@@ -827,7 +834,7 @@ class Timer {
             this.interval = setInterval(() => this.updateForTimeTimer(), 1000);
             this.isRunning = true;
         } catch (error) {
-            console.error('Ошибка запуска т��ймера:', error);
+            console.error('Ошибка запуска таймера:', error);
         }
     }
 
