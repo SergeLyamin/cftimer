@@ -67,6 +67,9 @@ class Timer {
         this.initWebSocket();
 
         this.headerElement = null;
+
+        this.updateBottomClock();
+        setInterval(() => this.updateBottomClock(), 1000);
     }
 
     initWebSocket() {
@@ -382,7 +385,7 @@ class Timer {
                     <span class="text-4xl self-center">сек</span>
                 </div>
                 
-                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase">
+                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black">
                     ${this.translations.START}
                 </button>
             </div>
@@ -681,7 +684,7 @@ class Timer {
                     <span class="text-4xl self-center">сек</span>
                 </div>
                 
-                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase">
+                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black">
                     ${this.translations.START}
                 </button>
             </div>
@@ -759,7 +762,7 @@ class Timer {
                     <span class="text-4xl self-center">сек</span>
                 </div>
                 
-                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase">
+                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black">
                     ${this.translations.START}
                 </button>
             </div>
@@ -824,7 +827,7 @@ class Timer {
             this.interval = setInterval(() => this.updateForTimeTimer(), 1000);
             this.isRunning = true;
         } catch (error) {
-            console.error('Ошибка запуска таймера:', error);
+            console.error('Ошибка запуска т��ймера:', error);
         }
     }
 
@@ -992,6 +995,18 @@ class Timer {
             if (restartButton) {
                 restartButton.addEventListener('click', () => this.showScreen('amrap'));
             }
+        }
+    }
+
+    updateBottomClock() {
+        const clockButton = document.getElementById('clock-button');
+        if (clockButton) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+            clockButton.textContent = timeString;
         }
     }
 }
