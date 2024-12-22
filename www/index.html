@@ -5,30 +5,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Онлайн таймер для кроссфит</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Подключаем Tailwind CSS через CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Настройка темы Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        timer: ['TimerFont', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @font-face {
+            font-family: 'TimerFont';
+            src: url('fonts/monospace.woff2') format('truetype');
+        }
+    </style>
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6V31X7ZKL8"></script>
 </head>
 
-<body>
-    <div id="app">
+<body class="bg-black text-white font-timer min-h-screen flex justify-center items-center">
+    <div id="app" class="w-full max-w-2xl p-5">
         <!-- Главное меню -->
-        <div id="main-menu" class="screen">
-            <button class="menu-item" data-timer="clock">Часы</button>
-            <button class="menu-item" data-timer="interval">Интервалы</button>
-            <button class="menu-item" data-timer="fortime">На время</button>
-            <button class="menu-item" data-timer="amrap">AMRAP</button>
+        <div id="main-menu" class="screen flex flex-col gap-5 items-center">
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="clock">Часы</button>
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="interval">Интервалы</button>
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="fortime">На время</button>
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="amrap">AMRAP</button>
         </div>
 
         <!-- Экраны таймеров -->
         <div id="timer-screens"></div>
 
         <!-- QR код -->
-        <div id="qr-container" class="qr-code"></div>
+        <div id="qr-container" class="fixed bottom-5 right-5 bg-white p-3 rounded shadow-lg text-center z-50"></div>
     </div>
 
     <script src="timer.js"></script>
-    <script src="metrics.js"></script>
+    <!-- <script src="metrics.js"></script> -->
 </body>
 
 </html>

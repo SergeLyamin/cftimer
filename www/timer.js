@@ -65,6 +65,8 @@ class Timer {
         this.init();
 
         this.initWebSocket();
+
+        this.headerElement = null;
     }
 
     initWebSocket() {
@@ -202,14 +204,21 @@ class Timer {
     }
 
     init() {
-        document.querySelectorAll('.menu-item').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const timerType = e.target.dataset.timer;
-                if (timerType) {
-                    this.showScreen(timerType);
-                }
+        console.log('Timer initialized');
+        
+        const mainMenu = document.getElementById('main-menu');
+        if (mainMenu) {
+            mainMenu.querySelectorAll('.menu-item').forEach(button => {
+                console.log('Adding click handler to button:', button.dataset.timer);
+                button.addEventListener('click', (e) => {
+                    console.log('Button clicked:', e.target.dataset.timer);
+                    const timerType = e.target.dataset.timer;
+                    if (timerType) {
+                        this.showScreen(timerType);
+                    }
+                });
             });
-        });
+        }
 
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('back-button')) {
@@ -248,17 +257,19 @@ class Timer {
 
     createHeader(title, details = '') {
         return `
-            <div class="header-panel">
-                <div class="header-left">
-                    <button class="back-button">←</button>
-                    <h2 class="timer--header">${title}${details ? ' – ' + details : ''}</h2>
+            <div class="header-panel fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-black">
+                <div class="flex items-center gap-4">
+                    <button class="back-button text-2xl bg-transparent border-none text-white cursor-pointer">←</button>
+                    <h2 class="timer--header text-2xl font-normal m-0">${title}${details ? ' – ' + details : ''}</h2>
                 </div>
-                <button class="fullscreen-button">⛶</button>
+                <button class="fullscreen-button text-2xl bg-transparent border-none text-white cursor-pointer">⛶</button>
             </div>
         `;
     }
 
     showScreen(screenName) {
+        console.log('Switching to screen:', screenName);
+        
         if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;
@@ -266,29 +277,34 @@ class Timer {
         this.isRunning = false;
         this.isTransitioning = false;
         
+        const mainMenu = document.getElementById('main-menu');
         const timerScreens = document.getElementById('timer-screens');
         
+        if (screenName === 'main-menu') {
+            if (timerScreens) {
+                timerScreens.innerHTML = '';
+            }
+            if (mainMenu) {
+                mainMenu.style.display = 'flex';
+            }
+        } else {
+            if (mainMenu) {
+                mainMenu.style.display = 'none';
+            }
+            if (timerScreens && this.screens[screenName]) {
+                timerScreens.innerHTML = '';
+                const screen = this.screens[screenName]();
+                timerScreens.appendChild(screen);
+                
+                if (screenName === 'clock') {
+                    this.startClock();
+                }
+            }
+        }
+
         const qrContainer = document.getElementById('qr-container');
         if (qrContainer) {
-            qrContainer.style.display = 'block';
-        }
-        
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.style.display = 'none';
-        });
-
-        if (screenName === 'main-menu') {
-            const mainMenu = document.getElementById('main-menu');
-            mainMenu.style.display = 'flex';
-        } else if (this.screens[screenName]) {
-            timerScreens.innerHTML = '';
-            const screen = this.screens[screenName]();
-            timerScreens.appendChild(screen);
-            screen.style.display = 'flex';
-            
-            if (screenName === 'clock') {
-                this.startClock();
-            }
+            qrContainer.style.display = screenName === 'main-menu' ? 'none' : 'block';
         }
 
         this.currentScreen = screenName;
@@ -303,55 +319,81 @@ class Timer {
 
     createIntervalScreen() {
         const screen = document.createElement('div');
-        screen.className = 'screen';
+        screen.className = 'screen flex flex-col items-center';
 
         screen.innerHTML = `
             ${this.createHeader('Интервалы')}
-            <div class="timer--settings">
-                <div class="timer--settingField">
-                    <label>
-                        <span>${this.translations.ROUNDS}</span>
-                        <div class="timer--input-container">
-                            <input type="number" 
-                                   name="rounds" 
-                                   value="${this.settings.interval.rounds}" 
-                                   min="1" 
-                                   class="timer--input">
-                        </div>
-                    </label>
+            <div class="interval-setup grid grid-cols-[150px,1fr] gap-5 max-w-md mt-24">
+                <label class="text-right self-center text-2xl">${this.translations.ROUNDS}</label>
+                <div class="flex items-center border-2 border-white p-3">
+                    <input type="number" 
+                           name="rounds" 
+                           value="${this.settings.interval.rounds}" 
+                           min="1" 
+                           class="w-16 bg-transparent border-none text-2xl text-center">
                 </div>
-                ${this.createTimeInputs(
-                    this.translations.WORK,
-                    'workMinutes',
-                    'workSeconds',
-                    this.settings.interval.workMinutes,
-                    this.settings.interval.workSeconds
-                )}
-                ${this.createTimeInputs(
-                    this.translations.REST,
-                    'restMinutes',
-                    'restSeconds',
-                    this.settings.interval.restMinutes,
-                    this.settings.interval.restSeconds
-                )}
-                ${this.createTimeInputs(
-                    this.translations.COUNTDOWN,
-                    'countdownMinutes',
-                    'countdownSeconds',
-                    0,
-                    this.settings.interval.countdownSeconds
-                )}
-                <button class="menu-item start-button">
-                    ${this.translations.START}
-                </button>
+
+                <label class="text-right self-center text-2xl">${this.translations.WORK}</label>
+                <div class="flex items-center gap-3 border-2 border-white p-3">
+                    <input type="number" 
+                           name="workMinutes" 
+                           value="${this.settings.interval.workMinutes}" 
+                           min="0" 
+                           max="59" 
+                           class="w-16 bg-transparent border-none text-2xl text-center">
+                    <span class="text-2xl">:</span>
+                    <input type="number" 
+                           name="workSeconds" 
+                           value="${this.settings.interval.workSeconds}" 
+                           min="0" 
+                           max="59" 
+                           class="w-16 bg-transparent border-none text-2xl text-center">
+                </div>
+
+                <label class="text-right self-center text-2xl">${this.translations.REST}</label>
+                <div class="flex items-center gap-3 border-2 border-white p-3">
+                    <input type="number" 
+                           name="restMinutes" 
+                           value="${this.settings.interval.restMinutes}" 
+                           min="0" 
+                           max="59" 
+                           class="w-16 bg-transparent border-none text-2xl text-center">
+                    <span class="text-2xl">:</span>
+                    <input type="number" 
+                           name="restSeconds" 
+                           value="${this.settings.interval.restSeconds}" 
+                           min="0" 
+                           max="59" 
+                           class="w-16 bg-transparent border-none text-2xl text-center">
+                </div>
+
+                <label class="text-right self-center text-2xl">${this.translations.COUNTDOWN}</label>
+                <div class="flex items-center gap-3 border-2 border-white p-3">
+                    <input type="number" 
+                           name="countdownMinutes" 
+                           value="0" 
+                           min="0" 
+                           max="59" 
+                           class="w-16 bg-transparent border-none text-2xl text-center">
+                    <span class="text-2xl">:</span>
+                    <input type="number" 
+                           name="countdownSeconds" 
+                           value="${this.settings.interval.countdownSeconds}" 
+                           min="0" 
+                           max="59" 
+                           class="w-16 bg-transparent border-none text-2xl text-center">
+                </div>
             </div>
-            <div class="timer-container" style="display: none;">
+            <button class="menu-item ml-[150px] w-[calc(100%-150px)] text-2xl bg-transparent border-2 border-white p-4 mt-5 cursor-pointer uppercase">
+                ${this.translations.START}
+            </button>
+            <div class="timer-container hidden">
                 <div class="round-number"></div>
-                <div class="timer-display"></div>
+                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
             </div>
         `;
 
-        const startButton = screen.querySelector('.start-button');
+        const startButton = screen.querySelector('.menu-item');
         startButton.addEventListener('click', () => this.startInterval());
 
         screen.querySelectorAll('input').forEach(input => {
@@ -360,13 +402,6 @@ class Timer {
 
         const timerDisplay = screen.querySelector('.timer-display');
         timerDisplay.addEventListener('click', () => this.togglePause());
-
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && this.currentScreen === 'interval') {
-                e.preventDefault();
-                this.togglePause();
-            }
-        });
 
         return screen;
     }
@@ -397,12 +432,13 @@ class Timer {
             }
 
             const settings = this.settings.interval;
-            const timerSettings = screen.querySelector('.timer--settings');
+            const intervalSetup = screen.querySelector('.interval-setup');
             const timerContainer = screen.querySelector('.timer-container');
             
             this.saveIntervalSettings(screen);
             
-            timerSettings.style.display = 'none';
+            intervalSetup.style.display = 'none';
+            screen.querySelector('.menu-item').style.display = 'none';
             timerContainer.style.display = 'flex';
             
             this.currentRound = 1;
@@ -430,68 +466,44 @@ class Timer {
             return;
         }
         
-        if (this.phase === 'countdown' && this.remainingTime <= 3 && this.remainingTime > 1) {
+        const minutes = Math.floor(this.remainingTime / 60);
+        const seconds = this.remainingTime % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (this.phase === 'countdown' && this.remainingTime <= 3 && this.remainingTime > 0) {
             this.playSound('beep');
         }
         
-        if (this.remainingTime === 1 && !this.isTransitioning) {
-            this.isTransitioning = true;
-            
+        if (this.remainingTime === 0) {
             switch (this.phase) {
                 case 'countdown':
                     this.playSound('start');
+                    this.phase = 'work';
+                    this.remainingTime = this.settings.interval.workMinutes * 60 + this.settings.interval.workSeconds;
+                    this.updateHeader(`РАУНД ${this.currentRound}/${this.settings.interval.rounds}`, 'РАБОТА');
                     break;
+                
                 case 'work':
+                    if (this.currentRound >= this.settings.interval.rounds) {
+                        this.finishInterval();
+                        return;
+                    }
                     this.playSound('rest');
+                    this.phase = 'rest';
+                    this.remainingTime = this.settings.interval.restMinutes * 60 + this.settings.interval.restSeconds;
+                    this.updateHeader(`РАУНД ${this.currentRound}/${this.settings.interval.rounds}`, 'ОТДЫХ');
                     break;
+                
                 case 'rest':
                     this.playSound('start');
+                    this.currentRound++;
+                    this.phase = 'work';
+                    this.remainingTime = this.settings.interval.workMinutes * 60 + this.settings.interval.workSeconds;
+                    this.updateHeader(`РАУНД ${this.currentRound}/${this.settings.interval.rounds}`, 'РАБОТА');
                     break;
             }
-            
-            setTimeout(() => {
-                this.isTransitioning = false;
-                this.switchToNextPhase();
-            }, 1000);
-            
-            return;
-        }
-        
-        if (!this.isTransitioning) {
-            const minutes = Math.floor(this.remainingTime / 60);
-            const seconds = this.remainingTime % 60;
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
+        } else {
             this.remainingTime--;
-        }
-    }
-
-    switchToNextPhase() {
-        const settings = this.settings.interval;
-        
-        switch (this.phase) {
-            case 'countdown':
-                this.phase = 'work';
-                this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
-                this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
-                break;
-                
-            case 'work':
-                if (this.currentRound >= settings.rounds && this.isWorkPhase) {
-                    this.finishInterval();
-                    return;
-                }
-                this.phase = 'rest';
-                this.remainingTime = settings.restMinutes * 60 + settings.restSeconds;
-                this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'ОТДЫХ');
-                break;
-                
-            case 'rest':
-                this.currentRound++;
-                this.phase = 'work';
-                this.remainingTime = settings.workMinutes * 60 + settings.workSeconds;
-                this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'РАБОТА');
-                break;
         }
     }
 
@@ -520,7 +532,9 @@ class Timer {
 
     updateHeader(title, details = '') {
         const header = document.querySelector('.timer--header');
-        header.textContent = details ? `${title} – ${details}` : title;
+        if (header) {
+            header.textContent = details ? `${title} – ${details}` : title;
+        }
     }
 
     togglePause() {
@@ -580,13 +594,32 @@ class Timer {
 
     createMainMenu() {
         const menu = document.createElement('div');
-        menu.className = 'screen';
+        menu.id = 'main-menu';
+        menu.className = 'screen flex flex-col gap-5 items-center';
         menu.innerHTML = `
-            <button class="menu-item" data-timer="clock">Часы</button>
-            <button class="menu-item" data-timer="interval">Интервалы</button>
-            <button class="menu-item" data-timer="fortime">На время</button>
-            <button class="menu-item" data-timer="amrap">AMRAP</button>
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="clock">
+                ${this.translations.CLOCK}
+            </button>
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="interval">
+                ${this.translations.INTERVAL}
+            </button>
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="fortime">
+                ${this.translations.FOR_TIME}
+            </button>
+            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="amrap">
+                AMRAP
+            </button>
         `;
+
+        menu.querySelectorAll('.menu-item').forEach(button => {
+            button.addEventListener('click', () => {
+                const timerType = button.dataset.timer;
+                if (timerType) {
+                    this.showScreen(timerType);
+                }
+            });
+        });
+
         return menu;
     }
 
@@ -602,34 +635,50 @@ class Timer {
 
     createForTimeScreen() {
         const screen = document.createElement('div');
-        screen.className = 'screen';
+        screen.className = 'screen flex flex-col items-center relative w-full pt-20';
+
         screen.innerHTML = `
             ${this.createHeader('НА ВРЕМЯ')}
-            <div class="timer--settings">
-                ${this.createTimeInputs(
-                    'ВРЕМЯ',
-                    'targetMinutes',
-                    'targetSeconds',
-                    this.settings.fortime.targetMinutes,
-                    this.settings.fortime.targetSeconds
-                )}
-                <div class="timer--settingField">
-                    <label>
-                        <span>${this.translations.COUNTDOWN}</span>
-                        <div class="timer--input-container">
-                            <input type="number" 
-                                   name="countdownSeconds" 
-                                   value="${this.settings.fortime.countdownSeconds}" 
-                                   min="0" 
-                                   max="59" 
-                                   class="timer--input">
-                        </div>
-                    </label>
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-md">
+                <div class="grid grid-cols-[150px,1fr] gap-5 w-full">
+                    <label class="text-right self-center text-2xl">${this.translations.MINUTES}</label>
+                    <div class="flex items-center border-2 border-white p-3">
+                        <input type="number" 
+                               name="targetMinutes" 
+                               value="${this.settings.fortime.targetMinutes}" 
+                               min="0" 
+                               max="59" 
+                               class="w-20 bg-transparent border-none text-2xl text-center">
+                    </div>
+
+                    <label class="text-right self-center text-2xl">${this.translations.SECONDS}</label>
+                    <div class="flex items-center border-2 border-white p-3">
+                        <input type="number" 
+                               name="targetSeconds" 
+                               value="${this.settings.fortime.targetSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="w-20 bg-transparent border-none text-2xl text-center">
+                    </div>
+
+                    <label class="text-right self-center text-2xl">${this.translations.COUNTDOWN}</label>
+                    <div class="flex items-center border-2 border-white p-3">
+                        <input type="number" 
+                               name="countdownSeconds" 
+                               value="${this.settings.fortime.countdownSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="w-20 bg-transparent border-none text-2xl text-center">
+                    </div>
                 </div>
-                <button class="menu-item start-button">${this.translations.START}</button>
+                
+                <button class="start-button ml-[150px] w-[calc(100%-150px)] text-2xl bg-transparent border-2 border-white p-4 cursor-pointer uppercase">
+                    ${this.translations.START}
+                </button>
             </div>
-            <div class="timer-container" style="display: none;">
-                <div class="timer-display"></div>
+            
+            <div class="timer-container hidden w-full flex justify-center items-center relative">
+                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
             </div>
         `;
 
@@ -643,12 +692,15 @@ class Timer {
         const timerDisplay = screen.querySelector('.timer-display');
         timerDisplay.addEventListener('click', () => this.togglePause());
 
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && this.currentScreen === 'fortime') {
-                e.preventDefault();
-                this.togglePause();
-            }
-        });
+        const backButton = screen.querySelector('.back-button');
+        if (backButton) {
+            backButton.addEventListener('click', () => this.showScreen('main-menu'));
+        }
+
+        const fullscreenButton = screen.querySelector('.fullscreen-button');
+        if (fullscreenButton) {
+            fullscreenButton.addEventListener('click', () => this.toggleFullscreen());
+        }
 
         return screen;
     }
@@ -743,13 +795,14 @@ class Timer {
             }
 
             const settings = this.settings.fortime;
-            const timerSettings = screen.querySelector('.timer--settings');
+            const setupContainer = screen.querySelector('.flex.flex-col');
             const timerContainer = screen.querySelector('.timer-container');
             
             this.saveForTimeSettings(screen);
             
-            timerSettings.style.display = 'none';
-            timerContainer.style.display = 'flex';
+            setupContainer.style.display = 'none';
+            timerContainer.classList.remove('hidden');
+            timerContainer.classList.add('flex');
             
             this.remainingTime = settings.countdownSeconds;
             this.elapsedTime = 0;
@@ -777,26 +830,20 @@ class Timer {
         }
         
         if (this.phase === 'countdown') {
-            if (this.remainingTime <= 3 && this.remainingTime > 1) {
+            if (this.remainingTime <= 3 && this.remainingTime > 0) {
                 this.playSound('beep');
             }
             
-            if (this.remainingTime === 1 && !this.isTransitioning) {
-                this.isTransitioning = true;
-                timerDisplay.textContent = '00:01';
-                this.playSound('start');
-                
-                setTimeout(() => {
-                    this.isTransitioning = false;
-                    this.phase = 'work';
-                    this.elapsedTime = 0;
-                    this.updateHeader('НА ВРЕМЯ', `ЦЕЛЬ ${Math.floor(this.targetTime / 60)}:${(this.targetTime % 60).toString().padStart(2, '0')}`);
-                }, 1000);
-                return;
-            }
+            const minutes = Math.floor(this.remainingTime / 60);
+            const seconds = this.remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            if (!this.isTransitioning) {
-                timerDisplay.textContent = `00:${this.remainingTime.toString().padStart(2, '0')}`;
+            if (this.remainingTime === 0) {
+                this.playSound('start');
+                this.phase = 'work';
+                this.elapsedTime = 0;
+                this.updateHeader('НА ВРЕМЯ', `ЦЕЛЬ ${Math.floor(this.targetTime / 60)}:${(this.targetTime % 60).toString().padStart(2, '0')}`);
+            } else {
                 this.remainingTime--;
             }
         } else {
@@ -881,26 +928,20 @@ class Timer {
         }
         
         if (this.phase === 'countdown') {
-            if (this.remainingTime <= 3 && this.remainingTime > 1) {
+            if (this.remainingTime <= 3 && this.remainingTime > 0) {
                 this.playSound('beep');
             }
             
-            if (this.remainingTime === 1 && !this.isTransitioning) {
-                this.isTransitioning = true;
-                timerDisplay.textContent = '00:01';
-                this.playSound('start');
-                
-                setTimeout(() => {
-                    this.isTransitioning = false;
-                    this.phase = 'work';
-                    this.remainingTime = this.targetTime;
-                    this.updateHeader('AMRAP', `${Math.floor(this.targetTime / 60)}:${(this.targetTime % 60).toString().padStart(2, '0')}`);
-                }, 1000);
-                return;
-            }
+            const minutes = Math.floor(this.remainingTime / 60);
+            const seconds = this.remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            if (!this.isTransitioning) {
-                timerDisplay.textContent = `00:${this.remainingTime.toString().padStart(2, '0')}`;
+            if (this.remainingTime === 0) {
+                this.playSound('start');
+                this.phase = 'work';
+                this.remainingTime = this.targetTime;
+                this.updateHeader('AMRAP', `${Math.floor(this.targetTime / 60)}:${(this.targetTime % 60).toString().padStart(2, '0')}`);
+            } else {
                 this.remainingTime--;
             }
         } else {
@@ -949,5 +990,6 @@ class Timer {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, creating Timer');
     window.timer = new Timer();
 });

@@ -62,7 +62,7 @@ input[type="number"] {
     background: transparent;
     color: white;
     padding: 5px;
-    font-size: 24px;
+    font-size: 2rem;
     width: 80px;
     text-align: center;
     font-family: 'TimerFont', monospace;
@@ -356,3 +356,65 @@ input[type="number"] {
 .phase-work, .phase-rest, .phase-countdown {
     animation: none;
 }
+
+/* Стили для формы интервального таймера */
+.interval-setup {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+    max-width: 400px;
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
+.interval-setup label {
+    text-align: right;
+    align-self: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.timer--input-container {
+    border: 2px solid white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.timer--input {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    width: 60px;
+    text-align: center;
+    font-family: 'TimerFont', monospace;
+}
+
+.timer--input::-webkit-inner-spin-button,
+.timer--input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Обновляем стиль кнопки старт */
+.interval-setup + .menu-item {
+    width: calc(100% - 150px);
+    margin-left: auto;
+    margin-right: 0;
+    font-size: 2rem;
+}
+
+/* Обновляем общие стили для всех форм ввода */
+input[type="number"] {
+    background: transparent;
+    color: white;
+    padding: 5px;
+    font-size: 2rem;
+    width: 80px;
+    text-align: center;
+    font-family: 'TimerFont', monospace;
+}
+
+

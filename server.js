@@ -9,7 +9,16 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // Serve static files
-app.use(express.static('www'));
+app.use(express.static('www', {
+    setHeaders: (res, path, stat) => {
+        if (path.endsWith('.js')) {
+            res.set('Content-Type', 'application/javascript');
+        }
+        if (path.endsWith('.css')) {
+            res.set('Content-Type', 'text/css');
+        }
+    }
+}));
 
 // Serve control page
 app.get('/control', (req, res) => {
