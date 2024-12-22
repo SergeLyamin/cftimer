@@ -1,89 +1,114 @@
 const WebSocket = require('ws');
 const http = require('http');
 const express = require('express');
-const QRCode = require('qrcode');
 const path = require('path');
+const QRCode = require('qrcode');
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// Serve static files
-app.use(express.static('www', {
-    setHeaders: (res, path, stat) => {
-        if (path.endsWith('.js')) {
-            res.set('Content-Type', 'application/javascript');
-        }
-        if (path.endsWith('.css')) {
-            res.set('Content-Type', 'text/css');
-        }
-    }
-}));
+// Статические файлы
+app.use(express.static(path.join(__dirname, 'www')));
 
-// Serve control page
-app.get('/control', (req, res) => {
-    res.sendFile(path.join(__dirname, 'control.html'));
+// Маршруты
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'www', 'index.html'));
 });
 
-const clients = new Map();
-let displayClient = null;
+app.get('/control', (req, res) => {
+    res.sendFile(path.join(__dirname, 'www', 'control.html'));
+});
 
-wss.on('connection', (ws, req) => {
+// WebSocket соединения
+const connections = {
+    host: null,
+    controllers: new Set()
+};
+
+wss.on('connection', (ws) => {
+    console.log('New WebSocket connection');
+
     ws.on('message', async (message) => {
-        const data = JSON.parse(message);
+        try {
+            const data = JSON.parse(message);
+            console.log('Received:', data);
 
-        if (data.type === 'init') {
-            if (!clients.has(ws)) {
-                clients.set(ws, { type: 'display' });
-                displayClient = ws;
-                
-                // Получаем host из заголовков запроса
-                const host = req.headers.host;
-                try {
-                    // Формируем URL используя тот же протокол и хост, с которого пришел запрос
-                    const protocol = req.headers['x-forwarded-proto'] || 'http';
-                    const controlUrl = `${protocol}://${host}/control`;
-                    console.log('Generating QR for URL:', controlUrl); // Для отладки
-                    
-                    const qrCodeDataUrl = await QRCode.toDataURL(controlUrl);
-                    ws.send(JSON.stringify({
-                        type: 'qr',
-                        qrCode: qrCodeDataUrl
-                    }));
-                } catch (error) {
-                    console.error('Ошибка генерации QR-кода:', error);
-                }
+            switch (data.type) {
+                case 'init':
+                    if (data.isController) {
+                        connections.controllers.add(ws);
+                        ws.isController = true;
+                        console.log('Controller connected');
+                    } else {
+                        connections.host = ws;
+                        ws.isHost = true;
+                        console.log('Host connected');
+
+                        // Генерируем QR-код для подключения контроллера
+                        const controlUrl = `${process.env.APP_URL || 'http://localhost:3000'}/control`;
+                        const qrCode = await QRCode.toDataURL(controlUrl);
+                        ws.send(JSON.stringify({
+                            type: 'qr',
+                            qrCode: qrCode
+                        }));
+                    }
+                    break;
+
+                case 'screen-change':
+                    // Отправляем всем контроллерам
+                    connections.controllers.forEach(controller => {
+                        controller.send(JSON.stringify({
+                            type: 'screen-change',
+                            screen: data.screen
+                        }));
+                    });
+                    break;
+
+                case 'command':
+                    // Отправляем команду хосту
+                    if (connections.host) {
+                        connections.host.send(JSON.stringify({
+                            type: 'command',
+                            action: data.action
+                        }));
+                    }
+                    break;
+
+                case 'timer-update':
+                    // Отправляем обновление таймера всем контроллерам
+                    connections.controllers.forEach(controller => {
+                        controller.send(JSON.stringify({
+                            type: 'timer-update',
+                            ...data
+                        }));
+                    });
+                    break;
             }
-        } else if (data.type === 'control-init') {
-            clients.set(ws, { type: 'control' });
-            if (displayClient) {
-                displayClient.send(JSON.stringify({
-                    type: 'controller-connected'
-                }));
-            }
-        } else if (data.type === 'command' && displayClient) {
-            displayClient.send(JSON.stringify({
-                type: 'command',
-                action: data.action
-            }));
+        } catch (error) {
+            console.error('Error processing message:', error);
         }
     });
 
     ws.on('close', () => {
-        const client = clients.get(ws);
-        if (client && client.type === 'control' && displayClient) {
-            displayClient.send(JSON.stringify({
-                type: 'controller-disconnected'
-            }));
+        if (ws.isController) {
+            connections.controllers.delete(ws);
+            console.log('Controller disconnected');
         }
-        if (ws === displayClient) {
-            displayClient = null;
+        if (ws.isHost) {
+            connections.host = null;
+            console.log('Host disconnected');
+            // Уведомляем контроллеры об отключении хоста
+            connections.controllers.forEach(controller => {
+                controller.send(JSON.stringify({
+                    type: 'host-disconnected'
+                }));
+            });
         }
-        clients.delete(ws);
     });
 });
 
-const port = process.env.PORT || 3000;
-server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 }); 

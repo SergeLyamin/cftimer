@@ -3,21 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление таймером</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Пульт управления таймером</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        timer: ['Ubuntu Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div id="app">
-        <div id="control-screen" class="screen">
-            <h2>Управление таймером</h2>
-            <div id="status">Подключение...</div>
-            <div id="controls" style="display: none;">
-                <button class="menu-item" data-action="start">СТАРТ</button>
-                <button class="menu-item" data-action="pause">ПАУЗА</button>
-                <button class="menu-item" data-action="reset">СБРОС</button>
-            </div>
-        </div>
+<body class="bg-black text-white font-timer min-h-screen flex flex-col justify-center items-center">
+    <!-- Часы в левом нижнем углу -->
+    <button id="clock-button" class="absolute bottom-5 left-5 text-2xl cursor-pointer">09:23</button>
+
+    <!-- Главное меню -->
+    <div id="main-menu" class="screen flex flex-col gap-3 items-center">
+        <button class="menu-item w-[300px] p-4 text-5xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100" data-timer="interval">Интервалы</button>
+        <button class="menu-item w-[300px] p-4 text-5xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100" data-timer="fortime">На время</button>
+        <button class="menu-item w-[300px] p-4 text-5xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100" data-timer="amrap">AMRAP</button>
     </div>
+
+    <!-- Экраны таймеров -->
+    <div id="timer-screens"></div>
+
     <script src="control.js"></script>
 </body>
 </html> 

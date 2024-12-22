@@ -1,26 +1,26 @@
-class TimerControl {
+class ControlTimer extends Timer {
     constructor() {
-        this.timerId = new URLSearchParams(window.location.search).get('id');
-        this.status = document.getElementById('status');
-        this.controls = document.getElementById('controls');
-        
-        if (!this.timerId) {
-            this.status.textContent = 'Ошибка: ID таймера не найден';
-            return;
-        }
-        
-        this.connectWebSocket();
-        this.initControls();
+        super();
+        this.isController = true; // Флаг для определения, что это пульт управления
     }
-    
-    connectWebSocket() {
+
+    // Переопределяем методы воспроизведения звука
+    playSound() {
+        // Пустой метод, так как в пульте управления звуки не нужны
+    }
+
+    // Переопределяем инициализацию WebSocket
+    initWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        this.ws = new WebSocket(`${protocol}//${window.location.host}`);
+        const wsUrl = `${protocol}//${window.location.host}`;
+        
+        this.ws = new WebSocket(wsUrl);
         
         this.ws.onopen = () => {
-            this.ws.send(JSON.stringify({
-                type: 'connect',
-                timerId: this.timerId
+            console.log('WebSocket connected, sending controller init');
+            this.ws.send(JSON.stringify({ 
+                type: 'init',
+                isController: true 
             }));
         };
         
@@ -28,40 +28,47 @@ class TimerControl {
             const data = JSON.parse(event.data);
             
             switch(data.type) {
-                case 'connected':
-                    this.status.textContent = 'Подключено';
-                    this.controls.style.display = 'flex';
+                case 'screen-change':
+                    this.showScreen(data.screen);
                     break;
-                    
-                case 'host-disconnected':
-                    this.status.textContent = 'Таймер отключен';
-                    this.controls.style.display = 'none';
+                case 'timer-update':
+                    this.updateTimerDisplay(data);
+                    break;
+                case 'timer-finish':
+                    this.showFinishMessage(data);
                     break;
             }
         };
-        
-        this.ws.onclose = () => {
-            this.status.textContent = 'Соединение потеряно';
-            this.controls.style.display = 'none';
-            setTimeout(() => this.connectWebSocket(), 5000);
-        };
     }
-    
-    initControls() {
-        document.querySelectorAll('[data-action]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const action = e.target.dataset.action;
-                this.ws.send(JSON.stringify({
-                    type: 'control',
-                    timerId: this.timerId,
-                    target: 'host',
-                    action: action
-                }));
-            });
-        });
+
+    // Добавляем метод для отправки команд
+    sendCommand(action) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+                type: 'command',
+                action: action
+            }));
+        }
+    }
+
+    // Переопределяем методы запуска таймеров
+    startInterval() {
+        this.sendCommand('start');
+    }
+
+    startForTime() {
+        this.sendCommand('start');
+    }
+
+    startAmrap() {
+        this.sendCommand('start');
+    }
+
+    togglePause() {
+        this.sendCommand('pause');
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new TimerControl();
+    window.timer = new ControlTimer();
 }); 

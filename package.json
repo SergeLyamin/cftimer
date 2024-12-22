@@ -11,9 +11,20 @@
   "dependencies": {
     "express": "^4.21.2",
     "qrcode": "^1.5.4",
-    "ws": "^8.2.3"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SergeLyamin/cftimer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SergeLyamin/cftimer/issues"
+  },
+  "homepage": "https://github.com/SergeLyamin/cftimer#readme"
 }
