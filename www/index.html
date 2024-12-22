@@ -22,12 +22,20 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <style>
-        .modal-slide-up {
+        .settings-modal {
             transform: translateY(100%);
             transition: transform 0.3s ease-out;
         }
-        .modal-slide-up.show {
+        .settings-modal.show {
             transform: translateY(0);
+        }
+        .settings-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+        .settings-backdrop.show {
+            opacity: 1;
         }
     </style>
 </head>
@@ -37,88 +45,80 @@
     <button id="clock-button" class="absolute bottom-5 left-5 text-2xl cursor-pointer">09:23</button>
 
     <!-- Главное меню -->
-    <div id="app" class="flex flex-col items-center gap-5">
-        <button class="menu-item w-menu p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-200" data-timer="interval">Интервалы</button>
-        <button class="menu-item w-menu p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-200" data-timer="fortime">На время</button>
-        <button class="menu-item w-menu p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-200" data-timer="amrap">AMRAP</button>
+    <div id="main-menu" class="screen flex flex-col gap-3 items-center">
+        <button class="menu-item w-[300px] p-4 text-5xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100" data-timer="interval">Интервалы</button>
+        <button class="menu-item w-[300px] p-4 text-5xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100" data-timer="fortime">На время</button>
+        <button class="menu-item w-[300px] p-4 text-5xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100" data-timer="amrap">AMRAP</button>
     </div>
+
+    <!-- Экраны таймеров -->
+    <div id="timer-screens"></div>
 
     <!-- Кнопка настроек -->
     <button id="settings-button" class="absolute bottom-5 right-5 text-2xl bg-transparent border-none text-white cursor-pointer">
         <img src="img/remote-ico.svg" alt="Настройки" class="w-8 h-8">
     </button>
 
-    <!-- Модальное окно для QR-кода -->
-    <div id="qr-modal" class="fixed bottom-0 right-0 mb-16 mr-5 bg-white p-5 rounded-t shadow-lg text-center modal-slide-up hidden">
-        <button id="close-modal" class="absolute top-2 right-2 text-black">✖</button>
-        <img src="img/qr-code.png" alt="QR Code" class="w-48 h-48">
-        <p class="text-black mt-2">Сканируйте для удаленного управления</p>
-        <p class="text-black mt-2 text-sm">
-            <a href="https://github.com/yourusername/yourrepo" class="text-blue-600 hover:underline">GitHub</a>
-        </p>
-    </div>
-
-    <!-- Экран часов -->
-    <div id="clock-screen" class="fixed inset-0 bg-black flex justify-center items-center text-[18vw] hidden">
-        <div class="clock-display"></div>
+    <!-- Модальное окно настроек -->
+    <div id="settings-backdrop" class="settings-backdrop fixed inset-0 hidden">
+        <div id="settings-modal" class="settings-modal fixed bottom-0 right-0 w-[400px] bg-black border-t border-l border-white">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl">Настройки</h2>
+                    <button id="close-settings" class="text-2xl">&times;</button>
+                </div>
+                <div class="flex flex-col items-center gap-4">
+                    <div id="qr-container" class="bg-white p-4 flex justify-center items-center w-48 h-48">
+                        <!-- QR код будет добавлен через JavaScript -->
+                    </div>
+                    <p class="text-center">Сканируйте для удаленного управления</p>
+                    <div class="mt-4 text-sm text-center">
+                        <p class="text-gray-500"><a href="https://github.com/SergeLyamin/cftimer" target="_blank" class="text-white hover:underline">GitHub</a> repo by Serge</p>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="timer.js"></script>
     <script src="metrics.js"></script>
     <script>
-        // Обновление времени
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ru-RU', { 
-                hour: '2-digit', 
-                minute: '2-digit'
+        // Обработчики для модального окна настроек
+        const settingsButton = document.getElementById('settings-button');
+        const settingsBackdrop = document.getElementById('settings-backdrop');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettings = document.getElementById('close-settings');
+
+        settingsButton.addEventListener('click', () => {
+            settingsBackdrop.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                settingsBackdrop.classList.add('show');
+                settingsModal.classList.add('show');
             });
-            document.getElementById('clock-button').textContent = timeString;
-            if (!document.getElementById('clock-screen').classList.contains('hidden')) {
-                document.querySelector('.clock-display').textContent = 
-                    now.toLocaleTimeString('ru-RU', { 
-                        hour: '2-digit', 
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
-            }
+        });
+
+        function closeModal() {
+            settingsBackdrop.classList.remove('show');
+            settingsModal.classList.remove('show');
+            setTimeout(() => {
+                settingsBackdrop.classList.add('hidden');
+            }, 300);
         }
 
-        setInterval(updateTime, 1000);
-        updateTime();
-
-        // Обработчики для часов
-        document.getElementById('clock-button').addEventListener('click', () => {
-            document.getElementById('clock-screen').classList.remove('hidden');
+        closeSettings.addEventListener('click', closeModal);
+        settingsBackdrop.addEventListener('click', (e) => {
+            if (e.target === settingsBackdrop) {
+                closeModal();
+            }
         });
-
-        document.getElementById('clock-screen').addEventListener('click', () => {
-            document.getElementById('clock-screen').classList.add('hidden');
-        });
-
-        // Обработчики для модального окна
-        document.getElementById('settings-button').addEventListener('click', () => {
-            const modal = document.getElementById('qr-modal');
-            modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.add('show'), 10);
-        });
-
-        document.getElementById('close-modal').addEventListener('click', () => {
-            const modal = document.getElementById('qr-modal');
-            modal.classList.remove('show');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        });
-
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                const modal = document.getElementById('qr-modal');
-                modal.classList.remove('show');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-                document.getElementById('clock-screen').classList.add('hidden');
+                closeModal();
             }
         });
 
-        // Обработчики для кнопок меню
+        // Восстановление работы кнопок меню
         document.querySelectorAll('.menu-item').forEach(button => {
             button.addEventListener('click', (e) => {
                 const timerType = e.target.dataset.timer;
@@ -126,6 +126,13 @@
                     window.timer.showScreen(timerType);
                 }
             });
+        });
+
+        // Обработчик для часов
+        document.getElementById('clock-button').addEventListener('click', () => {
+            if (window.timer) {
+                window.timer.showScreen('clock');
+            }
         });
     </script>
 </body>

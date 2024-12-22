@@ -52,7 +52,7 @@ class Timer {
             'REST': 'ОТДЫХ',
             'MINUTES': 'МИНУТ',
             'SECONDS': 'СЕКУНД',
-            'COUNTDOWN': 'ОБРАТНЫЙ ОТСЧЕТ'
+            'COUNTDOWN': 'ПОДГОТОВКА'
         };
 
         this.sounds = {
@@ -129,7 +129,7 @@ class Timer {
         
         qrContainer.innerHTML = `
             <img src="${qrDataUrl}" alt="QR Code">
-            <p>Сканируйте для удаленного управления</p>
+            //<!-- <p class="text-center">Сканируйте для удаленного управления</p>-->
         `;
         qrContainer.style.display = 'block';
         console.log('QR container updated and displayed');
@@ -259,10 +259,10 @@ class Timer {
         return `
             <div class="header-panel fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-black">
                 <div class="flex items-center gap-4">
-                    <button class="back-button text-2xl bg-transparent border-none text-white cursor-pointer">←</button>
-                    <h2 class="timer--header text-2xl font-normal m-0">${title}${details ? ' – ' + details : ''}</h2>
+                    <button class="back-button text-4xl bg-transparent border-none text-white cursor-pointer">←</button>
+                    <h2 class="timer--header text-4xl font-normal m-0">${title}${details ? ' – ' + details : ''}</h2>
                 </div>
-                <button class="fullscreen-button text-2xl bg-transparent border-none text-white cursor-pointer">⛶</button>
+                <button class="fullscreen-button text-4xl bg-transparent border-none text-white cursor-pointer">⛶</button>
             </div>
         `;
     }
@@ -319,81 +319,80 @@ class Timer {
 
     createIntervalScreen() {
         const screen = document.createElement('div');
-        screen.className = 'screen flex flex-col items-center';
+        screen.className = 'screen flex flex-col items-center relative w-full pt-20';
 
         screen.innerHTML = `
-            ${this.createHeader('Интервалы')}
-            <div class="interval-setup grid grid-cols-[150px,1fr] gap-5 max-w-md mt-24">
-                <label class="text-right self-center text-2xl">${this.translations.ROUNDS}</label>
-                <div class="flex items-center border-2 border-white p-3">
-                    <input type="number" 
-                           name="rounds" 
-                           value="${this.settings.interval.rounds}" 
-                           min="1" 
-                           class="w-16 bg-transparent border-none text-2xl text-center">
-                </div>
+            ${this.createHeader('ИНТЕРВАЛЫ')}
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[43rem] px-4">
+                <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
+                    <label class="text-right self-center text-4xl">${this.translations.ROUNDS}</label>
+                    <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
+                        <input type="number" 
+                               name="rounds" 
+                               value="${this.settings.interval.rounds}" 
+                               min="1" 
+                               max="99" 
+                               class="w-full bg-transparent border-none text-4xl text-center">
+                    </div>
+                    <span class="text-4xl self-center">раз</span>
 
-                <label class="text-right self-center text-2xl">${this.translations.WORK}</label>
-                <div class="flex items-center gap-3 border-2 border-white p-3">
-                    <input type="number" 
-                           name="workMinutes" 
-                           value="${this.settings.interval.workMinutes}" 
-                           min="0" 
-                           max="59" 
-                           class="w-16 bg-transparent border-none text-2xl text-center">
-                    <span class="text-2xl">:</span>
-                    <input type="number" 
-                           name="workSeconds" 
-                           value="${this.settings.interval.workSeconds}" 
-                           min="0" 
-                           max="59" 
-                           class="w-16 bg-transparent border-none text-2xl text-center">
-                </div>
+                    <label class="text-right self-center text-4xl">${this.translations.WORK}</label>
+                    <div class="grid grid-cols-2 gap-2 border-2 border-white w-[16rem] h-[72px]">
+                        <input type="number" 
+                               name="workMinutes" 
+                               value="${this.settings.interval.workMinutes}" 
+                               min="0" 
+                               max="59" 
+                               class="bg-transparent border-none text-4xl text-center">
+                        <input type="number" 
+                               name="workSeconds" 
+                               value="${this.settings.interval.workSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="bg-transparent border-none text-4xl text-center">
+                    </div>
+                    <span class="text-4xl self-center">мин:сек</span>
 
-                <label class="text-right self-center text-2xl">${this.translations.REST}</label>
-                <div class="flex items-center gap-3 border-2 border-white p-3">
-                    <input type="number" 
-                           name="restMinutes" 
-                           value="${this.settings.interval.restMinutes}" 
-                           min="0" 
-                           max="59" 
-                           class="w-16 bg-transparent border-none text-2xl text-center">
-                    <span class="text-2xl">:</span>
-                    <input type="number" 
-                           name="restSeconds" 
-                           value="${this.settings.interval.restSeconds}" 
-                           min="0" 
-                           max="59" 
-                           class="w-16 bg-transparent border-none text-2xl text-center">
-                </div>
+                    <label class="text-right self-center text-4xl">${this.translations.REST}</label>
+                    <div class="grid grid-cols-2 gap-2 border-2 border-white w-[16rem] h-[72px]">
+                        <input type="number" 
+                               name="restMinutes" 
+                               value="${this.settings.interval.restMinutes}" 
+                               min="0" 
+                               max="59" 
+                               class="bg-transparent border-none text-4xl text-center">
+                        <input type="number" 
+                               name="restSeconds" 
+                               value="${this.settings.interval.restSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="bg-transparent border-none text-4xl text-center">
+                    </div>
+                    <span class="text-4xl self-center">мин:сек</span>
 
-                <label class="text-right self-center text-2xl">${this.translations.COUNTDOWN}</label>
-                <div class="flex items-center gap-3 border-2 border-white p-3">
-                    <input type="number" 
-                           name="countdownMinutes" 
-                           value="0" 
-                           min="0" 
-                           max="59" 
-                           class="w-16 bg-transparent border-none text-2xl text-center">
-                    <span class="text-2xl">:</span>
-                    <input type="number" 
-                           name="countdownSeconds" 
-                           value="${this.settings.interval.countdownSeconds}" 
-                           min="0" 
-                           max="59" 
-                           class="w-16 bg-transparent border-none text-2xl text-center">
+                    <label class="text-right self-center text-4xl">${this.translations.COUNTDOWN}</label>
+                    <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
+                        <input type="number" 
+                               name="countdownSeconds" 
+                               value="${this.settings.interval.countdownSeconds}" 
+                               min="0" 
+                               max="59" 
+                               class="w-full bg-transparent border-none text-4xl text-center">
+                    </div>
+                    <span class="text-4xl self-center">сек</span>
                 </div>
+                
+                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase">
+                    ${this.translations.START}
+                </button>
             </div>
-            <button class="menu-item ml-[150px] w-[calc(100%-150px)] text-2xl bg-transparent border-2 border-white p-4 mt-5 cursor-pointer uppercase">
-                ${this.translations.START}
-            </button>
-            <div class="timer-container hidden">
-                <div class="round-number"></div>
+            
+            <div class="timer-container hidden w-full flex justify-center items-center relative">
                 <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
             </div>
         `;
 
-        const startButton = screen.querySelector('.menu-item');
+        const startButton = screen.querySelector('.start-button');
         startButton.addEventListener('click', () => this.startInterval());
 
         screen.querySelectorAll('input').forEach(input => {
@@ -426,27 +425,25 @@ class Timer {
     startInterval() {
         try {
             const screen = document.querySelector('#timer-screens .screen');
-            if (!screen) {
-                console.error('Экран таймера не найден');
-                return;
-            }
+            if (!screen) return;
 
             const settings = this.settings.interval;
-            const intervalSetup = screen.querySelector('.interval-setup');
+            const setupContainer = screen.querySelector('.flex.flex-col');
             const timerContainer = screen.querySelector('.timer-container');
             
             this.saveIntervalSettings(screen);
             
-            intervalSetup.style.display = 'none';
-            screen.querySelector('.menu-item').style.display = 'none';
-            timerContainer.style.display = 'flex';
+            setupContainer.style.display = 'none';
+            timerContainer.classList.remove('hidden');
+            timerContainer.classList.add('flex');
             
-            this.currentRound = 1;
-            this.isWorkPhase = true;
             this.remainingTime = settings.countdownSeconds;
+            this.currentRound = 1;
             this.phase = 'countdown';
+            this.workTime = settings.workMinutes * 60 + settings.workSeconds;
+            this.restTime = settings.restMinutes * 60 + settings.restSeconds;
             
-            this.updateHeader(`РАУНД ${this.currentRound}/${settings.rounds}`, 'ПОДГОТОВКА');
+            this.updateHeader('ИНТЕРВАЛЫ', 'ПОДГОТОВКА');
             
             this.interval = setInterval(() => this.updateIntervalTimer(), 1000);
             this.isRunning = true;
@@ -466,44 +463,61 @@ class Timer {
             return;
         }
         
-        const minutes = Math.floor(this.remainingTime / 60);
-        const seconds = this.remainingTime % 60;
-        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (this.phase === 'countdown' && this.remainingTime <= 3 && this.remainingTime > 0) {
-            this.playSound('beep');
-        }
-        
-        if (this.remainingTime === 0) {
-            switch (this.phase) {
-                case 'countdown':
-                    this.playSound('start');
-                    this.phase = 'work';
-                    this.remainingTime = this.settings.interval.workMinutes * 60 + this.settings.interval.workSeconds;
-                    this.updateHeader(`РАУНД ${this.currentRound}/${this.settings.interval.rounds}`, 'РАБОТА');
-                    break;
-                
-                case 'work':
-                    if (this.currentRound >= this.settings.interval.rounds) {
-                        this.finishInterval();
-                        return;
-                    }
-                    this.playSound('rest');
-                    this.phase = 'rest';
-                    this.remainingTime = this.settings.interval.restMinutes * 60 + this.settings.interval.restSeconds;
-                    this.updateHeader(`РАУНД ${this.currentRound}/${this.settings.interval.rounds}`, 'ОТДЫХ');
-                    break;
-                
-                case 'rest':
-                    this.playSound('start');
-                    this.currentRound++;
-                    this.phase = 'work';
-                    this.remainingTime = this.settings.interval.workMinutes * 60 + this.settings.interval.workSeconds;
-                    this.updateHeader(`РАУНД ${this.currentRound}/${this.settings.interval.rounds}`, 'РАБОТА');
-                    break;
+        if (this.phase === 'countdown') {
+            if (this.remainingTime <= 3 && this.remainingTime > 0) {
+                this.playSound('beep');
             }
-        } else {
-            this.remainingTime--;
+            
+            const minutes = Math.floor(this.remainingTime / 60);
+            const seconds = this.remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (this.remainingTime === 0) {
+                this.playSound('start');
+                this.phase = 'work';
+                this.remainingTime = this.workTime;
+                this.updateHeader('ИНТЕРВАЛЫ', `РАУНД ${this.currentRound} - РАБОТА`);
+            } else {
+                this.remainingTime--;
+            }
+        } else if (this.phase === 'work') {
+            if (this.remainingTime === 1) {
+                this.playSound('rest');
+            }
+            
+            const minutes = Math.floor(this.remainingTime / 60);
+            const seconds = this.remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (this.remainingTime === 0) {
+                if (this.currentRound < this.settings.interval.rounds) {
+                    this.phase = 'rest';
+                    this.remainingTime = this.restTime;
+                    this.updateHeader('ИНТЕРВАЛЫ', `РАУНД ${this.currentRound} - ОТДЫХ`);
+                } else {
+                    this.finishInterval();
+                    return;
+                }
+            } else {
+                this.remainingTime--;
+            }
+        } else if (this.phase === 'rest') {
+            if (this.remainingTime === 1) {
+                this.playSound('start');
+            }
+            
+            const minutes = Math.floor(this.remainingTime / 60);
+            const seconds = this.remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (this.remainingTime === 0) {
+                this.currentRound++;
+                this.phase = 'work';
+                this.remainingTime = this.workTime;
+                this.updateHeader('ИНТЕРВАЛЫ', `РАУНД ${this.currentRound} - РАБОТА`);
+            } else {
+                this.remainingTime--;
+            }
         }
     }
 
@@ -513,13 +527,12 @@ class Timer {
             this.interval = null;
         }
         this.isRunning = false;
-        this.isTransitioning = false;
         
         const timerContainer = document.querySelector('.timer-container');
         if (timerContainer) {
             this.playSound('finish');
             timerContainer.innerHTML = `
-                <div class="finish-message">${this.settings.interval.rounds} раундов выполнены</div>
+                <div class="finish-message">${this.settings.interval.rounds} раундов завершены</div>
                 <button class="menu-item restart-button">${this.translations.RESTART}</button>
             `;
             
@@ -595,18 +608,18 @@ class Timer {
     createMainMenu() {
         const menu = document.createElement('div');
         menu.id = 'main-menu';
-        menu.className = 'screen flex flex-col gap-5 items-center';
+        menu.className = 'screen flex flex-col gap-4 items-center';
         menu.innerHTML = `
-            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="clock">
+            <button class="menu-item w-4/5 p-4 text-4xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="clock">
                 ${this.translations.CLOCK}
             </button>
-            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="interval">
+            <button class="menu-item w-4/5 p-4 text-4xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="interval">
                 ${this.translations.INTERVAL}
             </button>
-            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="fortime">
+            <button class="menu-item w-4/5 p-4 text-4xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="fortime">
                 ${this.translations.FOR_TIME}
             </button>
-            <button class="menu-item w-4/5 p-4 text-2xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="amrap">
+            <button class="menu-item w-4/5 p-4 text-4xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="amrap">
                 AMRAP
             </button>
         `;
@@ -643,40 +656,32 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('НА ВРЕМЯ')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-md">
-                <div class="grid grid-cols-[150px,1fr] gap-5 w-full">
-                    <label class="text-right self-center text-2xl">${this.translations.MINUTES}</label>
-                    <div class="flex items-center border-2 border-white p-3">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[43rem] px-4">
+                <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
+                    <label class="text-right self-center text-4xl">ЦЕЛЬ</label>
+                    <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
                         <input type="number" 
                                name="targetMinutes" 
                                value="${this.settings.fortime.targetMinutes}" 
                                min="0" 
-                               max="59" 
-                               class="w-20 bg-transparent border-none text-2xl text-center">
+                               max="99" 
+                               class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
+                    <span class="text-4xl self-center">${this.translations.MINUTES}</span>
 
-                    <label class="text-right self-center text-2xl">${this.translations.SECONDS}</label>
-                    <div class="flex items-center border-2 border-white p-3">
-                        <input type="number" 
-                               name="targetSeconds" 
-                               value="${this.settings.fortime.targetSeconds}" 
-                               min="0" 
-                               max="59" 
-                               class="w-20 bg-transparent border-none text-2xl text-center">
-                    </div>
-
-                    <label class="text-right self-center text-2xl">${this.translations.COUNTDOWN}</label>
-                    <div class="flex items-center border-2 border-white p-3">
+                    <label class="text-right self-center text-4xl">${this.translations.COUNTDOWN}</label>
+                    <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
                         <input type="number" 
                                name="countdownSeconds" 
                                value="${this.settings.fortime.countdownSeconds}" 
                                min="0" 
                                max="59" 
-                               class="w-20 bg-transparent border-none text-2xl text-center">
+                               class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
+                    <span class="text-4xl self-center">сек</span>
                 </div>
                 
-                <button class="start-button ml-[150px] w-[calc(100%-150px)] text-2xl bg-transparent border-2 border-white p-4 cursor-pointer uppercase">
+                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase">
                     ${this.translations.START}
                 </button>
             </div>
@@ -713,7 +718,7 @@ class Timer {
         try {
             const settings = {
                 targetMinutes: parseInt(screen.querySelector('[name="targetMinutes"]').value) || 0,
-                targetSeconds: parseInt(screen.querySelector('[name="targetSeconds"]').value) || 0,
+                targetSeconds: 0,
                 countdownSeconds: parseInt(screen.querySelector('[name="countdownSeconds"]').value) || 10
             };
 
@@ -729,40 +734,32 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('AMRAP')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-md">
-                <div class="grid grid-cols-[150px,1fr] gap-5 w-full">
-                    <label class="text-right self-center text-2xl">${this.translations.MINUTES}</label>
-                    <div class="flex items-center border-2 border-white p-3">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[43rem] px-4">
+                <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
+                    <label class="text-right self-center text-4xl">&nbsp;</label>
+                    <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
                         <input type="number" 
                                name="targetMinutes" 
                                value="${this.settings.amrap.targetMinutes}" 
                                min="0" 
-                               max="59" 
-                               class="w-20 bg-transparent border-none text-2xl text-center">
+                               max="99" 
+                               class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
+                    <span class="text-4xl self-center uppercase">${this.translations.MINUTES}</span>
 
-                    <label class="text-right self-center text-2xl">${this.translations.SECONDS}</label>
-                    <div class="flex items-center border-2 border-white p-3">
-                        <input type="number" 
-                               name="targetSeconds" 
-                               value="${this.settings.amrap.targetSeconds}" 
-                               min="0" 
-                               max="59" 
-                               class="w-20 bg-transparent border-none text-2xl text-center">
-                    </div>
-
-                    <label class="text-right self-center text-2xl">${this.translations.COUNTDOWN}</label>
-                    <div class="flex items-center border-2 border-white p-3">
+                    <label class="text-right self-center text-4xl">${this.translations.COUNTDOWN}</label>
+                    <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
                         <input type="number" 
                                name="countdownSeconds" 
                                value="${this.settings.amrap.countdownSeconds}" 
                                min="0" 
                                max="59" 
-                               class="w-20 bg-transparent border-none text-2xl text-center">
+                               class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
+                    <span class="text-4xl self-center">сек</span>
                 </div>
                 
-                <button class="start-button ml-[150px] w-[calc(100%-150px)] text-2xl bg-transparent border-2 border-white p-4 cursor-pointer uppercase">
+                <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase">
                     ${this.translations.START}
                 </button>
             </div>
@@ -789,7 +786,7 @@ class Timer {
         try {
             const settings = {
                 targetMinutes: parseInt(screen.querySelector('[name="targetMinutes"]').value) || 0,
-                targetSeconds: parseInt(screen.querySelector('[name="targetSeconds"]').value) || 0,
+                targetSeconds: 0,
                 countdownSeconds: parseInt(screen.querySelector('[name="countdownSeconds"]').value) || 10
             };
 
@@ -901,24 +898,21 @@ class Timer {
     startAmrap() {
         try {
             const screen = document.querySelector('#timer-screens .screen');
-            if (!screen) {
-                console.error('Экран таймера не найден');
-                return;
-            }
+            if (!screen) return;
 
             const settings = this.settings.amrap;
-            const timerSettings = screen.querySelector('.timer--settings');
+            const setupContainer = screen.querySelector('.flex.flex-col');
             const timerContainer = screen.querySelector('.timer-container');
             
             this.saveAmrapSettings(screen);
             
-            timerSettings.style.display = 'none';
-            timerContainer.style.display = 'flex';
+            setupContainer.style.display = 'none';
+            timerContainer.classList.remove('hidden');
+            timerContainer.classList.add('flex');
             
             this.remainingTime = settings.countdownSeconds;
-            this.elapsedTime = 0;
+            this.targetTime = settings.targetMinutes * 60;
             this.phase = 'countdown';
-            this.targetTime = settings.targetMinutes * 60 + settings.targetSeconds;
             
             this.updateHeader('AMRAP', 'ПОДГОТОВКА');
             

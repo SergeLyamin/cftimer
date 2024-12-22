@@ -1,49 +1,64 @@
 # Чек-лист рефакторинга
 
-## Ключевые селекторы и классы
-- [ ] Проверить все querySelector и querySelectorAll
-- [ ] Проверить все addEventListener
-- [ ] Проверить все className и classList операции
-- [ ] Сверить все data-атрибуты
+## Ключевые селекторы
+- [ ] .menu-item
+- [ ] .timer-display
+- [ ] .timer-container
+- [ ] .back-button
+- [ ] .fullscreen-button
+- [ ] #main-menu
+- [ ] #timer-screens
+- [ ] #qr-container
+- [ ] #settings-button
+- [ ] #clock-button
+- [ ] #qr-modal
 
-## Функциональность
-- [ ] Проверить работу главного меню
-- [ ] Проверить работу каждого типа таймера:
-  - [ ] Часы
-  - [ ] Интервалы
-  - [ ] На время
-  - [ ] AMRAP
+## CSS классы
+- [ ] .screen
+- [ ] .hidden
+- [ ] .modal-slide-up
+- [ ] .show
+- [ ] .font-timer
+- [ ] .transition-duration-200
 
-## События
-- [ ] Проверить все обработчики кликов
-- [ ] Проверить все обработчики изменений (change)
-- [ ] Проверить все клавиатурные события
+## Обработчики событий
+- [ ] click на .menu-item
+- [ ] click на .back-button
+- [ ] click на .fullscreen-button
+- [ ] click на #settings-button
+- [ ] click на #clock-button
+- [ ] keydown для 'Escape'
+- [ ] change для input[type="number"]
 
-## Стили
-- [ ] Сохранить все важные размеры
-- [ ] Проверить все позиционирование
-- [ ] Проверить все отступы
-- [ ] Проверить все выравнивания
+## Методы таймера
+- [ ] showScreen()
+- [ ] toggleFullscreen()
+- [ ] togglePause()
+- [ ] startClock()
+- [ ] startForTime()
+- [ ] startInterval()
+- [ ] startAmrap()
+- [ ] updateHeader()
+- [ ] playSound()
 
-## Тестирование
-- [ ] Проверить в десктопной версии
-- [ ] Проверить в мобильной версии
-- [ ] Проверить все переходы между экранами 
+## Состояния таймера
+- [ ] isRunning
+- [ ] isTransitioning
+- [ ] currentScreen
+- [ ] interval
+- [ ] phase
+- [ ] remainingTime
+- [ ] elapsedTime
+- [ ] currentRound
 
-## Отладка
-- [ ] Добавить console.log для ключевых моментов
-- [ ] Проверить консоль на наличие ошибок
-- [ ] Проверить, что обработчики событий добавляются
-- [ ] Проверить, что события срабатывают
+## Звуковые файлы
+- [ ] beep.mp3
+- [ ] start.mp3
+- [ ] finish.mp3
+- [ ] rest.mp3
 
-## Серверная часть
-- [ ] Проверить MIME-типы файлов
-- [ ] Проверить маршруты сервера
-- [ ] Проверить статические файлы
-- [ ] Проверить заголовки ответов
-
-## Дизайн
-- [ ] Проверить соответствие макетам
-- [ ] Проверить анимации
-- [ ] Проверить шрифты
-- [ ] Проверить адаптацию под мобильные устройства
+## WebSocket события
+- [ ] 'screen-change'
+- [ ] 'controller-connected'
+- [ ] 'controller-disconnected'
+- [ ] 'command'
