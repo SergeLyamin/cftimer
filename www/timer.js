@@ -337,7 +337,7 @@ class Timer {
                                max="99" 
                                class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
-                    <span class="text-4xl self-center">раз</span>
+                    <span class="text-4xl self-center">&nbsp;</span>
 
                     <label class="text-right self-center text-4xl">${this.translations.WORK}</label>
                     <div class="grid grid-cols-2 gap-2 border-2 border-white w-[16rem] h-[72px]">
@@ -354,7 +354,7 @@ class Timer {
                                max="59" 
                                class="bg-transparent border-none text-4xl text-center">
                     </div>
-                    <span class="text-4xl self-center">мин:сек</span>
+                    <span class="text-4xl self-center uppercase">мин:сек</span>
 
                     <label class="text-right self-center text-4xl">${this.translations.REST}</label>
                     <div class="grid grid-cols-2 gap-2 border-2 border-white w-[16rem] h-[72px]">
@@ -371,7 +371,7 @@ class Timer {
                                max="59" 
                                class="bg-transparent border-none text-4xl text-center">
                     </div>
-                    <span class="text-4xl self-center">мин:сек</span>
+                    <span class="text-4xl self-center uppercase">мин:сек</span>
 
                     <label class="text-right self-center text-4xl">${this.translations.COUNTDOWN}</label>
                     <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
@@ -382,7 +382,7 @@ class Timer {
                                max="59" 
                                class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
-                    <span class="text-4xl self-center">сек</span>
+                    <span class="text-4xl self-center uppercase">секунд</span>
                 </div>
                 
                 <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black">
@@ -681,7 +681,7 @@ class Timer {
                                max="59" 
                                class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
-                    <span class="text-4xl self-center">сек</span>
+                    <span class="text-4xl self-center uppercase">секунд</span>
                 </div>
                 
                 <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black">
@@ -759,7 +759,7 @@ class Timer {
                                max="59" 
                                class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
-                    <span class="text-4xl self-center">сек</span>
+                    <span class="text-4xl self-center uppercase">секунд</span>
                 </div>
                 
                 <button class="start-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black">
