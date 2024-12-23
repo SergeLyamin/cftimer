@@ -5,22 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Онлайн таймер для кроссфит</title>
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <link href="styles.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        timer: ['Ubuntu Mono', 'monospace'],
-                    },
-                    width: {
-                        'menu': '300px',
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="dist/styles.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <style>
         .settings-modal {
@@ -81,6 +66,10 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Для кнопки "полный экран" -->
+    <button class="fullscreen-button"></button>
 
     <script src="timer.js"></script>
     <script src="metrics.js"></script>

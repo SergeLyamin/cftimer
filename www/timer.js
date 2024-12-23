@@ -231,13 +231,20 @@ class Timer {
         }
 
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('back-button')) {
+            const backButton = e.target.closest('.back-button');
+            const fullscreenButton = e.target.closest('.fullscreen-button');
+            
+            if (backButton) {
+                e.preventDefault();
+                e.stopPropagation();
                 this.showScreen('main-menu');
             }
-            if (e.target.classList.contains('fullscreen-button')) {
+            if (fullscreenButton) {
+                e.preventDefault();
+                e.stopPropagation();
                 this.toggleFullscreen();
             }
-        });
+        }, true);
     }
 
     createTimeInputs(label, minutesName, secondsName, defaultMinutes = 0, defaultSeconds = 0) {
@@ -269,10 +276,12 @@ class Timer {
         return `
             <div class="header-panel fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-black">
                 <div class="flex items-center gap-4">
-                    <button class="back-button text-4xl bg-transparent border-none text-white cursor-pointer">��</button>
+                    <button class="back-button">
+                        <div class="back-arrow"></div>
+                    </button>
                     <h2 class="timer--header text-4xl font-normal m-0">${title}${details ? ' – ' + details : ''}</h2>
                 </div>
-                <button class="fullscreen-button text-4xl bg-transparent border-none text-white cursor-pointer">⛶</button>
+                <button class="fullscreen-button"></button>
             </div>
         `;
     }
@@ -428,7 +437,7 @@ class Timer {
 
             this.settings.interval = settings;
         } catch (error) {
-            console.error('Ошибка сохранения настроек:', error);
+            console.error('О��ибка сохранения настроек:', error);
         }
     }
 
@@ -618,7 +627,7 @@ class Timer {
     createMainMenu() {
         const menu = document.createElement('div');
         menu.id = 'main-menu';
-        menu.className = 'screen flex flex-col gap-4 items-center';
+        menu.className = 'screen flex flex-col gap-4 items-center justify-center h-full';
         menu.innerHTML = `
             <button class="menu-item w-4/5 p-4 text-4xl bg-transparent border-2 border-white cursor-pointer uppercase" data-timer="clock">
                 ${this.translations.CLOCK}
@@ -810,7 +819,7 @@ class Timer {
         try {
             const screen = document.querySelector('#timer-screens .screen');
             if (!screen) {
-                console.error('Экран таймера не найден');
+                console.error('Экран таймер�� не найден');
                 return;
             }
 

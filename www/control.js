@@ -67,6 +67,26 @@ class ControlTimer {
                 this.sendCommand('pause');
             }
         });
+
+        // Обработка полноэкранного режима
+        const fullscreenButton = document.querySelector('.fullscreen-button');
+        if (fullscreenButton) {
+            fullscreenButton.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+        }
+
+        // Обработка кнопки "назад"
+        const backButton = document.querySelector('.back-button');
+        if (backButton) {
+            backButton.addEventListener('click', () => {
+                window.history.back();
+            });
+        }
     }
 
     sendCommand(action) {

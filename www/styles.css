@@ -2,4 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+.back-arrow {
+    width: 30px;
+    height: 27px;
+    background: url('/img/arrow-left.svg') no-repeat center;
+    background-size: contain;
+    cursor: pointer;
+}
+
+.fullscreen-button {
+    width: 26px;
+    height: 24px;
+    background: url('/img/full-screen-ico.svg') no-repeat center;
+    background-size: contain;
+    cursor: pointer;
+}
+
+.back-button,
+.fullscreen-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    transition: opacity 0.2s;
+    -webkit-transition: opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-button:hover,
+.fullscreen-button:hover {
+    opacity: 0.8;
+}
+
+.back-button img,
+.fullscreen-button img {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
 
