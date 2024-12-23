@@ -1,49 +1,77 @@
-class ControlTimer extends Timer {
+class ControlTimer {
     constructor() {
-        super();
-        this.isController = true; // Флаг для определения, что это пульт управления
+        this.initWebSocket();
     }
 
-    // Переопределяем методы воспроизведения звука
-    playSound() {
-        // Пустой метод, так как в пульте управления звуки не нужны
-    }
-
-    // Переопределяем инициализацию WebSocket
     initWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}`;
         
-        this.ws = new WebSocket(wsUrl);
-        
-        this.ws.onopen = () => {
-            console.log('WebSocket connected, sending controller init');
-            this.ws.send(JSON.stringify({ 
-                type: 'init',
-                isController: true 
-            }));
-        };
-        
-        this.ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+        const connect = () => {
+            console.log('Connecting to WebSocket:', wsUrl);
+            this.ws = new WebSocket(wsUrl);
             
-            switch(data.type) {
-                case 'screen-change':
-                    this.showScreen(data.screen);
-                    break;
-                case 'timer-update':
-                    this.updateTimerDisplay(data);
-                    break;
-                case 'timer-finish':
-                    this.showFinishMessage(data);
-                    break;
-            }
+            this.ws.onopen = () => {
+                console.log('Controller connected, sending init');
+                this.ws.send(JSON.stringify({ 
+                    type: 'init',
+                    isController: true 
+                }));
+            };
+            
+            this.ws.onclose = () => {
+                console.log('WebSocket connection closed, reconnecting...');
+                setTimeout(connect, 1000);
+            };
+            
+            this.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('Received message:', data);
+                
+                switch(data.type) {
+                    case 'screen-change':
+                        this.updateScreen(data.screen);
+                        break;
+                    case 'timer-update':
+                        this.updateDisplay(data);
+                        break;
+                }
+            };
         };
+        
+        connect();
+        this.initControls();
     }
 
-    // Добавляем метод для отправки команд
+    initControls() {
+        document.querySelectorAll('.menu-item').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const timerType = e.target.dataset.timer;
+                if (timerType && this.ws) {
+                    console.log('Sending command:', timerType);
+                    this.ws.send(JSON.stringify({
+                        type: 'command',
+                        action: 'screen-change',
+                        screen: timerType
+                    }));
+                }
+            });
+        });
+
+        // Добавляем обработчики для кнопок управления таймером
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('start-button')) {
+                this.sendCommand('start');
+            }
+            if (e.target.classList.contains('timer-display')) {
+                this.sendCommand('pause');
+            }
+        });
+    }
+
     sendCommand(action) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            console.log('Sending command:', action);
             this.ws.send(JSON.stringify({
                 type: 'command',
                 action: action
@@ -51,24 +79,22 @@ class ControlTimer extends Timer {
         }
     }
 
-    // Переопределяем методы запуска таймеров
-    startInterval() {
-        this.sendCommand('start');
+    updateScreen(screenName) {
+        // Обновляем UI в соответствии с текущим экраном
+        console.log('Updating screen:', screenName);
     }
 
-    startForTime() {
-        this.sendCommand('start');
-    }
-
-    startAmrap() {
-        this.sendCommand('start');
-    }
-
-    togglePause() {
-        this.sendCommand('pause');
+    updateDisplay(data) {
+        // Обновляем отображение таймера
+        console.log('Updating display:', data);
+        const display = document.querySelector('.timer-display');
+        if (display && data.time) {
+            display.textContent = data.time;
+        }
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.timer = new ControlTimer();
+    console.log('Controller initialized');
+    window.controller = new ControlTimer();
 }); 
