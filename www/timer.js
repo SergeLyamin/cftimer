@@ -230,6 +230,13 @@ class Timer {
             });
         }
 
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'f' && this.currentScreen !== 'main-menu') {
+                e.preventDefault();
+                this.toggleFullscreen();
+            }
+        });
+
         document.addEventListener('click', (e) => {
             const backButton = e.target.closest('.back-button');
             const fullscreenButton = e.target.closest('.fullscreen-button');
@@ -281,7 +288,9 @@ class Timer {
                     </button>
                     <h2 class="timer--header text-4xl font-normal m-0">${title}${details ? ' – ' + details : ''}</h2>
                 </div>
-                <button class="fullscreen-button"></button>
+                <button class="fullscreen-button">
+                    
+                </button>
             </div>
         `;
     }
@@ -437,7 +446,7 @@ class Timer {
 
             this.settings.interval = settings;
         } catch (error) {
-            console.error('О��ибка сохранения настроек:', error);
+            console.error('Ошибка сохранения настроек:', error);
         }
     }
 
@@ -819,7 +828,7 @@ class Timer {
         try {
             const screen = document.querySelector('#timer-screens .screen');
             if (!screen) {
-                console.error('Экран таймер�� не найден');
+                console.error('Экран таймера не найден');
                 return;
             }
 
