@@ -18,7 +18,6 @@
 - [ ] .hidden
 - [ ] .modal-slide-up
 - [ ] .show
-- [ ] .font-timer
 - [ ] .transition-duration-200
 
 ## Обработчики событий
