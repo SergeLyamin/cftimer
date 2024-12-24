@@ -4,7 +4,11 @@ module.exports = {
     "./www/**/*.{html,js}",  // поиск во всех HTML и JS файлах
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Roboto Mono', 'monospace'],
+      },
+    },
   },
   plugins: [],
 }

@@ -351,7 +351,7 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('ИНТЕРВАЛЫ')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[43rem] px-4">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[44rem] px-4">
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
                     <label class="text-right self-center text-4xl">${this.translations.ROUNDS}</label>
                     <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
@@ -416,6 +416,7 @@ class Timer {
             </div>
             
             <div class="timer-container hidden w-full flex justify-center items-center relative">
+                <div class="round-number text-[18vw] font-semibold absolute left-20" style="color: #FF0101"></div>
                 <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
             </div>
         `;
@@ -484,6 +485,8 @@ class Timer {
         if (!this.isRunning) return;
         
         const timerDisplay = document.querySelector('.timer-display');
+        const roundNumber = document.querySelector('.round-number');
+        
         if (!timerDisplay) {
             clearInterval(this.interval);
             this.interval = null;
@@ -509,43 +512,41 @@ class Timer {
                 this.remainingTime--;
             }
         } else if (this.phase === 'work') {
-            if (this.remainingTime === 1) {
-                this.playSound('rest');
-            }
-            
             const minutes = Math.floor(this.remainingTime / 60);
             const seconds = this.remainingTime % 60;
             timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            roundNumber.textContent = this.currentRound;
+            roundNumber.style.color = '#FF0101';
             
             if (this.remainingTime === 0) {
                 if (this.currentRound < this.settings.interval.rounds) {
                     this.phase = 'rest';
                     this.remainingTime = this.restTime;
                     this.updateHeader('ИНТЕРВАЛЫ', `РАУНД ${this.currentRound} - ОТДЫХ`);
+                    this.playSound('rest');
                 } else {
                     this.finishInterval();
                     return;
                 }
-            } else {
-                this.remainingTime--;
             }
+            this.remainingTime--;
         } else if (this.phase === 'rest') {
-            if (this.remainingTime === 1) {
-                this.playSound('start');
-            }
-            
             const minutes = Math.floor(this.remainingTime / 60);
             const seconds = this.remainingTime % 60;
             timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            roundNumber.textContent = 'REST';
+            roundNumber.style.color = '#01D9FF';
             
             if (this.remainingTime === 0) {
                 this.currentRound++;
                 this.phase = 'work';
                 this.remainingTime = this.workTime;
                 this.updateHeader('ИНТЕРВАЛЫ', `РАУНД ${this.currentRound} - РАБОТА`);
-            } else {
-                this.remainingTime--;
+                this.playSound('start');
             }
+            this.remainingTime--;
         }
     }
 
@@ -684,7 +685,7 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('НА ВРЕМЯ')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[43rem] px-4">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[44rem] px-4">
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
                     <label class="text-right self-center text-4xl">ЦЕЛЬ</label>
                     <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
@@ -715,7 +716,7 @@ class Timer {
             </div>
             
             <div class="timer-container hidden w-full flex justify-center items-center relative">
-                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
+                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center "></div>
             </div>
         `;
 
@@ -762,7 +763,7 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('AMRAP')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[43rem] px-4">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[44rem] px-4">
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
                     <label class="text-right self-center text-4xl">&nbsp;</label>
                     <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
@@ -793,7 +794,7 @@ class Timer {
             </div>
             
             <div class="timer-container hidden w-full flex justify-center items-center relative">
-                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
+                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center "></div>
             </div>
         `;
 
@@ -1012,7 +1013,7 @@ class Timer {
             this.playSound('finish');
             const minutes = Math.floor(this.targetTime / 60);
             timerContainer.innerHTML = `
-                <div class="finish-message">${minutes} минут выполнены</div>
+                <div class="finish-message">${minutes} минут вып��лнены</div>
                 <button class="menu-item restart-button">${this.translations.RESTART}</button>
             `;
             
