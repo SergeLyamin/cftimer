@@ -28,7 +28,9 @@
 
 <body class="bg-black text-white min-h-screen flex flex-col justify-center items-center">
     <!-- Часы в левом нижнем углу -->
-    <button id="clock-button" class="absolute bottom-5 left-5 text-2xl cursor-pointer">09:00</button>
+    <button id="clock-button" class="absolute bottom-5 left-5 text-2xl cursor-pointer hidden md:block">09:00</button>
+
+
 
     <!-- Главное меню -->
     <div id="main-menu" class="screen flex flex-col gap-3 items-center">
@@ -42,7 +44,7 @@
 
     <!-- Кнопка настроек -->
     <button id="settings-button" class="absolute bottom-5 right-5 text-2xl bg-transparent border-none text-white cursor-pointer">
-        <img src="img/remote-ico.svg" alt="Пульт управления с телефона" class="w-8 h-8">
+        <img src="img/remote-ico.svg" alt="Пульт управления" class="w-8 h-8 hidden md:block">
     </button>
 
     <!-- Модальное окно настроек -->
@@ -50,7 +52,7 @@
         <div id="settings-modal" class="settings-modal fixed bottom-0 right-0 w-[400px] bg-black border-t border-l border-white">
             <div class="p-8">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl">Пульт управления с телефона</h2>
+                    <h2 class="text-xl text-center">Пульт управления</h2>
                     <button id="close-settings" class="text-2xl">&times;</button>
                 </div>
                 <div class="flex flex-col items-center gap-4">
@@ -67,60 +69,8 @@
         </div>
     </div>
 
-    <script src="timer.js"></script>
+    <script type="module" src="js/main.js"></script>
     <script src="metrics.js"></script>
-    <script>
-        // Обработчики для модального окна настроек
-        const settingsButton = document.getElementById('settings-button');
-        const settingsBackdrop = document.getElementById('settings-backdrop');
-        const settingsModal = document.getElementById('settings-modal');
-        const closeSettings = document.getElementById('close-settings');
-
-        settingsButton.addEventListener('click', () => {
-            settingsBackdrop.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                settingsBackdrop.classList.add('show');
-                settingsModal.classList.add('show');
-            });
-        });
-
-        function closeModal() {
-            settingsBackdrop.classList.remove('show');
-            settingsModal.classList.remove('show');
-            setTimeout(() => {
-                settingsBackdrop.classList.add('hidden');
-            }, 300);
-        }
-
-        closeSettings.addEventListener('click', closeModal);
-        settingsBackdrop.addEventListener('click', (e) => {
-            if (e.target === settingsBackdrop) {
-                closeModal();
-            }
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        // Восстановление работы кнопок меню
-        document.querySelectorAll('.menu-item').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const timerType = e.target.dataset.timer;
-                if (timerType && window.timer) {
-                    window.timer.showScreen(timerType);
-                }
-            });
-        });
-
-        // Обработчик для часов
-        document.getElementById('clock-button').addEventListener('click', () => {
-            if (window.timer) {
-                window.timer.showScreen('clock');
-            }
-        });
-    </script>
 </body>
 
 </html>

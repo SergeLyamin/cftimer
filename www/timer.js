@@ -286,9 +286,9 @@ class Timer {
                     <button class="back-button">
                         <div class="back-arrow"></div>
                     </button>
-                    <h2 class="timer--header text-4xl font-normal m-0">${title}${details ? ' – ' + details : ''}</h2>
+                    <h2 class="timer--header text-2xl md:text-2xl">${title}${details ? ' – ' + details : ''}</h2>
                 </div>
-                <button class="fullscreen-button">
+                <button class="fullscreen-button hidden md:block">
                     
                 </button>
             </div>
@@ -351,7 +351,7 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('ИНТЕРВАЛЫ')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[45rem] px-4">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[46rem] px-4">
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
                     <label class="text-right self-center text-4xl">${this.translations.ROUNDS}</label>
                     <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
@@ -365,41 +365,29 @@ class Timer {
                     <span class="text-4xl self-center">&nbsp;</span>
 
                     <label class="text-right self-center text-4xl">${this.translations.WORK}</label>
-                    <div class="grid grid-cols-2 gap-2 border-2 border-white w-[16rem] h-[72px]">
+                    <div class="timer--input-container border-2 border-white w-[16rem] h-[72px]">
                         <input type="number" 
                                name="workMinutes" 
                                value="${this.settings.interval.workMinutes}" 
                                min="0" 
                                max="59" 
-                               class="bg-transparent border-none text-4xl text-center">
-                        <input type="number" 
-                               name="workSeconds" 
-                               value="${this.settings.interval.workSeconds}" 
-                               min="0" 
-                               max="59" 
-                               class="bg-transparent border-none text-4xl text-center">
+                               class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
                     <span class="text-4xl self-center uppercase">мин:сек</span>
 
                     <label class="text-right self-center text-4xl">${this.translations.REST}</label>
-                    <div class="grid grid-cols-2 gap-2 border-2 border-white w-[16rem] h-[72px]">
+                    <div class="timer--input-container border-2 border-white w-[16rem] h-[72px]">
                         <input type="number" 
                                name="restMinutes" 
                                value="${this.settings.interval.restMinutes}" 
                                min="0" 
                                max="59" 
-                               class="bg-transparent border-none text-4xl text-center">
-                        <input type="number" 
-                               name="restSeconds" 
-                               value="${this.settings.interval.restSeconds}" 
-                               min="0" 
-                               max="59" 
-                               class="bg-transparent border-none text-4xl text-center">
+                               class="w-full bg-transparent border-none text-4xl text-center">
                     </div>
                     <span class="text-4xl self-center uppercase">мин:сек</span>
 
                     <label class="text-right self-center text-4xl">${this.translations.COUNTDOWN}</label>
-                    <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
+                    <div class="timer--input-container border-2 border-white w-[16rem] h-[72px]">
                         <input type="number" 
                                name="countdownSeconds" 
                                value="${this.settings.interval.countdownSeconds}" 
@@ -415,9 +403,9 @@ class Timer {
                 </button>
             </div>
             
-            <div class="timer-container hidden w-full flex justify-center items-center gap-8">
-                <div class="round-number text-[18vw] font-semibold"></div>
-                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center"></div>
+            <div class="timer-container hidden w-full flex justify-center items-center gap-20 md:my-10">
+                <div class="round-number text-[18vw] font-semibold min-h-[144px] self-center"></div>
+                <div class="timer-display text-[18vw] font-semibold min-h-[144px] text-center self-center cursor-pointer"></div>
             </div>
         `;
 
@@ -562,8 +550,12 @@ class Timer {
         if (timerContainer) {
             this.playSound('finish');
             timerContainer.innerHTML = `
-                <div class="finish-message">${this.settings.interval.rounds} раундов завершены</div>
-                <button class="menu-item restart-button">${this.translations.RESTART}</button>
+                <div class="flex flex-col items-center gap-8">
+                    <div class="finish-message text-4xl">${this.settings.interval.rounds} раундов завершены</div>
+                    <button class="menu-item restart-button w-[16rem] h-[72px] text-4xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100">
+                        ${this.translations.RESTART}
+                    </button>
+                </div>
             `;
             
             const restartButton = timerContainer.querySelector('.restart-button');
@@ -673,7 +665,7 @@ class Timer {
         screen.innerHTML = `
             ${this.createHeader('ЧАСЫ')}
             <div class="flex-1 w-full flex justify-center items-center">
-                <div class="timer-display text-[18vw] font-semibold text-center"></div>
+                <div class="timer-display text-[18vw] font-semibold text-center cursor-pointer"></div>
             </div>
         `;
 
@@ -686,7 +678,7 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('НА ВРЕМЯ')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[45rem] px-4">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[46rem] px-4">
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
                     <label class="text-right self-center text-4xl">ЦЕЛЬ</label>
                     <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
@@ -717,7 +709,7 @@ class Timer {
             </div>
             
             <div class="timer-container hidden w-full flex justify-center items-center relative">
-                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center "></div>
+                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center cursor-pointer"></div>
             </div>
         `;
 
@@ -764,7 +756,7 @@ class Timer {
 
         screen.innerHTML = `
             ${this.createHeader('AMRAP')}
-            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[45rem] px-4">
+            <div class="flex flex-col items-center gap-8 mt-24 w-full max-w-[46rem] px-4">
                 <div class="grid grid-cols-[1fr,1fr,1fr] gap-4 w-full">
                     <label class="text-right self-center text-4xl">&nbsp;</label>
                     <div class="flex items-center border-2 border-white w-[16rem] h-[72px]">
@@ -795,7 +787,7 @@ class Timer {
             </div>
             
             <div class="timer-container hidden w-full flex justify-center items-center relative">
-                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center "></div>
+                <div class="timer-display text-[18vw] font-semibold my-10 min-h-[144px] text-center cursor-pointer"></div>
             </div>
         `;
 
@@ -882,7 +874,7 @@ class Timer {
                 this.playSound('start');
                 this.phase = 'work';
                 this.elapsedTime = 0;
-                this.updateHeader('НА ВРЕМЯ', `ЦЕЛЬ ${Math.floor(this.targetTime / 60)}:${(this.targetTime % 60).toString().padStart(2, '0')}`);
+                this.updateHeader('НА ВРЕМЯ', `TIME CAP ${Math.floor(this.targetTime / 60)}:${(this.targetTime % 60).toString().padStart(2, '0')}`);
             } else {
                 this.remainingTime--;
             }

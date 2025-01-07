@@ -46,4 +46,17 @@
     background: url('/img/full-screen-ico.svg') no-repeat center;
 }
 
+/* Стили для спиннеров */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    height: 72px;
+    width: 36px;
+    opacity: 1;
+    cursor: pointer;
+}
+
+input[type="number"] {
+    padding-right: 20px;
+}
+
 
