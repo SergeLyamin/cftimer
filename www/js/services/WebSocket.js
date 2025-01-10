@@ -2,9 +2,12 @@ export class WebSocketService {
     constructor(timer) {
         this.timer = timer;
         this.ws = null;
-        this.isController = window.location.pathname === '/control';
+        this.isController = window.location.pathname === '/control.html';
         this.qrCode = null;
         this.init();
+        if (this.isController) {
+            this.initControlPage();
+        }
     }
 
     init() {
@@ -131,6 +134,22 @@ export class WebSocketService {
         if (this.ws) {
             this.ws.close();
             this.ws = null;
+        }
+    }
+
+    initControlPage() {
+        if (window.location.pathname === '/control.html') {
+            document.querySelectorAll('.menu-item').forEach(button => {
+                button.addEventListener('click', () => {
+                    const timerType = button.getAttribute('data-timer');
+                    if (timerType) {
+                        this.sendMessage({
+                            type: 'command',
+                            command: `start-${timerType}`
+                        });
+                    }
+                });
+            });
         }
     }
 } 

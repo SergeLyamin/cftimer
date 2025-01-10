@@ -98,6 +98,11 @@ export class Timer {
 
     // Базовые методы UI
     createHeader(title, details = '') {
+        // Не показываем header на странице управления
+        if (window.location.pathname === '/control.html') {
+            return '';
+        }
+
         return `
             <div class="header-panel fixed top-0 left-0 right-0 flex justify-between items-center p-5 bg-black">
                 <div class="flex items-center gap-4">
@@ -148,6 +153,11 @@ export class Timer {
     }
 
     updateBottomClock() {
+        // Не показываем часы на странице управления
+        if (window.location.pathname === '/control.html') {
+            return;
+        }
+
         const clockButton = document.getElementById('clock-button');
         if (clockButton) {
             const now = new Date();
