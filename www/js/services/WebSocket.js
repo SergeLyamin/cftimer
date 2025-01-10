@@ -3,6 +3,7 @@ export class WebSocketService {
         this.timer = timer;
         this.ws = null;
         this.isController = window.location.pathname === '/control';
+        this.qrCode = null;
         this.init();
     }
 
@@ -35,6 +36,12 @@ export class WebSocketService {
         console.log('WebSocket connected');
         if (this.isController) {
             this.sendMessage({ type: 'controller-connected' });
+        } else {
+            // Запрашиваем QR-код при подключении
+            this.sendMessage({ 
+                type: 'init',
+                isController: false 
+            });
         }
     }
 
@@ -49,14 +56,19 @@ export class WebSocketService {
     handleMessage(event) {
         try {
             const data = JSON.parse(event.data);
-            console.log('Received message:', data);
-
+            console.log('WebSocket message received:', data);
+            
             switch (data.type) {
+                case 'qr':
+                    console.log('QR code received, length:', data.qrCode?.length);
+                    this.qrCode = data.qrCode;
+                    this.showQRCode();
+                    break;
                 case 'screen-change':
                     this.timer.showScreen(data.screen);
                     break;
                 case 'controller-connected':
-                    this.showQRCode();
+                    console.log('Controller connected');
                     break;
                 case 'controller-disconnected':
                     // Обработка отключения контроллера
@@ -69,6 +81,7 @@ export class WebSocketService {
             }
         } catch (error) {
             console.error('Error handling message:', error);
+            console.error('Raw message:', event.data);
         }
     }
 
@@ -98,19 +111,19 @@ export class WebSocketService {
     }
 
     showQRCode() {
-        if (!this.isController) {
-            const qrContainer = document.getElementById('qr-container');
-            if (qrContainer) {
-                const controlUrl = `${window.location.protocol}//${window.location.host}/control`;
-                const qr = new QRCode(qrContainer, {
-                    text: controlUrl,
-                    width: 192,
-                    height: 192,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            }
+        console.log('Showing QR code, stored code length:', this.qrCode?.length);
+        if (!this.qrCode) {
+            console.log('No QR code available yet');
+            return;
+        }
+        
+        let qrContainer = document.getElementById('qr-container');
+        console.log('QR container found:', !!qrContainer);
+        if (qrContainer) {
+            qrContainer.innerHTML = `
+                <img src="${this.qrCode}" alt="QR Code">
+            `;
+            console.log('QR code image set');
         }
     }
 

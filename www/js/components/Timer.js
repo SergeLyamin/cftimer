@@ -68,6 +68,32 @@ export class Timer {
                 this.togglePause();
             }
         });
+
+        // Добавляем обработчики для модального окна настроек
+        const settingsButton = document.getElementById('settings-button');
+        const settingsBackdrop = document.getElementById('settings-backdrop');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettings = document.getElementById('close-settings');
+
+        if (settingsButton && settingsBackdrop && settingsModal && closeSettings) {
+            settingsButton.addEventListener('click', () => {
+                settingsBackdrop.classList.remove('hidden');
+                setTimeout(() => {
+                    settingsBackdrop.classList.add('show');
+                    settingsModal.classList.add('show');
+                    // Просто показываем сохраненный QR-код
+                    this.ws.showQRCode();
+                }, 10);
+            });
+
+            closeSettings.addEventListener('click', () => {
+                settingsBackdrop.classList.remove('show');
+                settingsModal.classList.remove('show');
+                setTimeout(() => {
+                    settingsBackdrop.classList.add('hidden');
+                }, 300);
+            });
+        }
     }
 
     // Базовые методы UI
