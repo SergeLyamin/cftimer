@@ -68,7 +68,20 @@ export class WebSocketService {
                     this.showQRCode();
                     break;
                 case 'screen-change':
-                    this.timer.showScreen(data.screen);
+                    if (this.isController) {
+                        // На пульте показываем тот же экран
+                        console.log('Syncing screen on controller:', data.screen);
+                        this.showControllerScreen(data.screen);
+                    } else {
+                        this.timer.showScreen(data.screen);
+                    }
+                    break;
+                case 'timer-update':
+                    if (this.isController) {
+                        // Обновляем состояние таймера на пульте
+                        console.log('Syncing timer state:', data);
+                        this.updateControllerTimer(data);
+                    }
                     break;
                 case 'controller-connected':
                     console.log('Controller connected');
@@ -77,7 +90,7 @@ export class WebSocketService {
                     // Обработка отключения контроллера
                     break;
                 case 'command':
-                    this.handleCommand(data.command);
+                    this.handleCommand(data);
                     break;
                 default:
                     console.warn('Unknown message type:', data.type);
@@ -88,22 +101,22 @@ export class WebSocketService {
         }
     }
 
-    handleCommand(command) {
-        switch (command) {
-            case 'start-interval':
-                this.timer.startInterval();
-                break;
-            case 'start-fortime':
-                this.timer.startForTime();
-                break;
-            case 'start-amrap':
-                this.timer.startAmrap();
-                break;
-            case 'toggle-pause':
-                this.timer.togglePause();
-                break;
-            default:
-                console.warn('Unknown command:', command);
+    handleCommand(data) {
+        console.log('Handling command:', data);
+        const action = data.action || data.command;
+
+        // На основном экране выполняем команду
+        if (!this.isController) {
+            if (action.startsWith('start-')) {
+                const timerType = action.replace('start-', '');
+                console.log('Starting timer on main screen:', timerType);
+                
+                // Находим кнопку на основном экране и кликаем по ней
+                const button = document.querySelector(`[data-timer="${timerType}"]`);
+                if (button) {
+                    button.click();
+                }
+            }
         }
     }
 
@@ -138,18 +151,47 @@ export class WebSocketService {
     }
 
     initControlPage() {
-        if (window.location.pathname === '/control.html') {
+        if (this.isController) {
+            console.log('Initializing control page buttons');
             document.querySelectorAll('.menu-item').forEach(button => {
                 button.addEventListener('click', () => {
-                    const timerType = button.getAttribute('data-timer');
+                    const timerType = button.dataset.timer;
                     if (timerType) {
+                        // Отправляем команду на основной экран
                         this.sendMessage({
                             type: 'command',
-                            command: `start-${timerType}`
+                            action: `start-${timerType}`
                         });
                     }
                 });
             });
         }
+    }
+
+    // Показываем тот же экран на пульте
+    showControllerScreen(screen) {
+        const timerScreens = document.getElementById('timer-screens');
+        if (!timerScreens) return;
+
+        // Создаем соответствующий экран на пульте
+        switch(screen) {
+            case 'interval':
+                const intervalTimer = new IntervalTimer();
+                timerScreens.innerHTML = '';
+                timerScreens.appendChild(intervalTimer.createControlScreen());
+                break;
+            // ... аналогично для других таймеров
+        }
+    }
+
+    // Обновляем состояние таймера на пульте
+    updateControllerTimer(data) {
+        const { time, phase, round, isRunning } = data;
+        // Обновляем отображение на пульте
+        const timerDisplay = document.querySelector('.timer-display');
+        if (timerDisplay) {
+            timerDisplay.textContent = time;
+        }
+        // ... обновляем другие элементы
     }
 } 

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пульт управления таймером</title>
+    <title>Управление таймером</title>
+    <link href="dist/styles.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,9 +20,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 </head>
 <body class="bg-black text-white font-timer min-h-screen flex flex-col justify-center items-center">
-    <!-- Часы в левом нижнем углу -->
-    <button id="clock-button" class="absolute bottom-5 left-5 text-2xl cursor-pointer">09:23</button>
-
     <!-- Главное меню -->
     <div id="main-menu" class="screen flex flex-col gap-3 items-center">
         <button class="menu-item w-[300px] p-4 text-5xl bg-transparent border-2 border-white cursor-pointer uppercase hover:bg-white hover:text-black transition duration-100" data-timer="interval">Интервалы</button>
@@ -31,24 +29,6 @@
 
     <!-- Экраны таймеров -->
     <div id="timer-screens"></div>
-
-    <div class="timer-controls">
-        <div class="back-arrow"></div>
-        <!-- остальные элементы управления -->
-    </div>
-
-    <div class="fullscreen-controls">
-        <div class="fullscreen-button"></div>
-    </div>
-
-    <div class="controls">
-        <button class="back-button">
-            <img src="img/arrow-left.svg" alt="Назад" />
-        </button>
-        <button class="fullscreen-button">
-            <img src="img/full-screen-ico.svg" alt="На весь экран" />
-        </button>
-    </div>
 
     <script src="control.js"></script>
 </body>

@@ -1,120 +1,86 @@
-class ControlTimer {
-    constructor() {
-        this.initWebSocket();
-    }
-
-    initWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}`;
-        
-        const connect = () => {
-            console.log('Connecting to WebSocket:', wsUrl);
-            this.ws = new WebSocket(wsUrl);
-            
-            this.ws.onopen = () => {
-                console.log('Controller connected, sending init');
-                this.ws.send(JSON.stringify({ 
-                    type: 'init',
-                    isController: true 
-                }));
-            };
-            
-            this.ws.onclose = () => {
-                console.log('WebSocket connection closed, reconnecting...');
-                setTimeout(connect, 1000);
-            };
-            
-            this.ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                console.log('Received message:', data);
-                
-                switch(data.type) {
-                    case 'screen-change':
-                        this.updateScreen(data.screen);
-                        break;
-                    case 'timer-update':
-                        this.updateDisplay(data);
-                        break;
-                }
-            };
-        };
-        
-        connect();
-        this.initControls();
-    }
-
-    initControls() {
-        document.querySelectorAll('.menu-item').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const timerType = e.target.dataset.timer;
-                if (timerType && this.ws) {
-                    console.log('Sending command:', timerType);
-                    this.ws.send(JSON.stringify({
-                        type: 'command',
-                        action: 'screen-change',
-                        screen: timerType
-                    }));
-                }
-            });
-        });
-
-        // Добавляем обработчики для кнопок управления таймером
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('start-button')) {
-                this.sendCommand('start');
-            }
-            if (e.target.classList.contains('timer-display')) {
-                this.sendCommand('pause');
-            }
-        });
-
-        // Обработка полноэкранного режима
-        const fullscreenButton = document.querySelector('.fullscreen-button');
-        if (fullscreenButton) {
-            fullscreenButton.addEventListener('click', () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                } else {
-                    document.exitFullscreen();
-                }
-            });
-        }
-
-        // Обработка кнопки "назад"
-        const backButton = document.querySelector('.back-button');
-        if (backButton) {
-            backButton.addEventListener('click', () => {
-                window.history.back();
-            });
-        }
-    }
-
-    sendCommand(action) {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            console.log('Sending command:', action);
-            this.ws.send(JSON.stringify({
-                type: 'command',
-                action: action
-            }));
-        }
-    }
-
-    updateScreen(screenName) {
-        // Обновляем UI в соответствии с текущим экраном
-        console.log('Updating screen:', screenName);
-    }
-
-    updateDisplay(data) {
-        // Обновляем отображение таймера
-        console.log('Updating display:', data);
-        const display = document.querySelector('.timer-display');
-        if (display && data.time) {
-            display.textContent = data.time;
-        }
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Controller initialized');
-    window.controller = new ControlTimer();
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}`;
+    const ws = new WebSocket(wsUrl);
+
+    console.log('Initializing controller WebSocket:', wsUrl);
+
+    // Валидация сообщений перед отправкой
+    function sendMessage(type, data) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket not connected');
+            return;
+        }
+
+        const message = {
+            type,
+            ...data,
+            timestamp: Date.now()
+        };
+
+        try {
+            ws.send(JSON.stringify(message));
+            console.log('Message sent:', message);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }
+
+    ws.onopen = () => {
+        console.log('WebSocket connected');
+        // Инициализация контроллера
+        sendMessage('init', { isController: true });
+
+        // Добавляем обработчики для кнопок
+        document.querySelectorAll('.menu-item').forEach(button => {
+            button.addEventListener('click', () => {
+                const timerType = button.dataset.timer;
+                if (timerType) {
+                    sendMessage('command', { action: `start-${timerType}` });
+                }
+            });
+        });
+    };
+
+    // Обработка разрыва соединения с переподключением
+    ws.onclose = (event) => {
+        console.log('WebSocket disconnected:', event.code, event.reason);
+        // Переподключение через 1 секунду
+        setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            window.location.reload();
+        }, 1000);
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    // Валидация входящих сообщений
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            
+            // Проверяем структуру сообщения
+            if (!data.type) {
+                console.error('Invalid message format:', data);
+                return;
+            }
+
+            console.log('Message received:', data);
+
+            switch (data.type) {
+                case 'screen-change':
+                    console.log('Screen changed to:', data.screen);
+                    break;
+                case 'timer-update':
+                    console.log('Timer updated:', data.time);
+                    break;
+                default:
+                    console.warn('Unknown message type:', data.type);
+            }
+        } catch (error) {
+            console.error('Error processing message:', error);
+        }
+    };
 }); 
