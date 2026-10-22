@@ -1,0 +1,16 @@
+{
+  "name": "cf-timer-openspec-tooling",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isolated, pinned OpenSpec tooling for CF Timer documentation",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "openspec": "cd ../.. && OPENSPEC_TELEMETRY=0 tooling/openspec/node_modules/.bin/openspec",
+    "validate": "cd ../.. && OPENSPEC_TELEMETRY=0 tooling/openspec/node_modules/.bin/openspec validate --all --strict --no-interactive"
+  },
+  "devDependencies": {
+    "@fission-ai/openspec": "1.14.3"
+  }
+}
