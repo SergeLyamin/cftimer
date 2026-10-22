@@ -1,0 +1,25 @@
+# Добавим старые файлы в gitignore перед удалением
+www/
+server.js
+config.js
+ecosystem.config.js
+tailwind.config.js
+postcss.config.js
+
+# Остальное
+.env
+.DS_Store
+*.log
+node_modules/
+cgi-bin/
+log/
+~log/
+/log/
+design/
+rings/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

@@ -1,19 +1,24 @@
-# Добавим старые файлы в gitignore перед удалением
-www/
-server.js
-config.js
-ecosystem.config.js
-tailwind.config.js
-postcss.config.js
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 
-# Остальное
+# Local configuration
 .env
+.env.*
+!.env.example
 .DS_Store
 *.log
-node_modules/
-cgi-bin/
-log/
-~log/
-/log/
-design/
-rings/
+
+# Historical generated artifacts, retained locally only
+archive/legacy-worktree/test-results/
+archive/legacy-worktree/playwright-report/
+archive/legacy-worktree/src/graphify-out/
+archive/graphify-audit-2026-10-22/.*
+
+# Design references are intentional project assets; do not ignore design/.

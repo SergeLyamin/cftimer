@@ -1,0 +1,77 @@
+<div class="card">
+  
+    <div class="circles-container">
+      <div class="activity ring" id="activity">
+        <div class="dot"></div>
+        <svg class="progress-ring" height="250" width="250">
+          <linearGradient id="aGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#F6337A"/>
+            <stop offset="100%" stop-color="#F71046"/>
+          </linearGradient>
+          <circle class="progress-ring__circle"
+                  stroke-width="32" stroke-linecap="round" stroke="url(#aGradient)"
+                  fill="transparent"
+                  r="109" cx="125" cy="125"/>
+        </svg>
+      </div>
+
+      <div class="exercise ring" id="exercise">
+        <div class="dot"></div>
+        <svg class="progress-ring" height="185" width="185">
+          <linearGradient id="eGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#B1FD36"/>
+            <stop offset="100%" stop-color="#6FE430"/>
+          </linearGradient>
+          <circle class="progress-ring__circle"
+                  stroke-width="32" stroke-linecap="round" stroke="url(#eGradient)"
+                  fill="transparent"
+                  r="77" cx="92.5" cy="92.5"/>
+        </svg>
+      </div>
+
+      <div class="stand ring" id="stand">
+        <div class="dot"></div>
+        <svg class="progress-ring" height="122" width="122">
+          <linearGradient id="sGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#15C2E0"/>
+            <stop offset="100%" stop-color="#1EF8D5"/>
+          </linearGradient>
+          <circle class="progress-ring__circle"
+                  stroke-width="32" stroke-linecap="round" stroke="url(#sGradient)"
+                  fill="transparent"
+                  r="45" cx="61" cy="61"/>
+        </svg>
+      </div>
+    </div>
+  
+    <div class="info">
+      <div class="row activity"><span id="activityValue">0</span>/880KCAL</div>
+      <div class="row exercise"><span id="exerciseValue">0</span>/30MIN.</div>
+      <div class="row stand"><span id="standValue">0</span>/12HOURS</div>
+    </div>
+
+</div>
+
+<div class="controls">
+  <div class="number-input" data-target="activity">
+    <span class="increase">+</span>
+    <span class="value">400</span>
+    <span class="decrease">-</span>
+  </div>
+  
+  <div class="number-input" data-target="exercise">
+    <span class="increase">+</span>
+    <span class="value">24</span>
+    <span class="decrease">-</span>
+  </div>
+  
+  <div class="number-input" data-target="stand">
+    <span class="increase">+</span>
+    <span class="value">10</span>
+    <span class="decrease">-</span>
+  </div>
+  
+  <input class="controller" type="number" name="activityAmount" id="activityAmount" data-target="activity" value="400" hidden>
+  <input class="controller" type="number" name="exerciseAmount" id="exerciseAmount" data-target="exercise" value="24" hidden>
+  <input class="controller" type="number" name="standAmount" id="standAmount" data-target="stand" value="10" hidden>
+</div>

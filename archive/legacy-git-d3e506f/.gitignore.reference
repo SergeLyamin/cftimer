@@ -1,0 +1,13 @@
+.env
+.DS_Store
+*.log
+node_modules/
+www/fonts/
+cgi-bin/
+log/
+~log/
+/log/
+design/
+rings/  
+www/metrics.js
+www/dist/

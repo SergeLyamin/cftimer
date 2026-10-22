@@ -1,0 +1,399 @@
+{
+  "date": "2026-10-22",
+  "historical_commit": "d3e506fe62101a63667e39d0a8ffafdb3482268f",
+  "note": "Exact working files preserved before SDD migration. node_modules and generated browser reports moved locally, excluded from manifest and Git. Historical commit is a reference, not a verified working release.",
+  "files": [
+    {
+      "original": "src/app/App.ts",
+      "archived": "archive/legacy-worktree/src/app/App.ts",
+      "sha256": "bd6662af2095b08ebb20f75b4ba9eeb9708e93a54ff3761c8f3a8d2860644de8"
+    },
+    {
+      "original": "src/main.ts",
+      "archived": "archive/legacy-worktree/src/main.ts",
+      "sha256": "56db47df241d9461850ecf829a631872e65fe1d07f2b96d369cb4ab41f271e54"
+    },
+    {
+      "original": "src/services/EventBus.ts",
+      "archived": "archive/legacy-worktree/src/services/EventBus.ts",
+      "sha256": "3200a5f2b924367da0787115ded5ac4bcb7eac96ef95c3bb82e43cc0088a7849"
+    },
+    {
+      "original": "src/styles/main.css",
+      "archived": "archive/legacy-worktree/src/styles/main.css",
+      "sha256": "e04432b9810c3a69f602fead7076d9151e69d9e8f7751ca947a02ee58e7dd9a5"
+    },
+    {
+      "original": "src/types/app.types.ts",
+      "archived": "archive/legacy-worktree/src/types/app.types.ts",
+      "sha256": "41bf30ca56f16765a8834a581afad7ce249043cd3396dbe48346f03becd69110"
+    },
+    {
+      "original": "public/index.html",
+      "archived": "archive/legacy-worktree/public/index.html",
+      "sha256": "19f983996fb6455e2cbcb53fe272a8133338744616d5a437c6b987ee562f94b3"
+    },
+    {
+      "original": "control.js",
+      "archived": "archive/legacy-worktree/control.js",
+      "sha256": "4630f90d976babd4aa4462fff137019730ac29d07800d74eeec93d350e0c716d"
+    },
+    {
+      "original": "package.json",
+      "archived": "archive/legacy-worktree/package.json",
+      "sha256": "6914d6fa89d55b03a99dea830fbe53e6a97cebc4b1ad635f98321def222a0e08"
+    },
+    {
+      "original": "package-lock.json",
+      "archived": "archive/legacy-worktree/package-lock.json",
+      "sha256": "739e9050430786154b587b6f92c9eadaf234de5b10247291b072c17b136648be"
+    },
+    {
+      "original": "tsconfig.json",
+      "archived": "archive/legacy-worktree/tsconfig.json",
+      "sha256": "c372dabfd54aac6ab5dd22204044ed0dc5e6b31d24cf42c6ee53602943ee8468"
+    },
+    {
+      "original": "vite.config.ts",
+      "archived": "archive/legacy-worktree/vite.config.ts",
+      "sha256": "a40db00707df4d9c6df47d32a4db4cc39c6e4e22b7fced67f1764773f58943ba"
+    },
+    {
+      "original": "playwright.config.ts",
+      "archived": "archive/legacy-worktree/playwright.config.ts",
+      "sha256": "83d0eeec239bd3a727a92efffd94f601d0881188c00ff2feaedd21d20bd90867"
+    },
+    {
+      "original": "tests/example.spec.ts",
+      "archived": "archive/legacy-worktree/tests/example.spec.ts",
+      "sha256": "a3cbab846a58843b6350e2cc96801b4b6c41e86880451a68c9a01b149708a042"
+    },
+    {
+      "original": "tests-examples/demo-todo-app.spec.ts",
+      "archived": "archive/legacy-worktree/tests-examples/demo-todo-app.spec.ts",
+      "sha256": "3b8679bfa675efc200f404b6bb77b367710a572d5c9d8c421b711f015244b596"
+    },
+    {
+      "original": "rings/index.html",
+      "archived": "archive/legacy-worktree/rings/index.html",
+      "sha256": "0c9ed258bef7a97db5567a512e792ba17a74e0f2c99b5095ed08022074046377"
+    },
+    {
+      "original": "rings/script.js",
+      "archived": "archive/legacy-worktree/rings/script.js",
+      "sha256": "ab08604181cfc3caf4f2ddeb2dc7590b39b7332c0a086732b6888d2f7217126c"
+    },
+    {
+      "original": "rings/style.css",
+      "archived": "archive/legacy-worktree/rings/style.css",
+      "sha256": "4b880b0709056f26d0504298b01ff3d4dc4aa2f9f1bbba4eb44640cca19591fc"
+    },
+    {
+      "original": ".kiro/specs/crossfit-timer-rewrite/design.md",
+      "archived": "archive/legacy-worktree/.kiro/specs/crossfit-timer-rewrite/design.md",
+      "sha256": "15f5cf380dd3a0ec8b0d61df575fa9960420967df0c3a910eadedd8bd72dc074"
+    },
+    {
+      "original": ".kiro/specs/crossfit-timer-rewrite/requirements.md",
+      "archived": "archive/legacy-worktree/.kiro/specs/crossfit-timer-rewrite/requirements.md",
+      "sha256": "df6d2da4a04e74d272b6af0b807ce38e7d8f11cd98982d6ca8e4ecdd24cde51c"
+    },
+    {
+      "original": ".kiro/specs/crossfit-timer-rewrite/tasks.md",
+      "archived": "archive/legacy-worktree/.kiro/specs/crossfit-timer-rewrite/tasks.md",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "Docs old/plan-relis.md",
+      "archived": "archive/legacy-worktree/Docs old/plan-relis.md",
+      "sha256": "2d1e67df151a8c55ba25fff95211eb2d9b67311eba2d1a61761be5536af325e1"
+    },
+    {
+      "original": "Docs old/plan.md",
+      "archived": "archive/legacy-worktree/Docs old/plan.md",
+      "sha256": "5675a48c9b0fdf3b77a6631cc57228e4626243356a62c972e6491c825ef56ad1"
+    },
+    {
+      "original": "Docs old/refactoring-checklist.md",
+      "archived": "archive/legacy-worktree/Docs old/refactoring-checklist.md",
+      "sha256": "70fa073be296defd95264f1879b01682dca18d0d50629d1dd86841680a562a8e"
+    },
+    {
+      "original": "Docs old/refactoring-plan.md",
+      "archived": "archive/legacy-worktree/Docs old/refactoring-plan.md",
+      "sha256": "38451874fa609dceea4730a82b6f35abb50cc3aac7844e12dd2ca5a925de8f0d"
+    },
+    {
+      "original": "Docs old/technical-specification.md",
+      "archived": "archive/legacy-worktree/Docs old/technical-specification.md",
+      "sha256": "ae990856deeff923cc2b11773975efa8c7d1bd5cd8153ba4aa42117043e0fc2c"
+    },
+    {
+      "original": "Docs old/testing-checklist.md",
+      "archived": "archive/legacy-worktree/Docs old/testing-checklist.md",
+      "sha256": "7d10f4f5f63a5b86489420ee29d00c8baf3a0b7acde68e2252bb984d44c9d6be"
+    },
+    {
+      "original": "README.md",
+      "archived": "archive/documentation-before-sdd/README.md",
+      "sha256": "5ba88451f7020e2085374bb8fd8ba1a1ae370e470c59430474b074e877a9aba5"
+    },
+    {
+      "original": ".gitignore",
+      "archived": "archive/documentation-before-sdd/.gitignore",
+      "sha256": "92df58cfa1a232c802aeff731f2fb2502ef312e02756ef38e44f861b2e3055f7"
+    },
+    {
+      "original": "docs/README.md",
+      "archived": "archive/documentation-before-sdd/docs/README.md",
+      "sha256": "ab4f8be7dbdbd3031745511c8a19dc69d8607bb6b7c46383ebd4ad0988283956"
+    },
+    {
+      "original": "docs/architecture.md",
+      "archived": "archive/documentation-before-sdd/docs/architecture.md",
+      "sha256": "2c7e0726004041e513f09d595e407d6d33371c47b4220f8e3ac3bf6f8da34e8d"
+    },
+    {
+      "original": "docs/development.md",
+      "archived": "archive/documentation-before-sdd/docs/development.md",
+      "sha256": "cd3a70ad3be2df6de4e42277034220e82fb70748ac10649de95e01f44967dce7"
+    },
+    {
+      "original": "docs/project-plan.md",
+      "archived": "archive/documentation-before-sdd/docs/project-plan.md",
+      "sha256": "f5a072b7b50cf82cee6cd9849c2e37e035f2433b8546f65ce3759224a4df6177"
+    },
+    {
+      "original": "docs/technical-requirements.md",
+      "archived": "archive/documentation-before-sdd/docs/technical-requirements.md",
+      "sha256": "2e55602dac51ef6637e676e78a3f89405bb2c41a501da995112f3dc6a71b02ff"
+    },
+    {
+      "original": "docs/team-recommendations.md",
+      "archived": "archive/documentation-before-sdd/docs/team-recommendations.md",
+      "sha256": "5bb1aba169ef74cacf01eed8e1a13a8a91a47fa40105664b0119778e8d04b329"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:.gitignore",
+      "archived": "archive/legacy-git-d3e506f/.gitignore.reference",
+      "sha256": "7e18de75c06894f76b4a58d23566774f1d6cbd9cc50021525bd4d2a6c70e39ef"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:LICENSE",
+      "archived": "archive/legacy-git-d3e506f/LICENSE",
+      "sha256": "fc519adf25959b5d7c8144cc51a09dbf3bcd320b5519f0e6a7499c7f8837d12e"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:README.md",
+      "archived": "archive/legacy-git-d3e506f/README.md",
+      "sha256": "5ba88451f7020e2085374bb8fd8ba1a1ae370e470c59430474b074e877a9aba5"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:SOP/plan-relis.md",
+      "archived": "archive/legacy-git-d3e506f/SOP/plan-relis.md",
+      "sha256": "2d1e67df151a8c55ba25fff95211eb2d9b67311eba2d1a61761be5536af325e1"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:SOP/plan.md",
+      "archived": "archive/legacy-git-d3e506f/SOP/plan.md",
+      "sha256": "5675a48c9b0fdf3b77a6631cc57228e4626243356a62c972e6491c825ef56ad1"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:SOP/refactoring-checklist.md",
+      "archived": "archive/legacy-git-d3e506f/SOP/refactoring-checklist.md",
+      "sha256": "70fa073be296defd95264f1879b01682dca18d0d50629d1dd86841680a562a8e"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:SOP/refactoring-plan.md",
+      "archived": "archive/legacy-git-d3e506f/SOP/refactoring-plan.md",
+      "sha256": "38451874fa609dceea4730a82b6f35abb50cc3aac7844e12dd2ca5a925de8f0d"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:SOP/technical-specification.md",
+      "archived": "archive/legacy-git-d3e506f/SOP/technical-specification.md",
+      "sha256": "ae990856deeff923cc2b11773975efa8c7d1bd5cd8153ba4aa42117043e0fc2c"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:SOP/testing-checklist.md",
+      "archived": "archive/legacy-git-d3e506f/SOP/testing-checklist.md",
+      "sha256": "7d10f4f5f63a5b86489420ee29d00c8baf3a0b7acde68e2252bb984d44c9d6be"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:config.js",
+      "archived": "archive/legacy-git-d3e506f/config.js",
+      "sha256": "e60da83b09c657f781600267b9dbd555477ebed012a8e39f221bd2266796c92f"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:control.js",
+      "archived": "archive/legacy-git-d3e506f/control.js",
+      "sha256": "4630f90d976babd4aa4462fff137019730ac29d07800d74eeec93d350e0c716d"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:deploy.sh",
+      "archived": "archive/legacy-git-d3e506f/deploy.sh",
+      "sha256": "918e7be558333e6182a3eb86d0ba3c801c02d4138b066425198e1ceae8be07b2"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:ecosystem.config.js",
+      "archived": "archive/legacy-git-d3e506f/ecosystem.config.js",
+      "sha256": "cd342ab6b2804b9f32973a16f518c78c32d960d091947d2d2084a64bd5c8e0c5"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:package-lock.json",
+      "archived": "archive/legacy-git-d3e506f/package-lock.json",
+      "sha256": "db3236d6da4a13457a7657ddef299675a749eeb6c08a1d726995a26985ee6f36"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:package.json",
+      "archived": "archive/legacy-git-d3e506f/package.json",
+      "sha256": "e982340c375777b5ea2c6cbc9dc65f60e40815397b98d5cb55830f9ffaca0333"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:postcss.config.js",
+      "archived": "archive/legacy-git-d3e506f/postcss.config.js",
+      "sha256": "3f9392f0899d9250ee60c60e2ffad2283c29b74eb615b7ee27f46a4efbc92446"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:server.js",
+      "archived": "archive/legacy-git-d3e506f/server.js",
+      "sha256": "03a6b697a7d6718745c59c3846c70a2b3333390d76c70d6f4e776e63798332f9"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:tailwind.config.js",
+      "archived": "archive/legacy-git-d3e506f/tailwind.config.js",
+      "sha256": "69ec3eaab413b9e3e687406ba1ded408a9a1370f328dfb3b1e393d522840e901"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/control.html",
+      "archived": "archive/legacy-git-d3e506f/www/control.html",
+      "sha256": "0cbdef13dc1c4f28cf85b7628d9479259471c221c86a7cb7f7ffbbff67c7acab"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/control.js",
+      "archived": "archive/legacy-git-d3e506f/www/control.js",
+      "sha256": "9d7f86e1ef4d3002a07a634627743c43820d20e21f93e29b0454fc14840f00d7"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/favicon.ico",
+      "archived": "archive/legacy-git-d3e506f/www/favicon.ico",
+      "sha256": "3ed4b9974dcec0c6b65bc6d4000f8fa3e4aca3db5994f9ca142c3a549608f917"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/fonts/monospace.woff2",
+      "archived": "archive/legacy-git-d3e506f/www/fonts/monospace.woff2",
+      "sha256": "12a717367af287b090030c6136c673990ea4366c7a76eb7161e17f3b2ef0733a"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/fonts/monospace2.woff2",
+      "archived": "archive/legacy-git-d3e506f/www/fonts/monospace2.woff2",
+      "sha256": "7b348b30ea1fe43857e68fc462c29e5c6e63c97666af75135c4396a272e54762"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/img/arrow-left.svg",
+      "archived": "archive/legacy-git-d3e506f/www/img/arrow-left.svg",
+      "sha256": "0e44ae4e7ea495174c8df964d57d17a99992805c348d78c922a8ec863c3ddd72"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/img/chevron-down.svg",
+      "archived": "archive/legacy-git-d3e506f/www/img/chevron-down.svg",
+      "sha256": "e2ada2eb51ee762135b14420c334627ad97c6a7a85c4c6de5c0fb8d10d6f4c25"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/img/chevron-up.svg",
+      "archived": "archive/legacy-git-d3e506f/www/img/chevron-up.svg",
+      "sha256": "12e8e64e94eabf5ed2565e3df7ea917141e45b646296828fa0c135ffb5719c97"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/img/full-screen-ico.svg",
+      "archived": "archive/legacy-git-d3e506f/www/img/full-screen-ico.svg",
+      "sha256": "91e4cc4573bacc562ab155c0255a006a09b40fe197801562cb6acf2edf91f651"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/img/remote-ico.svg",
+      "archived": "archive/legacy-git-d3e506f/www/img/remote-ico.svg",
+      "sha256": "5a4ded70058e2319221f89029d1c7bc40bd09c59fa1baf6453c50479dada0ef5"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/index.html",
+      "archived": "archive/legacy-git-d3e506f/www/index.html",
+      "sha256": "e7f7d738a9550089b603ef771c88df69b0be982d98b9d9d3dfc9623dc946faf9"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/js/components/Amrap.js",
+      "archived": "archive/legacy-git-d3e506f/www/js/components/Amrap.js",
+      "sha256": "3fae67b5b996cfa52a4d7e4ec24afcca9e82046bb4c9b55aa153ca1f5bca0bc4"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/js/components/Clock.js",
+      "archived": "archive/legacy-git-d3e506f/www/js/components/Clock.js",
+      "sha256": "38d072fb903c108bfa0a80e2831f7d7cc9c5fc3d353fc8e79092d42cd53cecbf"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/js/components/ForTime.js",
+      "archived": "archive/legacy-git-d3e506f/www/js/components/ForTime.js",
+      "sha256": "59897551d6376713127ac524d159772b2ce396b2298fa4d373a6709135439bfe"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/js/components/Interval.js",
+      "archived": "archive/legacy-git-d3e506f/www/js/components/Interval.js",
+      "sha256": "f31f50d9fdc85413bebcb84bed21b5cd8fad33994b9fbc010611ebecdbba339d"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/js/components/Timer.js",
+      "archived": "archive/legacy-git-d3e506f/www/js/components/Timer.js",
+      "sha256": "c5a9645a4ade96de35ba32c3d01820c18ccb01801a387a195d7894ac6461ff3f"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/js/main.js",
+      "archived": "archive/legacy-git-d3e506f/www/js/main.js",
+      "sha256": "40c2c5f11862df81615e4e77fc50edcb9fe58869ea17b20df302c53fd04d1eed"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/js/services/WebSocket.js",
+      "archived": "archive/legacy-git-d3e506f/www/js/services/WebSocket.js",
+      "sha256": "f0cb74de6c630db744add5c79fc0ee3c65cd6641b291817a42d547398a13a5a4"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/metrics.js.example",
+      "archived": "archive/legacy-git-d3e506f/www/metrics.js.example",
+      "sha256": "4dd998160f231a5093f1e4254f861a3115bd297bad4f21d09a6cb42f03c2fa26"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/sound/beep.mp3",
+      "archived": "archive/legacy-git-d3e506f/www/sound/beep.mp3",
+      "sha256": "1b9e7617c0bb3a06383da3a396c972484a6f2294e7c38fe9af612329fbd7c619"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/sound/finish.mp3",
+      "archived": "archive/legacy-git-d3e506f/www/sound/finish.mp3",
+      "sha256": "258a0edf876a2655268002ca8c2d3fed5491e762fb8c0711d5af073994717b50"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/sound/rest.mp3",
+      "archived": "archive/legacy-git-d3e506f/www/sound/rest.mp3",
+      "sha256": "258a0edf876a2655268002ca8c2d3fed5491e762fb8c0711d5af073994717b50"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/sound/start.mp3",
+      "archived": "archive/legacy-git-d3e506f/www/sound/start.mp3",
+      "sha256": "258a0edf876a2655268002ca8c2d3fed5491e762fb8c0711d5af073994717b50"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/styles.css",
+      "archived": "archive/legacy-git-d3e506f/www/styles.css",
+      "sha256": "3a4fbc40534ca7a37f92816842ab7fb5b297f877a2c47ee09adb4fbf7f8c8419"
+    },
+    {
+      "git": "d3e506fe62101a63667e39d0a8ffafdb3482268f:www/timer.js",
+      "archived": "archive/legacy-git-d3e506f/www/timer.js",
+      "sha256": "35132d3fa3599211811f8feebb2f214be527808b963ba5e395fa99595d3261ef"
+    }
+  ],
+  "generated_audit_artifacts": [
+    {
+      "path": "archive/graphify-audit-2026-10-22/cache/stat-index.json",
+      "sha256": "49906a55197afd2aa15044d04e1148972880daedc00fc0daacaf11dbc20f366a",
+      "note": "Generated by this audit, not an original project file"
+    }
+  ]
+}

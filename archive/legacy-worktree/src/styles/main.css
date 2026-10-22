@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Базовые стили приложения */
+body {
+  @apply bg-gray-900 text-white font-sans;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  @apply min-h-screen flex flex-col;
+}
+
+#loading {
+  @apply flex items-center justify-center h-screen text-xl;
+}
