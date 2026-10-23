@@ -33,7 +33,7 @@ export default defineConfig({
         ],
       },
       injectManifest: {
-        globPatterns: ["**/*.{js,css,html,svg,webmanifest}"],
+        globPatterns: ["**/*.{js,css,html,svg,webmanifest,ttf,woff2,txt}"],
         manifestTransforms: [
           async (entries) => ({
             manifest: await Promise.all(

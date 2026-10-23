@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "./Icon";
 import {
   AudioSignals,
   createSettingsStore,
@@ -14,11 +15,36 @@ import {
 } from "../timer";
 
 const modes = [
-  { id: "intervals", name: "Интервалы", detail: "Работа и отдых" },
-  { id: "for-time", name: "На время", detail: "Завершите как можно быстрее" },
-  { id: "amrap", name: "AMRAP", detail: "Максимум за отведённое время" },
-  { id: "tabata", name: "Tabata", detail: "8 × 20 / 10 секунд" },
-  { id: "emom", name: "EMOM", detail: "Новый раунд каждую минуту" },
+  {
+    id: "intervals",
+    name: "Интервалы",
+    detail: "Работа и отдых",
+    icon: "stopwatch",
+  },
+  {
+    id: "for-time",
+    name: "На время",
+    detail: "Завершите как можно быстрее",
+    icon: "hourglass",
+  },
+  {
+    id: "amrap",
+    name: "AMRAP",
+    detail: "Максимум за отведённое время",
+    icon: "repeat",
+  },
+  {
+    id: "tabata",
+    name: "Tabata",
+    detail: "8 × 20 / 10 секунд",
+    icon: "tabata",
+  },
+  {
+    id: "emom",
+    name: "EMOM",
+    detail: "Новый раунд каждую минуту",
+    icon: "clock",
+  },
 ] as const;
 const defaults: TimerConfig = {
   mode: "intervals",
@@ -128,6 +154,7 @@ export default function App() {
     Partial<Record<keyof TimerConfig, string>>
   >({});
   const dialogRef = useRef<HTMLElement>(null);
+  const dialogTrigger = useRef<HTMLElement | null>(null);
   const [about, setAbout] = useState(false);
   const [confirm, setConfirm] = useState<"finish" | "reset" | null>(null);
   const [sound, setSound] = useState(false);
@@ -140,6 +167,26 @@ export default function App() {
   const [wakeActive, setWakeActive] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [updateWaiting, setUpdateWaiting] = useState(false);
+  function openAbout() {
+    dialogTrigger.current = document.activeElement as HTMLElement;
+    setAbout(true);
+  }
+  function openConfirmation(type: "finish" | "reset") {
+    dialogTrigger.current = document.activeElement as HTMLElement;
+    setConfirm(type);
+  }
+  function closeDialog() {
+    setAbout(false);
+    setConfirm(null);
+  }
+  function backToModes() {
+    if (view === "timer" && snapshot.status !== "completed") {
+      openConfirmation("reset");
+      return;
+    }
+    if (view === "timer") action("reset");
+    setView("home");
+  }
   function beep() {
     void audio.current.test().then((ready) => {
       setAudioReady(ready);
@@ -218,11 +265,11 @@ export default function App() {
   }, [snapshot, sound]);
   useEffect(() => {
     if (!about && !confirm) return;
-    const previous = document.activeElement as HTMLElement;
+    const previous = dialogTrigger.current;
     const handler = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setAbout(false);
-        setConfirm(null);
+        event.preventDefault();
+        closeDialog();
       }
       if (event.key === "Tab") {
         const items =
@@ -324,44 +371,56 @@ export default function App() {
         : snapshot.phase
           ? labels[snapshot.phase.kind]
           : "ГОТОВЫ?";
-  return (
-    <div className="app">
-      <header>
+  const headerActions = (
+    <div className="header-actions">
+      {!online && <span className="network">Без сети</span>}
+      <button
+        className="quiet icon-button"
+        onClick={openAbout}
+        aria-label="О проекте"
+        title="О проекте"
+      >
+        <Icon name="info" />
+      </button>
+      {view === "timer" && (
         <button
-          className="brand"
-          onClick={() =>
-            view === "timer" && snapshot.status !== "completed"
-              ? setConfirm("reset")
-              : setView("home")
-          }
+          className={`quiet icon-button sound${sound ? "" : " muted"}`}
+          onClick={() => {
+            if (!sound) beep();
+            setSound(!sound);
+          }}
+          aria-label={sound ? "Выключить звук" : "Включить звук"}
+          aria-pressed={sound}
+          title={sound ? "Выключить звук" : "Включить звук"}
         >
-          CF<span>TIMER</span>
+          <Icon name={sound ? "volume" : "muted"} />
         </button>
-        <div className="header-actions">
-          {!online && <span className="network">Без сети</span>}
-          <button
-            className="quiet"
-            onClick={() => setAbout(true)}
-            aria-label="О проекте"
-          >
-            ⓘ
+      )}
+      <button
+        className="quiet icon-button fullscreen"
+        onClick={() => {
+          void display.current?.toggleFullscreen().then((ok) => {
+            if (!ok)
+              setNotice("Полный экран недоступен. Разверните окно вручную.");
+          });
+        }}
+        aria-label="Полный экран"
+        title="Полный экран"
+      >
+        <Icon name="fullscreen" />
+      </button>
+    </div>
+  );
+  return (
+    <div className={`app${view === "timer" ? " app-timer" : ""}`}>
+      {view !== "timer" && (
+        <header>
+          <button className="brand" onClick={backToModes}>
+            CF<span>TIMER</span>
           </button>
-          <button
-            className="quiet fullscreen"
-            onClick={() => {
-              void display.current?.toggleFullscreen().then((ok) => {
-                if (!ok)
-                  setNotice(
-                    "Полный экран недоступен. Разверните окно вручную.",
-                  );
-              });
-            }}
-            aria-label="Полный экран"
-          >
-            ⛶
-          </button>
-        </div>
-      </header>
+          {headerActions}
+        </header>
+      )}
       {notice && (
         <div className="notice" role="status">
           {notice}
@@ -369,7 +428,7 @@ export default function App() {
             onClick={() => setNotice("")}
             aria-label="Закрыть уведомление"
           >
-            ×
+            <Icon name="close" />
           </button>
         </div>
       )}
@@ -385,16 +444,16 @@ export default function App() {
             <p className="eyebrow">ВАША ТРЕНИРОВКА</p>
             <h1>Выберите режим</h1>
             <div className="mode-grid">
-              {modes.map((mode, i) => (
+              {modes.map((mode) => (
                 <button
                   key={mode.id}
-                  className={`mode-card ${i > 2 ? "preset" : ""}`}
+                  className={`mode-card${mode.id === "tabata" || mode.id === "emom" ? " preset" : ""}`}
                   onClick={() => choose(mode.id)}
                 >
-                  <span className="mode-index">0{i + 1}</span>
+                  <Icon name={mode.icon} className="mode-icon" />
                   <strong>{mode.name}</strong>
-                  <span>{mode.detail}</span>
-                  <b aria-hidden="true">↗</b>
+                  <span className="mode-detail">{mode.detail}</span>
+                  <Icon name="arrow" className="mode-arrow" />
                 </button>
               ))}
             </div>
@@ -425,11 +484,18 @@ export default function App() {
           </section>
         ) : view === "setup" ? (
           <section className="setup">
-            <button className="back quiet" onClick={() => setView("home")}>
-              ← Все режимы
-            </button>
             <p className="eyebrow">НАСТРОЙКА</p>
-            <h1>{modeName}</h1>
+            <div className="workout-heading setup-heading">
+              <button
+                className="back quiet icon-button"
+                onClick={backToModes}
+                aria-label="Все режимы"
+                title="Все режимы"
+              >
+                <Icon name="back" />
+              </button>
+              <h1>{modeName}</h1>
+            </div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -533,87 +599,97 @@ export default function App() {
                 </span>
               </p>
               <button className="primary" type="submit">
-                Начать <span aria-hidden="true">→</span>
+                Начать <Icon name="arrow" className="action-icon" />
               </button>
             </form>
           </section>
         ) : (
           <section className={`timer ${snapshot.phase?.kind ?? ""}`}>
             <div className="timer-meta">
-              <span>{modeName}</span>
-              <button
-                className="quiet"
-                onClick={() => {
-                  if (!sound) beep();
-                  setSound(!sound);
-                }}
-              >
-                {sound ? "Звук вкл." : "Без звука"}
-              </button>
+              <div className="workout-heading">
+                <button
+                  className="back quiet icon-button"
+                  onClick={backToModes}
+                  aria-label="Все режимы"
+                  title="Все режимы"
+                >
+                  <Icon name="back" />
+                </button>
+                <h1>{modeName}</h1>
+              </div>
+              {headerActions}
             </div>
-            <p className="phase" aria-live="polite">
-              {phase}
-            </p>
-            <div className="time" aria-label={`Время ${displayedTime}`}>
-              {displayedTime}
-            </div>
-            <p className="round">
-              {interval || config.mode === "emom"
-                ? `Раунд ${snapshot.phase?.round || 1} / ${config.rounds}`
-                : finishedBeforeWork
-                  ? "До начала работы"
-                  : snapshot.status === "completed"
-                    ? "Тренировка завершена"
-                    : "Держите свой темп"}
-            </p>
-            <div className="timer-controls">
-              {snapshot.status === "completed" ? (
-                <>
-                  <button className="primary" onClick={() => action("repeat")}>
-                    Повторить
-                  </button>
-                  <button
-                    className="secondary"
-                    onClick={() => {
-                      action("reset");
-                      setView("home");
-                    }}
-                  >
-                    Все режимы
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    className="primary"
-                    onClick={() =>
-                      action(snapshot.status === "paused" ? "resume" : "pause")
-                    }
-                  >
-                    {snapshot.status === "paused" ? "Продолжить" : "Пауза"}
-                  </button>
-                  <button
-                    className="secondary"
-                    onClick={() => setConfirm("finish")}
-                  >
-                    Завершить
-                  </button>
-                  <button className="quiet" onClick={() => setConfirm("reset")}>
-                    Сбросить
-                  </button>
-                </>
+            <div className="timer-readout">
+              <p className="phase" aria-live="polite">
+                {phase}
+              </p>
+              <div className="time" aria-label={`Время ${displayedTime}`}>
+                {displayedTime}
+              </div>
+              {(interval || config.mode === "emom" || finishedBeforeWork) && (
+                <p className="round">
+                  {interval || config.mode === "emom"
+                    ? `Раунд ${snapshot.phase?.round || 1} / ${config.rounds}`
+                    : "До начала работы"}
+                </p>
               )}
             </div>
-            <p className="screen-hint" role="status">
-              {wakeActive
-                ? "Экран удерживается включённым. Не блокируйте устройство."
-                : "Отключите автоблокировку устройства вручную: удержание экрана не активно."}
-            </p>
+            <div className="timer-footer">
+              <div className="timer-controls">
+                {snapshot.status === "completed" ? (
+                  <button className="primary" onClick={() => action("repeat")}>
+                    <Icon name="repeat" className="action-icon" />
+                    Повторить
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className="primary"
+                      onClick={() =>
+                        action(
+                          snapshot.status === "paused" ? "resume" : "pause",
+                        )
+                      }
+                    >
+                      <Icon
+                        name={snapshot.status === "paused" ? "play" : "pause"}
+                        className="action-icon"
+                      />
+                      {snapshot.status === "paused" ? "Продолжить" : "Пауза"}
+                    </button>
+                    <button
+                      className="secondary"
+                      onClick={() => openConfirmation("finish")}
+                    >
+                      <Icon name="stop" className="action-icon" />
+                      Завершить
+                    </button>
+                    <button
+                      className="quiet"
+                      onClick={() => openConfirmation("reset")}
+                    >
+                      <Icon name="reset" className="action-icon" />
+                      Сбросить
+                    </button>
+                  </>
+                )}
+              </div>
+              <p className="screen-hint" role="status">
+                {wakeActive
+                  ? "Экран удерживается включённым. Не блокируйте устройство."
+                  : "Отключите автоблокировку устройства вручную: удержание экрана не активно."}
+              </p>
+            </div>
           </section>
         )}
       </main>
       {(about || confirm) && (
-        <div className="overlay">
+        <div
+          className="overlay"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) closeDialog();
+          }}
+        >
           <section
             ref={dialogRef}
             className="dialog"
@@ -621,6 +697,17 @@ export default function App() {
             aria-modal="true"
             aria-labelledby="dialog-title"
           >
+            {about && (
+              <button
+                className="dialog-close quiet icon-button"
+                autoFocus
+                onClick={closeDialog}
+                aria-label="Закрыть"
+                title="Закрыть"
+              >
+                <Icon name="close" />
+              </button>
+            )}
             <h2 id="dialog-title">
               {about
                 ? "CF Timer"
@@ -640,13 +727,6 @@ export default function App() {
                 >
                   Репозиторий на GitHub ↗
                 </a>
-                <button
-                  className="primary"
-                  autoFocus
-                  onClick={() => setAbout(false)}
-                >
-                  Закрыть
-                </button>
               </>
             ) : (
               <>
@@ -666,7 +746,7 @@ export default function App() {
                   className="primary"
                   onClick={() => {
                     action(confirm!);
-                    if (confirm === "reset") setView("setup");
+                    if (confirm === "reset") setView("home");
                     setConfirm(null);
                   }}
                 >
