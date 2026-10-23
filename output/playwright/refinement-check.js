@@ -322,4 +322,4 @@ async (page) => {
       "pause/resume/finish/repeat",
     ],
   };
-};
+}

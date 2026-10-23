@@ -50,4 +50,4 @@ async (page) => {
   } finally {
     await page.context().setOffline(false);
   }
-};
+}
