@@ -190,3 +190,26 @@ readlink -f www
 ```
 
 Обратное переключение не выполнялось. Новый каталог сохранять: откат symlink сам по себе не откатывает уже обновлённый клиентский SW.
+
+## Релиз 0.1.4 — 26.10.2026
+
+По сообщению владельца о серой AMRAP-полосе и его явному разрешению опубликована защитная переделка отрисовки. Runtime source: `b1ad370cf1543d6185866727d76362787f6d7310`. [Отчёт](ui-0.1.4-2026-10-26.md) прямо фиксирует: исходный симптом не воспроизведён в чистых движках, браузер владельца не уточнён, подтверждение его случая остаётся открытым.
+
+- 80 unit, 30 Chromium E2E, 6 Firefox regressions и WebKit CLI matrix прошли; lint/typecheck/build/OpenSpec — успешно. WebKit runner упёрся в несовместимость PushAPIEnabled с frozen binary до открытия страницы; фактическая видимость проверена работающим CLI. Это не объявляется успешным прогоном неисправного runner.
+- `www` атомарно переключён с `releases/ecb42f3` на `/home/timer/timer.lyamin.org/releases/b1ad370`. Предыдущий каталог и все прежние hash-assets сохранены. Другие сервисы не менялись.
+- Архив только dist: 187515 байт, SHA256 `3534c1984fa4d4fdfa1ae8a455b5b2c3462d0375627eff4a0cabd0fdbd5bfe4f`. Архив, manifest/SHA256SUMS и previous-release.txt — в `backups/release-b1ad370/` вне www.
+- [HTTP](../output/playwright/release-http-0.1.4-2026-10-26.json) подтвердил SHA256 10 файлов, 200 прежних JS/CSS и 404 отсутствующего JS. [Live smoke](../output/playwright/release-browser-0.1.4-2026-10-26.json) проверил свежий UI, click pause/restart, offline и сохранение preferences/assets. AMRAP 09:36 имеет красное ≈96% заполнение высотой 50 px: [отдельный протокол](../output/playwright/release-amrap-0.1.4-2026-10-26.json), [desktop](../output/playwright/live014-amrap.png), [телефон](../output/playwright/live014-amrap-phone.png).
+- Прежний `index-BC77AwsP.js` продолжал собственную тестовую тренировку, новый SW оставался waiting. После выхода из тестовой тренировки и ухода клиента на about:blank установился `index-BgKQaoxn.js`, версия 0.1.4. skipWaiting/очистка пользовательских кэшей не применялись.
+- Заголовки max-age=2592000 у HTML/SW/assets сохраняются; мгновенное обновление всех клиентов не обещается. Физические iPhone/PC+TV не проверены.
+
+Откат под timer:
+
+```bash
+cd /home/timer/timer.lyamin.org
+test "$(readlink www)" = releases/b1ad370
+ln -s releases/ecb42f3 www-rollback-b1ad370
+mv -Tf www-rollback-b1ad370 www
+readlink -f www
+```
+
+Откат не выполнялся; новый каталог сохранять и проверять клиентский SW отдельно.
