@@ -701,26 +701,28 @@ export default function App() {
                   )}
                 </div>
               </div>
-              <p className="screen-hint" role="status">
-                {wakeActive ? (
-                  "Экран остаётся включённым"
-                ) : (
-                  <>
-                    <button
-                      className="wake-retry quiet"
-                      onClick={() => {
-                        void display.current?.requestWakeLock();
-                      }}
-                    >
-                      Не выключать экран
-                    </button>
-                    <span>
-                      Если браузер не разрешит — отключите автоблокировку в
-                      настройках устройства.
-                    </span>
-                  </>
-                )}
-              </p>
+              {snapshot.status !== "completed" && (
+                <p className="screen-hint" role="status">
+                  {wakeActive ? (
+                    "Экран остаётся включённым"
+                  ) : (
+                    <>
+                      <button
+                        className="wake-retry quiet"
+                        onClick={() => {
+                          void display.current?.requestWakeLock();
+                        }}
+                      >
+                        Не выключать экран
+                      </button>
+                      <span>
+                        Если браузер не разрешит — отключите автоблокировку в
+                        настройках устройства.
+                      </span>
+                    </>
+                  )}
+                </p>
+              )}
             </div>
           </section>
         )}

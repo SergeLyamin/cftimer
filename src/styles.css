@@ -726,7 +726,14 @@ details .field {
     padding: 12px;
   }
   .reset-label {
-    display: none;
+    display: block;
+    font-size: 10px;
+    line-height: 1;
+  }
+  .timer-controls .timer-reset {
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px;
   }
   .workout-progress {
     width: 100%;
