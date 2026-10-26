@@ -127,6 +127,18 @@ for (const mode of ["Интервалы", "На время", "AMRAP", "Tabata", 
       const metrics = await page.locator(".timer-footer").boundingBox();
       expect(metrics!.y + metrics!.height).toBeLessThanOrEqual(height + 1);
       await page.evaluate(() => window.scrollTo(0, 0));
+      if (["Интервалы", "Tabata", "EMOM"].includes(mode)) {
+        const phaseTrack = await page
+          .locator(".workout-progress")
+          .boundingBox();
+        const roundsTrack = await page
+          .locator(".workout-timeline")
+          .boundingBox();
+        expect(Math.abs(phaseTrack!.x - roundsTrack!.x)).toBeLessThan(1);
+        expect(Math.abs(phaseTrack!.width - roundsTrack!.width)).toBeLessThan(
+          1,
+        );
+      }
       if (mode === "Tabata") {
         await expect
           .poll(async () => {

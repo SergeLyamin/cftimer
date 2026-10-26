@@ -1129,3 +1129,13 @@ details .field {
   padding-left: 0;
   text-decoration: underline;
 }
+@media (max-width: 640px) {
+  .workout-timeline {
+    width: 100%;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .workout-timeline {
+    width: min(620px, 86%);
+  }
+}
