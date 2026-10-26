@@ -117,7 +117,7 @@ it("exposes one time label, fixed character classes and remaining progress", () 
   expect(markup).toContain(
     'aria-valuetext="Осталось 50% времени текущей фазы"',
   );
-  expect(markup).toContain("transform:scaleX(0.5)");
+  expect(markup).toContain("width:50%");
 });
 
 it("describes elapsed progress for For Time work", () => {
@@ -138,7 +138,7 @@ it("describes elapsed progress for For Time work", () => {
   expect(markup).toContain('aria-label="Прошло времени фазы"');
   expect(markup).toContain('aria-valuenow="25"');
   expect(markup).toContain('aria-valuetext="Прошло 25% времени текущей фазы"');
-  expect(markup).toContain("transform:scaleX(0.25)");
+  expect(markup).toContain("width:25%");
 });
 
 function readout(snapshot: TimerSnapshot, roundLabel?: string) {

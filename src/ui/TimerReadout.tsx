@@ -85,7 +85,7 @@ export function TimerReadout({
         >
           <div
             className="workout-progress-fill"
-            style={{ transform: `scaleX(${progress})` }}
+            style={{ width: `${progress * 100}%` }}
           />
         </div>
         {interactive && (

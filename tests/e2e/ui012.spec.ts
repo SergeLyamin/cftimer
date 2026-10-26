@@ -284,7 +284,7 @@ test("settings are unified, persist, expose the build version and reduced motion
   await sound.check();
   await effects.uncheck();
   await confetti.uncheck();
-  await expect(page.getByText("Версия 0.1.3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Версия 0.1.4", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("link", { name: "GitHub автора →" }),
   ).toHaveAttribute("target", "_blank");
