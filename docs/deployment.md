@@ -163,3 +163,30 @@ readlink -f www
 ```
 
 Откат подготовлен, но при успешном выпуске не выполнялся. Каталог 7bf4b91 сохранить; обратное переключение symlink само по себе не отменяет обновление уже установившегося клиентского SW.
+
+## Релиз 0.1.3 — 26.10.2026
+
+После совместной desktop-проверки владелец явно разрешил оставшиеся проверки и деплой. Опубликован runtime `ecb42f37fd7ddf68f8873c93a071205e98818286` (readout-toggle `73e7614`, последняя правка выравнивает полосы). [Отчёт](ui-0.1.3-2026-10-26.md): 80 unit, 24 E2E Chromium, повтор пяти сценариев компоновки после CSS-правки, smoke Firefox 157.0 и доступного WebKit 27.2. Lint/typecheck/build и strict OpenSpec validation прошли; физическая приёмка открыта.
+
+- `www` атомарно переключён с `releases/7bf4b91` на `/home/timer/timer.lyamin.org/releases/ecb42f3` под timer, без перезапуска сервисов. Предыдущий каталог сохранён; все его hash-assets доступны в новом каталоге.
+- Архив только dist: 187720 байт, SHA256 `f906b08900e61f515338a90c338e5bfc42f9333212fae396b0886aed5bb1b047`. Все 10 файлов сверены на сервере и по HTTPS. Архив, manifest.json, SHA256SUMS, previous-release.txt сохранены вне www в `backups/release-ecb42f3/`.
+- [HTTP-протокол](../output/playwright/release-http-0.1.3-2026-10-26.json): новые HTML/SW/JS/CSS/fonts/favicon/manifest — 200 и совпадающие SHA256; четыре прежних assets — 200; отсутствующий JS — 404.
+- [Live-протокол](../output/playwright/release-browser-0.1.3-2026-10-26.json) и [функция проверки](../output/playwright/release-smoke-0.1.3-2026-10-26.js): свежий клиент получил `index-BC77AwsP.js`, версию 0.1.3, правый countdown, три click-toggle поверхности, header и прямой restart. После cached offline reload сохранены preferences, доступны новый запуск/пауза и favicon/шрифт; ошибок JavaScript нет.
+- Прежний `index-ClRRNzVg.js` продолжал собственную тестовую тренировку и pause/resume, пока новый SW ожидал. После подтверждённого выхода только из тестового занятия и ухода клиента на about:blank новый SW активировался; повторное открытие показало новый runtime. skipWaiting и очистка пользовательских кэшей не применялись.
+- Статусы Wake Lock/offline отображались в настройках. Desktop Chromium подтвердил удержание экрана; физический iPhone 13/Firefox/обычная вкладка и PC+TV остаются отдельной открытой приёмкой.
+- WebKit `setOffline(true)` дал известную ошибку эмуляции SW-navigation [Playwright #42775](https://github.com/microsoft/playwright/issues/42775). Альтернативный тест остановил только собственный localhost-preview: обычный HTTP недоступен, WebKit успешно открыл кэш, запустил новую тренировку и загрузил assets. [Протокол](../output/playwright/cross013-webkit-origin-offline.json). Это не изменение production или глобальной сети пользователя.
+- Ограничение хостинга сохраняется: `Cache-Control: max-age=2592000` у HTML/SW/assets. Для изменения заголовков нужен администратор; мгновенное обновление всех старых копий не гарантируется. Конфигурация Nginx/Apache/других приложений не менялась.
+
+Снимки: [телефон](../output/playwright/live013-phone.png), [offline](../output/playwright/live013-offline.png), [ожидающее обновление](../output/playwright/live013-update-waiting.png), [обновлённая PWA](../output/playwright/live013-upgraded-pwa.png).
+
+Откат под timer:
+
+```bash
+cd /home/timer/timer.lyamin.org
+test "$(readlink www)" = releases/ecb42f3
+ln -s releases/7bf4b91 www-rollback-ecb42f3
+mv -Tf www-rollback-ecb42f3 www
+readlink -f www
+```
+
+Обратное переключение не выполнялось. Новый каталог сохранять: откат symlink сам по себе не откатывает уже обновлённый клиентский SW.

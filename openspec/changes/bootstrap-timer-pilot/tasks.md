@@ -87,7 +87,7 @@
 - [x] 9.3 Локально принять работу/отдых до 99:99 с парами 00–99 и kernel до 6039 с, сохранив подготовку 0–30 с/total ≤4 ч; пятая цифра не меняет валидность/итог, oversized numeric paste→99:99, явные сегменты >99→99, раунды >99→99; показать уведомление примерно 10 с с fade и проверить desktop-ввод/round-trip 6039→99:99.
 - [x] 9.4 Локально добавить независимый persistent confetti switch default true и собственное мягкое завершение примерно 5 с без CDN по указанному визуальному референсу; только one-shot natural completed/limit, без menu/reset/manual finish/rerender, off/reduced motion без анимации; показать desktop владельцу.
 - [x] 9.5 Локальный desktop показан владельцу; последним сообщением он одобрил текущий UI, запросил toggle по readout и поручил необходимые проверки/production release. UI approval получено; фактические программные/аппаратные проверки отмечаются отдельно.
-- [ ] 9.6 После полученного UI approval выполнить программную приёмку: deterministic boundary tests ядра/маски/прогресса/confetti, mobile/responsive/cross-browser/regression/offline/PWA и необходимые lint/typecheck/build/E2E/OpenSpec проверки; записать результаты. Физические устройства относятся к 9.7.
+- [x] 9.6 После полученного UI approval выполнить программную приёмку: deterministic boundary tests ядра/маски/прогресса/confetti, mobile/responsive/cross-browser/regression/offline/PWA и необходимые lint/typecheck/build/E2E/OpenSpec проверки; записать результаты. Физические устройства относятся к 9.7.
 - [ ] 9.7 После UI approval проверить физические iOS/Android и PC+TV: ввод/фазовая полоса/конфетти/контраст/управление/сон и возврат; записать оборудование и ограничения, не закрывать аппаратную приёмку mocks или desktop-снимками.
 - [x] 9.8 Последним сообщением владелец явно разрешил production release после необходимых проверок этой итерации (0.1.3). Это новое разрешение; фактические выпуск/live smoke остаются задачами publish-local-timer-ui, не доказаны этим checkbox.
 
@@ -101,15 +101,17 @@
 - [x] 10.4 В заголовок интервальных режимов вынести N из M с 1 из M на подготовке, For Time — настроенный лимит; добавить стрелке тонкую круглую окантовку, убрать дублирующий контекст под цифрами и проверить активный/завершённый возврат.
 - [x] 10.5 Перенести Wake Lock/offline readiness и retry/repair в уведомления настроек, убрать постоянные строки/кнопки с home/timer; минимально проверить доступность desktop controls без изменения runtime/cache semantics.
 - [x] 10.6 Владелец просмотрел текущий desktop и последним сообщением одобрил UI, добавив toggle по цифрам/полосам; UI approval для этой итерации получено, как зафиксировано в 9.5.
-- [ ] 10.7 После полученного UI approval выполнить программные unit/mobile/responsive/cross-browser/regression/offline/PWA/OpenSpec проверки и записать результаты. Release approval получено, выпуск остаётся pending до проверок; физическая приёмка отдельно в 10.8.
+- [x] 10.7 После полученного UI approval выполнить программные unit/mobile/responsive/cross-browser/regression/offline/PWA/OpenSpec проверки и записать результаты. Chromium 24 E2E, Firefox/WebKit smoke, offline/PWA и build/unit/lint/OpenSpec проверены; физическая приёмка отдельно в 10.8. Release approval получено.
 - [ ] 10.8 Проверить физические iOS/Android и PC+TV, включая реальные клавиатуры, читаемость, звук/эффекты/сон и возврат; записать оборудование/ограничения. Не закрывать hardware по программным тестам или разрешению публикации.
 
 ## 11. Readout pause toggles and software acceptance for 0.1.3
 
-- [ ] 11.1 Добавить три отдельные native-button поверхности — цифры, фазовая полоса, сегментированная шкала — с click/Enter/Space toggle только running/paused, видимым focus и краткими ARIA-именами без шумного snapshot announcement; completed/modal не должны менять таймер, глобальный Space не дублирует действие.
-- [ ] 11.2 После реализации выполнить необходимые целевые и регрессионные программные проверки, включая desktop/mobile/responsive, unit/build/lint/typecheck/E2E, offline/PWA update и OpenSpec; записать фактические результаты отдельно от незавершённой аппаратной приёмки.
+Программная приёмка: docs/ui-0.1.3-2026-10-26.md. WebKit offline проверен с остановленным origin из-за ошибки эмуляции Playwright #42775; физические устройства остаются в открытых пунктах.
 
-- [ ] 11.3 Разместить хронологически первый countdown-сегмент у крайнего правого края и опустошать timeline справа налево при fill origin слева; count-up — первый сегмент слева и рост слева направо. Проверить порядок/частичное заполнение на реальной смене work/rest без изменения полученного release approval.
+- [x] 11.1 Добавить три отдельные native-button поверхности — цифры, фазовая полоса, сегментированная шкала — с click/Enter/Space toggle только running/paused, видимым focus и краткими ARIA-именами без шумного snapshot announcement; completed/modal не должны менять таймер, глобальный Space не дублирует действие.
+- [x] 11.2 После реализации выполнить необходимые целевые и регрессионные программные проверки, включая desktop/mobile/responsive, unit/build/lint/typecheck/E2E, offline/PWA update и OpenSpec; записать фактические результаты отдельно от незавершённой аппаратной приёмки.
+
+- [x] 11.3 Разместить хронологически первый countdown-сегмент у крайнего правого края и опустошать timeline справа налево при fill origin слева; count-up — первый сегмент слева и рост слева направо. Проверить порядок/частичное заполнение на реальной смене work/rest без изменения полученного release approval.
 
 ## Workflow follow-up
 
