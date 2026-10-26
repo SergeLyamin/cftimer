@@ -7,32 +7,59 @@ async function setup(page: Page) {
   await page.getByLabel("Подготовка").fill("0000");
   await page.getByRole("button", { name: "Начать" }).click();
 }
-test("pause, resume, cancel reset and confirmed finish preserve elapsed time", async ({
+test("pause, restart and confirmed menu exit preserve the intended workout", async ({
   page,
 }) => {
   await page.clock.install();
   await setup(page);
+  await expect(
+    page.getByRole("button", { name: "Сброс", exact: true }),
+  ).toBeHidden();
+  await expect(
+    page.getByRole("button", { name: "Завершить", exact: true }),
+  ).toHaveCount(0);
   await page.clock.runFor(5000);
   await page.getByRole("button", { name: "Пауза", exact: true }).click();
   const paused = await page.locator(".time").textContent();
-  await page.clock.runFor(30000);
+  const progress = await page
+    .getByRole("progressbar")
+    .getAttribute("aria-valuenow");
+  await page.clock.fastForward(30000);
   await expect(page.locator(".time")).toHaveText(paused!);
-  await page.getByRole("button", { name: "Продолжить", exact: true }).click();
-  await page.clock.runFor(5000);
-  await expect(page.locator(".time")).not.toHaveText(paused!);
-  await page.getByRole("button", { name: "Сбросить", exact: true }).click();
-  await page.getByRole("button", { name: "Продолжить тренировку" }).click();
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    progress!,
+  );
+  await page.getByRole("button", { name: "Сброс", exact: true }).click();
+  await page.getByRole("button", { name: "Отмена", exact: true }).click();
+  await expect(page.locator(".phase")).toHaveText("ПАУЗА");
+  await page.getByRole("button", { name: "Сброс", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Начать заново", exact: true })
+    .click();
+  await expect(page.locator(".time")).toHaveText("02:00");
   await expect(
     page.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Завершить", exact: true }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Завершить", exact: true })
-    .click();
+  await page.clock.runFor(5000);
+  await page.getByRole("button", { name: "Все режимы", exact: true }).click();
+  await page.getByRole("button", { name: "Отмена", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Пауза", exact: true }),
+  ).toBeVisible();
+  await page.clock.fastForward(115100);
   await expect(page.getByText("ГОТОВО", { exact: true })).toBeVisible();
+  await expect(page.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "0",
+  );
   await page.getByRole("button", { name: "Повторить", exact: true }).click();
   await expect(page.locator(".time")).toHaveText("02:00");
+  await page.getByRole("button", { name: "Все режимы", exact: true }).click();
+  await page.getByRole("button", { name: "В меню", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Выберите режим" }),
+  ).toBeVisible();
 });
 test("display reload creates an idle session with mode choice", async ({
   page,

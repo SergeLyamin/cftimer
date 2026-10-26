@@ -368,26 +368,76 @@ details .field {
 }
 .time {
   font-family: "Oswald", "Arial Narrow", sans-serif;
-  font-size: clamp(84px, min(29vw, 34svh), 480px);
+  font-size: clamp(84px, min(29vw, 32svh), 480px);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
+  display: inline-flex;
+  justify-content: center;
   line-height: 1.12;
   white-space: nowrap;
+}
+.time-digit,
+.time-separator {
+  display: inline-block;
+  flex: none;
+  text-align: center;
+}
+.time-digit {
+  width: 0.53em;
+}
+.time-separator {
+  width: 0.22em;
+}
+.workout-progress {
+  width: min(780px, 88%);
+  height: 16px;
+  margin-top: 24px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #292b30;
+}
+.workout-progress-fill {
+  width: 100%;
+  height: 100%;
+  background: #ef4a40;
+  transform-origin: left;
+  border-radius: inherit;
 }
 .round {
   font-size: clamp(16px, 1.8vw, 24px);
   color: #b1b4bd;
-  margin: 24px 0 0;
+  margin: 16px 0 0;
 }
 .timer-footer {
   padding-top: 12px;
 }
-.timer-controls {
+.timer-action-row {
+  position: relative;
   display: flex;
-  gap: 14px;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  min-height: 76px;
+}
+.timer-exit {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.timer-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0fr;
+  align-items: center;
+  gap: 0;
+  width: min(620px, calc(100% - 120px));
+  transition:
+    grid-template-columns 180ms ease,
+    gap 180ms ease;
+}
+.timer-controls.is-paused {
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+  gap: 12px;
 }
 .timer-controls .primary,
 .timer-controls .secondary,
@@ -396,20 +446,49 @@ details .field {
   gap: 12px;
   justify-content: center;
   align-items: center;
-  min-width: 200px;
+  min-width: 0;
   background: #08090a;
   border: 1px solid #eee;
   font-weight: 500;
 }
-.timer-controls .quiet {
-  display: inline-flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
+.timer-controls .timer-main-action {
+  width: 100%;
+  min-height: 76px;
+  font-size: 20px;
+}
+.timer-controls .timer-main-action:only-child {
+  grid-column: 1 / -1;
+}
+.timer-reset-slot {
+  min-width: 0;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition:
+    opacity 160ms ease,
+    transform 180ms ease,
+    visibility 0s 180ms;
+}
+.is-paused .timer-reset-slot {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0s;
+}
+.timer-reset {
+  width: 100%;
+  min-height: 56px;
+  padding: 12px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.timer-reset:focus-visible {
+  outline-offset: -5px;
 }
 .action-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 @media (hover: hover) {
   .timer-controls .primary:hover,
@@ -423,8 +502,25 @@ details .field {
   font-size: 11px;
   color: #989ba4;
   line-height: 1.5;
-  margin: 20px auto 0;
+  margin: 12px auto 0;
   max-width: 520px;
+}
+.screen-hint:has(.wake-retry) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.wake-retry {
+  flex: none;
+  padding: 8px;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.screen-hint > span {
+  max-width: 290px;
+  text-align: left;
 }
 .notice {
   background: #292820;
@@ -489,6 +585,43 @@ details .field {
   width: 48px;
   margin: 0;
   display: inline-flex;
+}
+.anchored-overlay {
+  display: block;
+  background: #0008;
+}
+.anchored-dialog {
+  position: fixed;
+  width: min(360px, calc(100vw - 32px));
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.anchored-dialog h2 {
+  padding-right: 0;
+  overflow-wrap: anywhere;
+  font-size: 23px;
+  margin-bottom: 12px;
+}
+.dialog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dialog .dialog-actions button {
+  margin: 0;
+}
+.dialog .dialog-cancel {
+  background: none;
+  border: 0;
+  color: #b6b8bf;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  min-height: 48px;
+  padding: 12px;
+}
+.dialog .dialog-cancel:hover {
+  color: white;
 }
 @media (max-width: 640px) {
   header {
@@ -570,24 +703,35 @@ details .field {
   .round {
     margin-top: 22px;
   }
-  .timer-controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+  .timer-action-row {
+    min-height: 72px;
   }
-  .timer-controls .primary,
-  .timer-controls .secondary {
-    width: 100%;
-    min-width: 0;
-    padding: 14px 10px;
-    font-size: 15px;
+  .timer-controls {
+    width: calc(100% - 64px);
+    margin-left: 64px;
+  }
+  .timer-controls.is-paused {
+    grid-template-columns: minmax(0, 1fr) 52px;
     gap: 8px;
   }
-  .timer-controls .primary:only-child {
-    grid-column: 1 / -1;
+  .timer-controls .timer-main-action {
+    min-height: 72px;
+    font-size: 16px;
+    gap: 8px;
+    padding: 12px 8px;
   }
-  .timer-controls .quiet {
-    grid-column: 1 / -1;
+  .timer-controls .timer-reset {
+    min-height: 52px;
+    width: 52px;
+    padding: 12px;
+  }
+  .reset-label {
+    display: none;
+  }
+  .workout-progress {
+    width: 100%;
+    height: 12px;
+    margin-top: 20px;
   }
   .screen-hint {
     margin-top: 12px;
@@ -615,7 +759,7 @@ details .field {
     margin: 0 0 4px;
   }
   .timer .time {
-    font-size: min(28vw, 38svh);
+    font-size: min(28vw, 29svh);
   }
   .timer .round {
     margin: 6px 0 0;
@@ -624,17 +768,22 @@ details .field {
   .timer-footer {
     padding: 4px 0 0;
   }
-  .timer-controls {
-    display: flex;
-    gap: 12px;
+  .timer-action-row {
+    min-height: 56px;
   }
-  .timer-controls .primary,
-  .timer-controls .secondary {
-    min-height: 48px;
-    width: auto;
-    min-width: 160px;
+  .timer-controls .timer-main-action {
+    min-height: 56px;
+    font-size: 16px;
     padding: 10px 16px;
-    font-size: 15px;
+  }
+  .timer-controls .timer-reset {
+    min-height: 48px;
+    padding: 10px;
+  }
+  .workout-progress {
+    height: 12px;
+    margin-top: 10px;
+    width: min(620px, 86%);
   }
   .screen-hint {
     margin-top: 6px;
@@ -693,4 +842,8 @@ details .field {
     grid-column: 2;
     grid-row: 3;
   }
+}
+
+.anchored-dialog:has(.dialog-close) h2 {
+  padding-right: 40px;
 }

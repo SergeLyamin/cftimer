@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
+import { AnchoredDialog } from "./AnchoredDialog";
+import { TimerReadout } from "./TimerReadout";
 import {
   AudioSignals,
   createSettingsStore,
@@ -156,7 +158,7 @@ export default function App() {
   const dialogRef = useRef<HTMLElement>(null);
   const dialogTrigger = useRef<HTMLElement | null>(null);
   const [about, setAbout] = useState(false);
-  const [confirm, setConfirm] = useState<"finish" | "reset" | null>(null);
+  const [confirm, setConfirm] = useState<"menu" | "restart" | null>(null);
   const [sound, setSound] = useState(false);
   const [notice, setNotice] = useState("");
   const [online, setOnline] = useState(navigator.onLine);
@@ -167,21 +169,21 @@ export default function App() {
   const [wakeActive, setWakeActive] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [updateWaiting, setUpdateWaiting] = useState(false);
-  function openAbout() {
-    dialogTrigger.current = document.activeElement as HTMLElement;
+  function openAbout(trigger: HTMLElement) {
+    dialogTrigger.current = trigger;
     setAbout(true);
   }
-  function openConfirmation(type: "finish" | "reset") {
-    dialogTrigger.current = document.activeElement as HTMLElement;
+  function openConfirmation(type: "menu" | "restart", trigger: HTMLElement) {
+    dialogTrigger.current = trigger;
     setConfirm(type);
   }
   function closeDialog() {
     setAbout(false);
     setConfirm(null);
   }
-  function backToModes() {
+  function backToModes(trigger: HTMLElement) {
     if (view === "timer" && snapshot.status !== "completed") {
-      openConfirmation("reset");
+      openConfirmation("menu", trigger);
       return;
     }
     if (view === "timer") action("reset");
@@ -218,7 +220,11 @@ export default function App() {
     type: "start" | "pause" | "resume" | "finish" | "reset" | "repeat",
   ) {
     engine.current.dispatch({ type });
-    setSnapshot(engine.current.getSnapshot());
+    const next = engine.current.getSnapshot();
+    setSnapshot(next);
+    // Request within the local gesture as well as the lifecycle effect.
+    if (next.status === "running" || next.status === "paused")
+      void display.current?.requestWakeLock();
   }
   useEffect(() => {
     let frame: number;
@@ -289,7 +295,16 @@ export default function App() {
     document.addEventListener("keydown", handler);
     return () => {
       document.removeEventListener("keydown", handler);
-      previous?.focus();
+      if (
+        previous?.isConnected &&
+        !previous.closest("[inert]") &&
+        !previous.matches(":disabled")
+      )
+        previous.focus();
+      else
+        document
+          .querySelector<HTMLElement>(".timer-main-action,.mode-card")
+          ?.focus();
     };
   }, [about, confirm]);
   function choose(mode: TimerConfig["mode"]) {
@@ -376,7 +391,7 @@ export default function App() {
       {!online && <span className="network">Без сети</span>}
       <button
         className="quiet icon-button"
-        onClick={openAbout}
+        onClick={(event) => openAbout(event.currentTarget)}
         aria-label="О проекте"
         title="О проекте"
       >
@@ -399,6 +414,8 @@ export default function App() {
       <button
         className="quiet icon-button fullscreen"
         onClick={() => {
+          if (view === "timer" && snapshot.status !== "completed")
+            void display.current?.requestWakeLock();
           void display.current?.toggleFullscreen().then((ok) => {
             if (!ok)
               setNotice("Полный экран недоступен. Разверните окно вручную.");
@@ -415,7 +432,10 @@ export default function App() {
     <div className={`app${view === "timer" ? " app-timer" : ""}`}>
       {view !== "timer" && (
         <header>
-          <button className="brand" onClick={backToModes}>
+          <button
+            className="brand"
+            onClick={(event) => backToModes(event.currentTarget)}
+          >
             CF<span>TIMER</span>
           </button>
           {headerActions}
@@ -488,7 +508,7 @@ export default function App() {
             <div className="workout-heading setup-heading">
               <button
                 className="back quiet icon-button"
-                onClick={backToModes}
+                onClick={(event) => backToModes(event.currentTarget)}
                 aria-label="Все режимы"
                 title="Все режимы"
               >
@@ -607,155 +627,173 @@ export default function App() {
           <section className={`timer ${snapshot.phase?.kind ?? ""}`}>
             <div className="timer-meta">
               <div className="workout-heading">
-                <button
-                  className="back quiet icon-button"
-                  onClick={backToModes}
-                  aria-label="Все режимы"
-                  title="Все режимы"
-                >
-                  <Icon name="back" />
-                </button>
                 <h1>{modeName}</h1>
               </div>
               {headerActions}
             </div>
-            <div className="timer-readout">
-              <p className="phase" aria-live="polite">
-                {phase}
-              </p>
-              <div className="time" aria-label={`Время ${displayedTime}`}>
-                {displayedTime}
-              </div>
-              {(interval || config.mode === "emom" || finishedBeforeWork) && (
-                <p className="round">
-                  {interval || config.mode === "emom"
-                    ? `Раунд ${snapshot.phase?.round || 1} / ${config.rounds}`
-                    : "До начала работы"}
-                </p>
-              )}
-            </div>
+            <TimerReadout
+              snapshot={snapshot}
+              displayedTime={displayedTime}
+              phaseLabel={phase}
+              roundLabel={
+                interval || config.mode === "emom"
+                  ? `Раунд ${snapshot.phase?.round || 1} / ${config.rounds}`
+                  : finishedBeforeWork
+                    ? "До начала работы"
+                    : undefined
+              }
+            />
             <div className="timer-footer">
-              <div className="timer-controls">
-                {snapshot.status === "completed" ? (
-                  <button className="primary" onClick={() => action("repeat")}>
-                    <Icon name="repeat" className="action-icon" />
-                    Повторить
-                  </button>
+              <div className="timer-action-row">
+                <button
+                  className="timer-exit quiet icon-button"
+                  onClick={(event) => backToModes(event.currentTarget)}
+                  aria-label="Все режимы"
+                  title="Вернуться к выбору режима"
+                >
+                  <Icon name="back" />
+                </button>
+                <div
+                  className={`timer-controls ${snapshot.status === "paused" ? "is-paused" : ""}`}
+                >
+                  {snapshot.status === "completed" ? (
+                    <button
+                      className="primary timer-main-action"
+                      onClick={() => action("repeat")}
+                    >
+                      <Icon name="repeat" className="action-icon" />
+                      Повторить
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="primary timer-main-action"
+                        onClick={() =>
+                          action(
+                            snapshot.status === "paused" ? "resume" : "pause",
+                          )
+                        }
+                      >
+                        <Icon
+                          name={snapshot.status === "paused" ? "play" : "pause"}
+                          className="action-icon"
+                        />
+                        {snapshot.status === "paused" ? "Продолжить" : "Пауза"}
+                      </button>
+                      <div
+                        className="timer-reset-slot"
+                        inert={snapshot.status !== "paused"}
+                      >
+                        <button
+                          className="secondary timer-reset"
+                          aria-label="Сброс"
+                          title="Запустить заново"
+                          disabled={snapshot.status !== "paused"}
+                          onClick={(event) =>
+                            openConfirmation("restart", event.currentTarget)
+                          }
+                        >
+                          <Icon name="stop" className="action-icon" />
+                          <span className="reset-label">Сброс</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+              <p className="screen-hint" role="status">
+                {wakeActive ? (
+                  "Экран остаётся включённым"
                 ) : (
                   <>
                     <button
-                      className="primary"
-                      onClick={() =>
-                        action(
-                          snapshot.status === "paused" ? "resume" : "pause",
-                        )
-                      }
+                      className="wake-retry quiet"
+                      onClick={() => {
+                        void display.current?.requestWakeLock();
+                      }}
                     >
-                      <Icon
-                        name={snapshot.status === "paused" ? "play" : "pause"}
-                        className="action-icon"
-                      />
-                      {snapshot.status === "paused" ? "Продолжить" : "Пауза"}
+                      Не выключать экран
                     </button>
-                    <button
-                      className="secondary"
-                      onClick={() => openConfirmation("finish")}
-                    >
-                      <Icon name="stop" className="action-icon" />
-                      Завершить
-                    </button>
-                    <button
-                      className="quiet"
-                      onClick={() => openConfirmation("reset")}
-                    >
-                      <Icon name="reset" className="action-icon" />
-                      Сбросить
-                    </button>
+                    <span>
+                      Если браузер не разрешит — отключите автоблокировку в
+                      настройках устройства.
+                    </span>
                   </>
                 )}
-              </div>
-              <p className="screen-hint" role="status">
-                {wakeActive
-                  ? "Экран удерживается включённым. Не блокируйте устройство."
-                  : "Отключите автоблокировку устройства вручную: удержание экрана не активно."}
               </p>
             </div>
           </section>
         )}
       </main>
       {(about || confirm) && (
-        <div
-          className="overlay"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) closeDialog();
-          }}
+        <AnchoredDialog
+          anchor={dialogTrigger.current}
+          dialogRef={dialogRef}
+          onClose={closeDialog}
         >
-          <section
-            ref={dialogRef}
-            className="dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dialog-title"
-          >
-            {about && (
-              <button
-                className="dialog-close quiet icon-button"
-                autoFocus
-                onClick={closeDialog}
-                aria-label="Закрыть"
-                title="Закрыть"
+          {about && (
+            <button
+              className="dialog-close quiet icon-button"
+              autoFocus
+              onClick={closeDialog}
+              aria-label="Закрыть"
+              title="Закрыть"
+            >
+              <Icon name="close" />
+            </button>
+          )}
+          <h2 id="dialog-title">
+            {about
+              ? "CF Timer"
+              : confirm === "menu"
+                ? "Вернуться в меню?"
+                : "Начать заново?"}
+          </h2>
+          {about ? (
+            <>
+              <p id="dialog-description">
+                Простой таймер для вашей тренировки.
+              </p>
+              <p>Автор — SergeLyamin · Версия 0.1.0</p>
+              <p>Политика конфиденциальности готовится к публикации.</p>
+              <a
+                href="https://github.com/SergeLyamin/cftimer"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Icon name="close" />
-              </button>
-            )}
-            <h2 id="dialog-title">
-              {about
-                ? "CF Timer"
-                : confirm === "finish"
-                  ? "Завершить тренировку?"
-                  : "Сбросить таймер?"}
-            </h2>
-            {about ? (
-              <>
-                <p>Простой таймер для вашей тренировки.</p>
-                <p>Автор — SergeLyamin · Версия 0.1.0</p>
-                <p>Политика конфиденциальности готовится к публикации.</p>
-                <a
-                  href="https://github.com/SergeLyamin/cftimer"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Репозиторий на GitHub ↗
-                </a>
-              </>
-            ) : (
-              <>
-                <p>
-                  {confirm === "finish"
-                    ? "Текущий отсчёт закончится."
-                    : "Текущий прогресс будет потерян."}
-                </p>
-                <button
-                  className="secondary"
-                  autoFocus
-                  onClick={() => setConfirm(null)}
-                >
-                  Продолжить тренировку
-                </button>
+                Репозиторий на GitHub ↗
+              </a>
+            </>
+          ) : (
+            <>
+              <p id="dialog-description">
+                {confirm === "menu"
+                  ? "Текущая тренировка будет сброшена."
+                  : "Таймер начнёт ту же программу заново, включая подготовку."}
+              </p>
+              <div className="dialog-actions">
                 <button
                   className="primary"
                   onClick={() => {
-                    action(confirm!);
-                    if (confirm === "reset") setView("home");
-                    setConfirm(null);
+                    action("reset");
+                    if (confirm === "restart") action("start");
+                    else setView("home");
+                    closeDialog();
                   }}
                 >
-                  {confirm === "finish" ? "Завершить" : "Сбросить"}
+                  {confirm === "menu" ? "В меню" : "Начать заново"}
                 </button>
-              </>
-            )}
-          </section>
-        </div>
+                <button
+                  className="dialog-cancel"
+                  autoFocus
+                  onClick={closeDialog}
+                >
+                  Отмена
+                </button>
+              </div>
+            </>
+          )}
+        </AnchoredDialog>
       )}
     </div>
   );
