@@ -1,0 +1,74 @@
+[
+  {
+    "path": "assets/index-DlvjYcfE.css",
+    "status": 200,
+    "bytes": 17034,
+    "sha256": "33eee17371265cbe5addb0d125c822cd0306d3ff65db0113944743be3a6f9a4d",
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "assets/index-DuAhxKcf.js",
+    "status": 200,
+    "bytes": 248845,
+    "sha256": "b27d93c0e93db7994a589ae56a4153ae54323c54bb395bbbd7b18566f2cea0c5",
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "fonts/OFL-Oswald.txt",
+    "status": 200,
+    "bytes": 4483,
+    "sha256": "0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652",
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "fonts/Oswald-Variable.ttf",
+    "status": 200,
+    "bytes": 172088,
+    "sha256": "5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817",
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "icon.svg",
+    "status": 200,
+    "bytes": 321,
+    "sha256": "eec81e347616f60e08b352427c987800a99d2e78c102688df3439e8841d5aad9",
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "index.html",
+    "status": 200,
+    "bytes": 639,
+    "sha256": "b3b1d83f7293069818f3fb1a5771049435cb902c06d99325f619f50496542d0a",
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "manifest.webmanifest",
+    "status": 200,
+    "bytes": 300,
+    "sha256": "86f30206ed138dcf9fdc3d421fa52d532a01b18982f16b4bc3cbd25b7b378b4a",
+    "cacheControl": null
+  },
+  {
+    "path": "sw.js",
+    "status": 200,
+    "bytes": 17867,
+    "sha256": "53029fc3eff8d59edc34962e6176062eddf96b69494b60c424545441848a3e05",
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "assets/index-ZPUCepVK.js",
+    "status": 200
+  },
+  {
+    "path": "assets/index-BwXvGpZm.css",
+    "status": 200
+  },
+  {
+    "path": "assets/index-CRZNHds-.js",
+    "status": 200
+  },
+  {
+    "path": "assets/missing-20261026.js",
+    "status": 404
+  }
+]
