@@ -1,0 +1,84 @@
+[
+  {
+    "path": "assets/index-CKR35dt1.css",
+    "status": 200,
+    "sha256": "c341d63d42173a15a307978ce667d2753d954f356630da933448c663c794aa24",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "assets/index-ClRRNzVg.js",
+    "status": 200,
+    "sha256": "b472207a1b8aac673c46511683a3a748c0fcea35158dd374e0232f8d436c40e6",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "favicon.ico",
+    "status": 200,
+    "sha256": "aee1e0e938426ab98c4c22c785252e311daa1354921bedf286dd077abfd26382",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "favicon.svg",
+    "status": 200,
+    "sha256": "f78d7f76959082792cfe54566191d59d9e2f012909bf14cfb68692b2de356ce2",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "fonts/OFL-Oswald.txt",
+    "status": 200,
+    "sha256": "0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "fonts/Oswald-Variable.ttf",
+    "status": 200,
+    "sha256": "5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "icon.svg",
+    "status": 200,
+    "sha256": "eec81e347616f60e08b352427c987800a99d2e78c102688df3439e8841d5aad9",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "index.html",
+    "status": 200,
+    "sha256": "09e34fa4ac3382296ce82f08bbc8c03f2db262449ed287a3ff06ccbfef0a0f02",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "manifest.webmanifest",
+    "status": 200,
+    "sha256": "86f30206ed138dcf9fdc3d421fa52d532a01b18982f16b4bc3cbd25b7b378b4a",
+    "match": true,
+    "cacheControl": null
+  },
+  {
+    "path": "sw.js",
+    "status": 200,
+    "sha256": "4774d5a6349b04da813db3f7d9ec34946cd62498bab55435e00342b2973a495c",
+    "match": true,
+    "cacheControl": "max-age=2592000"
+  },
+  {
+    "path": "assets/index-DuAhxKcf.js",
+    "status": 200
+  },
+  {
+    "path": "assets/index-ZPUCepVK.js",
+    "status": 200
+  },
+  {
+    "path": "assets/absent-012.js",
+    "status": 404
+  }
+]

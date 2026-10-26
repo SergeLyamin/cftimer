@@ -137,3 +137,29 @@ readlink -f www
 ```
 
 Откат подготовлен, но при успешном выпуске обратно не переключались. Новый каталог сохранять и проверять уже обновившиеся клиентские SW отдельно.
+
+## Релиз 0.1.2 — 26.10.2026
+
+Опубликован [согласованный интерфейс 0.1.2](ui-0.1.2-2026-10-26.md). Runtime source commit: `7bf4b9157aa7e305a8047d3fae4bdeec591fd4f9`; требования `76b1e89`, локальная приёмка `791649a`. Исходники отправлены в origin/main. Сборка прошла lint/typecheck, 75 unit, 17 E2E и strict OpenSpec validation (4 элемента).
+
+- `www` атомарно переключён с `releases/f325d81` на `/home/timer/timer.lyamin.org/releases/7bf4b91` под пользователем timer. Предыдущий релиз сохранён целиком; все его hash-assets скопированы без замены новых файлов для старых вкладок.
+- Архив только dist: 186328 байт, SHA256 `6666b6899e939df0c4a272677e7b7f40d960380e0c414b0975a24b3fa69857b6`. Все 10 файлов сверены после распаковки и через публичный HTTPS. Архив, manifest.json, SHA256SUMS и previous-release.txt сохранены вне www в `backups/release-7bf4b91/`.
+- [HTTP-протокол](../output/playwright/release-http-0.1.2-2026-10-26.json): HTML, SW, новый JS/CSS, шрифты, SVG/ICO, manifest — 200 и совпадающие SHA256; прежние JS — 200; отсутствующий JS — 404.
+- [Live smoke](../output/playwright/release-smoke-0.1.2-2026-10-26.js) выполнил проверку свежего Chromium: версия 0.1.2, исправленная маска, верхняя стрелка, восемь раундов, высоты 72/52 на viewport 390×844, сброс без диалога с подготовкой. После warm offline reload preferences сохранились, новый таймер стартовал, favicon SVG/ICO и шрифт загружались без сети; ошибок JavaScript нет.
+- Прежняя PWA с `index-DuAhxKcf.js` продолжала работу и pause/resume после явного `registration.update()`, пока новый SW оставался waiting. Только после выхода из собственной тестовой тренировки и ухода клиента на about:blank активировался новый SW; повторное открытие показало `index-ClRRNzVg.js` и версию 0.1.2. skipWaiting и очистка пользовательских кэшей не применялись.
+- На desktop Chromium Wake Lock сообщал «Экран остаётся включённым». Проверка физического iPhone 13/Firefox/обычной вкладки и PC+TV остаётся открытой.
+- `Cache-Control: max-age=2592000` у HTML/SW/assets сохраняется. Для корректировки заголовков нужен администратор хостинга; мгновенное обновление всех браузерных копий не гарантировано. Nginx, Apache и другие приложения не перезапускались.
+
+Снимки: [телефон](../output/playwright/live012-running-phone.png), [offline](../output/playwright/live012-offline-phone.png), [ожидающее обновление](../output/playwright/live012-update-waiting.png), [обновлённая PWA](../output/playwright/live012-upgraded-pwa.png).
+
+Откат под timer:
+
+```bash
+cd /home/timer/timer.lyamin.org
+test "$(readlink www)" = releases/7bf4b91
+ln -s releases/f325d81 www-rollback-7bf4b91
+mv -Tf www-rollback-7bf4b91 www
+readlink -f www
+```
+
+Откат подготовлен, но при успешном выпуске не выполнялся. Каталог 7bf4b91 сохранить; обратное переключение symlink само по себе не отменяет обновление уже установившегося клиентского SW.
