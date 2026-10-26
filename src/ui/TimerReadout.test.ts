@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TimerEngine, type TimerConfig, type TimerSnapshot } from "../timer";
 import { getPhaseProgressFraction, TimerReadout } from "./TimerReadout";
+import { getTimelineSegments } from "./WorkoutTimeline";
 
 const intervals: TimerConfig = {
   mode: "intervals",
@@ -151,102 +152,94 @@ function readout(snapshot: TimerSnapshot, roundLabel?: string) {
   );
 }
 
-function roundTiles(snapshot: TimerSnapshot) {
-  return Array.from(
-    readout(snapshot).matchAll(
-      /class="round-tile([^"]*)" aria-hidden="true">(\d+)<\/span>/g,
-    ),
-    ([, classes, number]) => ({
-      number: Number(number),
-      completed: classes.includes("is-completed"),
-      current: classes.includes("is-current"),
-    }),
-  );
+function timelineFractions(snapshot: TimerSnapshot) {
+  return getTimelineSegments(snapshot).map((segment) => segment.fraction);
 }
 
-describe("numbered round tiles", () => {
-  it("waits until the following rest is over before marking a round completed", () => {
+describe("segmented workout timeline", () => {
+  it("uses proportional work/rest segments without preparation or a final rest", () => {
     const { engine, at } = fixture();
     engine.dispatch({ type: "start" });
-    expect(roundTiles(engine.getSnapshot())).toEqual([
-      { number: 1, completed: false, current: false },
-      { number: 2, completed: false, current: false },
+    const segments = getTimelineSegments(engine.getSnapshot());
+    expect(
+      segments.map(({ kind, round, durationMs }) => ({
+        kind,
+        round,
+        durationMs,
+      })),
+    ).toEqual([
+      { kind: "work", round: 1, durationMs: 20000 },
+      { kind: "rest", round: 1, durationMs: 10000 },
+      { kind: "work", round: 2, durationMs: 20000 },
     ]);
-    expect(readout(engine.getSnapshot())).toContain(
-      'aria-label="Подготовка. Всего раундов: 2"',
-    );
-    expect(roundTiles(at(10000))[0]).toMatchObject({
-      completed: false,
-      current: true,
-    });
-    expect(roundTiles(at(30000))[0]).toMatchObject({
-      completed: false,
-      current: true,
-    });
-    expect(roundTiles(at(39999))[0].completed).toBe(false);
-    expect(roundTiles(at(40000))).toEqual([
-      { number: 1, completed: true, current: false },
-      { number: 2, completed: false, current: true },
-    ]);
-    engine.dispatch({ type: "pause" });
-    expect(roundTiles(at(90000))[1].current).toBe(true);
-    engine.dispatch({ type: "resume" });
-    expect(roundTiles(at(110000))).toEqual([
-      { number: 1, completed: true, current: false },
-      { number: 2, completed: true, current: false },
-    ]);
+    expect(timelineFractions(at(5000))).toEqual([0, 0, 0]);
+    expect(timelineFractions(at(20000))).toEqual([0.5, 0, 0]);
+    expect(timelineFractions(at(30000))).toEqual([1, 0, 0]);
+    expect(timelineFractions(at(35000))).toEqual([1, 0.5, 0]);
+    expect(timelineFractions(at(40000))).toEqual([1, 1, 0]);
+    expect(timelineFractions(at(60000))).toEqual([1, 1, 1]);
   });
 
-  it.each([
-    { mode: "emom" as const, rounds: 1 },
-    { mode: "tabata" as const, rounds: 8 },
-    { mode: "intervals" as const, rounds: 99 },
-  ])(
-    "renders all $rounds $mode rounds including the final number",
-    (config) => {
-      const { engine, at } = fixture({
-        ...intervals,
-        ...config,
-        workSeconds: 1,
-        restSeconds: 0,
-        preparationSeconds: 0,
-      });
-      expect(roundTiles(engine.getSnapshot())).toHaveLength(config.rounds);
-      expect(
-        roundTiles(engine.getSnapshot()).every((tile) => !tile.current),
-      ).toBe(true);
-      engine.dispatch({ type: "start" });
-      const finalRound = roundTiles(at((config.rounds - 1) * 1000));
-      expect(finalRound.at(-1)).toEqual({
-        number: config.rounds,
-        completed: false,
-        current: true,
-      });
-      expect(finalRound.filter((tile) => tile.completed)).toHaveLength(
-        config.rounds - 1,
-      );
-      const completed = roundTiles(at(config.rounds * 1000));
-      expect(completed.every((tile) => tile.completed && !tile.current)).toBe(
-        true,
-      );
-    },
-  );
-
-  it("keeps one short accessible summary and no interactive round controls", () => {
+  it("freezes each fill on pause and fills all segments on completion", () => {
     const { engine, at } = fixture();
     engine.dispatch({ type: "start" });
-    const markup = readout(at(40000), "Раунд 2 / 2");
-    expect(markup).toContain('role="group" aria-label="Раунд 2 из 2"');
-    expect(markup).not.toContain('class="round"');
+    at(35000);
+    engine.dispatch({ type: "pause" });
+    expect(timelineFractions(at(95000))).toEqual([1, 0.5, 0]);
+    engine.dispatch({ type: "finish" });
+    expect(timelineFractions(engine.getSnapshot())).toEqual([1, 1, 1]);
+    engine.dispatch({ type: "repeat" });
+    expect(timelineFractions(engine.getSnapshot())).toEqual([0, 0, 0]);
+  });
+
+  it("shows only minute work segments for EMOM", () => {
+    const { engine, at } = fixture({
+      ...intervals,
+      mode: "emom",
+      rounds: 3,
+      workSeconds: 60,
+      restSeconds: 0,
+    });
+    engine.dispatch({ type: "start" });
+    const segments = getTimelineSegments(at(100000));
+    expect(
+      segments.map(({ kind, durationMs }) => ({ kind, durationMs })),
+    ).toEqual([
+      { kind: "work", durationMs: 60000 },
+      { kind: "work", durationMs: 60000 },
+      { kind: "work", durationMs: 60000 },
+    ]);
+    expect(timelineFractions(engine.getSnapshot())).toEqual([1, 0.5, 0]);
+  });
+
+  it("exposes a short round summary and noninteractive proportional fills", () => {
+    const { engine, at } = fixture();
+    engine.dispatch({ type: "start" });
+    const markup = readout(at(35000), "Раунд 1 / 2");
+    expect(markup).toContain(
+      'class="workout-timeline" role="group" aria-label="Раунд 1 из 2"',
+    );
+    expect(
+      markup.match(/class="timeline-segment work" style="flex-grow:20000"/g),
+    ).toHaveLength(2);
+    expect(markup).toContain(
+      'class="timeline-segment rest" style="flex-grow:10000"',
+    );
+    expect(markup).toContain(
+      'class="timeline-segment-fill" style="transform:scaleX(0.5)"',
+    );
+    expect(markup).not.toContain("round-tile");
     expect(markup).not.toContain("<button");
   });
 
   it.each(["amrap", "for-time"] as const)(
-    "keeps %s free of round tiles and accepts its optional caption",
+    "keeps %s free of the second bar and accepts its optional caption",
     (mode) => {
       const { engine } = fixture({ ...intervals, mode });
-      const markup = readout(engine.getSnapshot(), "До начала работы");
-      expect(markup).not.toContain("rounds-grid");
+      const snapshot = engine.getSnapshot();
+      const markup = readout(snapshot, "До начала работы");
+      expect(getTimelineSegments(snapshot)).toEqual([]);
+      expect(markup).not.toContain("workout-timeline");
       expect(markup).toContain('<p class="round">До начала работы</p>');
     },
   );

@@ -430,6 +430,12 @@ export default function App() {
     finishedBeforeWork ? 0 : snapshot.displayMs,
     snapshot.countDirection,
   );
+  const timerTitleDetail =
+    interval || config.mode === "emom"
+      ? `${snapshot.phase?.round || 1} из ${config.rounds}`
+      : config.mode === "for-time"
+        ? formatTime(config.workSeconds * 1000)
+        : undefined;
   const phase =
     snapshot.status === "completed"
       ? config.mode === "for-time" && snapshot.completionReason === "limit"
@@ -543,30 +549,6 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <p className="home-note">
-              {offlineReady
-                ? "Готов к запуску без сети"
-                : "Офлайн-запуск пока не готов"}
-            </p>
-            {!offlineReady && (
-              <button
-                className="quiet offline-repair"
-                disabled={repairing || !online}
-                onClick={() => {
-                  setRepairing(true);
-                  void repairOfflineCache()
-                    .then((ok) => {
-                      if (!ok)
-                        setNotice(
-                          "Офлайн-копия пока не готова. Проверьте соединение и повторите подготовку.",
-                        );
-                    })
-                    .finally(() => setRepairing(false));
-                }}
-              >
-                {repairing ? "Подготовка…" : "Подготовить офлайн"}
-              </button>
-            )}
           </section>
         ) : view === "setup" ? (
           <section className="setup">
@@ -638,37 +620,26 @@ export default function App() {
                   onLimit={notifyLimit}
                 />
               )}
-              <details>
-                <summary>Время подготовки</summary>
+              <details className="preparation-options">
+                <summary>Подготовка</summary>
                 <Duration
                   id="prep"
                   label="Подготовка"
                   value={config.preparationSeconds}
                   onChange={(v) => change("preparationSeconds", v)}
                   error={errors.preparationSeconds}
+                  hideLabel
                 />
               </details>
-              <p className="preview">
-                {config.mode === "for-time"
-                  ? "Максимум"
-                  : interval || config.mode === "emom"
-                    ? "Всего времени"
-                    : "Всего"}{" "}
-                <strong>
-                  {Number.isFinite(total) ? formatTime(total * 1000) : "—"}
-                </strong>
-                <span>
-                  Подготовка{" "}
-                  {Number.isFinite(config.preparationSeconds)
-                    ? config.preparationSeconds
-                    : 0}{" "}
-                  с{interval ? " · Без последнего отдыха" : ""}
-                  {config.mode === "emom" ? " · Раунд каждую минуту" : ""}
-                </span>
-              </p>
               <button className="primary" type="submit">
                 Старт <Icon name="arrow" className="action-icon" />
               </button>
+              <p className="preview">
+                Общее время:{" "}
+                <strong>
+                  {Number.isFinite(total) ? formatTime(total * 1000) : "—"}
+                </strong>
+              </p>
             </form>
           </section>
         ) : (
@@ -683,7 +654,15 @@ export default function App() {
                 >
                   <Icon name="back" />
                 </button>
-                <h1>{modeName}</h1>
+                <h1>
+                  {modeName}
+                  {timerTitleDetail && (
+                    <span className="timer-title-detail">
+                      {" "}
+                      – {timerTitleDetail}
+                    </span>
+                  )}
+                </h1>
               </div>
               {headerActions}
             </div>
@@ -702,7 +681,7 @@ export default function App() {
             <div className="timer-footer" ref={footerRef}>
               <div className="timer-action-row">
                 <div
-                  className={`timer-controls ${snapshot.status === "paused" ? "is-paused" : ""}`}
+                  className={`timer-controls ${snapshot.status === "paused" ? "is-paused" : snapshot.status === "completed" ? "is-completed" : ""}`}
                 >
                   {snapshot.status === "completed" ? (
                     <button
@@ -716,6 +695,12 @@ export default function App() {
                     <>
                       <button
                         className="primary timer-main-action"
+                        aria-label={
+                          snapshot.status === "paused" ? "Продолжить" : "Пауза"
+                        }
+                        title={
+                          snapshot.status === "paused" ? "Продолжить" : "Пауза"
+                        }
                         onClick={() =>
                           action(
                             snapshot.status === "paused" ? "resume" : "pause",
@@ -726,7 +711,6 @@ export default function App() {
                           name={snapshot.status === "paused" ? "play" : "pause"}
                           className="action-icon"
                         />
-                        {snapshot.status === "paused" ? "Продолжить" : "Пауза"}
                       </button>
                       <div
                         className="timer-reset-slot"
@@ -740,35 +724,12 @@ export default function App() {
                           onClick={restart}
                         >
                           <Icon name="stop" className="action-icon" />
-                          <span className="reset-label">Сброс</span>
                         </button>
                       </div>
                     </>
                   )}
                 </div>
               </div>
-              {snapshot.status !== "completed" && (
-                <p className="screen-hint" role="status">
-                  {wakeActive ? (
-                    "Экран остаётся включённым"
-                  ) : (
-                    <>
-                      <button
-                        className="wake-retry quiet"
-                        onClick={() => {
-                          void display.current?.requestWakeLock();
-                        }}
-                      >
-                        Не выключать экран
-                      </button>
-                      <span>
-                        Если браузер не разрешит — отключите автоблокировку в
-                        настройках устройства.
-                      </span>
-                    </>
-                  )}
-                </p>
-              )}
             </div>
           </section>
         )}
@@ -851,6 +812,62 @@ export default function App() {
                 Esc — заново на паузе
                 <br />F — полный экран
               </p>
+              <div
+                className="settings-statuses"
+                aria-label="Состояние приложения"
+              >
+                {view === "timer" && snapshot.status !== "completed" && (
+                  <div className="settings-status" role="status">
+                    <p>
+                      {wakeActive
+                        ? "Экран остаётся включённым"
+                        : "Удержание экрана не подтверждено"}
+                    </p>
+                    {!wakeActive && (
+                      <>
+                        <button
+                          className="quiet wake-retry"
+                          onClick={() => {
+                            void display.current?.requestWakeLock();
+                          }}
+                        >
+                          Не выключать экран
+                        </button>
+                        <p className="settings-note">
+                          Если браузер не разрешит — отключите автоблокировку в
+                          настройках устройства.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+                <div className="settings-status" role="status">
+                  <p>
+                    {offlineReady
+                      ? "Готов к запуску без сети"
+                      : "Офлайн-запуск пока не готов"}
+                  </p>
+                  {!offlineReady && (
+                    <button
+                      className="quiet offline-repair"
+                      disabled={repairing || !online}
+                      onClick={() => {
+                        setRepairing(true);
+                        void repairOfflineCache()
+                          .then((ok) => {
+                            if (!ok)
+                              setNotice(
+                                "Офлайн-копия пока не готова. Проверьте соединение и повторите подготовку.",
+                              );
+                          })
+                          .finally(() => setRepairing(false));
+                      }}
+                    >
+                      {repairing ? "Подготовка…" : "Подготовить офлайн"}
+                    </button>
+                  )}
+                </div>
+              </div>
               <div className="settings-footer">
                 <span>Версия {__APP_VERSION__}</span>
                 <a

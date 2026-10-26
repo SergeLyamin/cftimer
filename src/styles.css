@@ -396,7 +396,7 @@ details .field {
   height: 50px;
   margin-top: 24px;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 0;
   background: #292b30;
 }
 .workout-progress-fill {
@@ -419,7 +419,7 @@ details .field {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 76px;
+  min-height: 40px;
 }
 .timer-exit {
   position: absolute;
@@ -428,18 +428,11 @@ details .field {
   transform: translateY(-50%);
 }
 .timer-controls {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 0fr;
+  position: relative;
+  display: flex;
   align-items: center;
-  gap: 0;
-  width: min(620px, 100%);
-  transition:
-    grid-template-columns 180ms ease,
-    gap 180ms ease;
-}
-.timer-controls.is-paused {
-  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
-  gap: 12px;
+  width: 40px;
+  height: 40px;
 }
 .timer-controls .primary,
 .timer-controls .secondary,
@@ -454,23 +447,38 @@ details .field {
   font-weight: 500;
 }
 .timer-controls .timer-main-action {
-  width: 100%;
-  min-height: 76px;
-  font-size: 20px;
+  position: relative;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  flex: none;
 }
-.timer-controls .timer-main-action:only-child {
-  grid-column: 1 / -1;
+.timer-controls.is-completed {
+  width: auto;
+}
+.timer-controls.is-completed .timer-main-action {
+  width: auto;
+  min-width: 136px;
+  padding: 0 18px;
+  border-radius: 20px;
+  font-size: 15px;
 }
 .timer-reset-slot {
-  min-width: 0;
-  overflow: hidden;
+  position: absolute;
+  left: 52px;
+  top: 0;
+  width: 40px;
+  height: 40px;
   visibility: hidden;
   opacity: 0;
-  transform: translateX(-8px);
+  transform: translateX(-52px) scale(0.8);
   transition:
-    opacity 160ms ease,
-    transform 180ms ease,
-    visibility 0s 180ms;
+    opacity 180ms ease,
+    transform 240ms ease,
+    visibility 0s 240ms;
 }
 .is-paused .timer-reset-slot {
   visibility: visible;
@@ -479,11 +487,11 @@ details .field {
   transition-delay: 0s;
 }
 .timer-reset {
-  width: 100%;
-  min-height: 56px;
-  padding: 12px;
-  font-size: 15px;
-  white-space: nowrap;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  padding: 0;
 }
 .timer-reset:focus-visible {
   outline-offset: -5px;
@@ -709,34 +717,10 @@ details .field {
   .timer-action-row {
     min-height: 72px;
   }
-  .timer-controls {
-    width: 100%;
-    margin-left: 0;
-  }
-  .timer-controls.is-paused {
-    grid-template-columns: minmax(0, 1fr) 52px;
-    gap: 8px;
-  }
-  .timer-controls .timer-main-action {
-    min-height: 72px;
-    font-size: 16px;
-    gap: 8px;
-    padding: 12px 8px;
-  }
-  .timer-controls .timer-reset {
-    min-height: 52px;
-    width: 52px;
-    padding: 12px;
-  }
   .reset-label {
     display: block;
     font-size: 10px;
     line-height: 1;
-  }
-  .timer-controls .timer-reset {
-    flex-direction: column;
-    gap: 3px;
-    padding: 6px;
   }
   .workout-progress {
     width: 100%;
@@ -781,15 +765,6 @@ details .field {
   }
   .timer-action-row {
     min-height: 56px;
-  }
-  .timer-controls .timer-main-action {
-    min-height: 60px;
-    font-size: 16px;
-    padding: 10px 16px;
-  }
-  .timer-controls .timer-reset {
-    min-height: 48px;
-    padding: 10px;
   }
   .workout-progress {
     height: 50px;
@@ -887,13 +862,6 @@ details .field {
   padding: 12px 4vw max(16px, env(safe-area-inset-bottom));
   background: #08090a;
 }
-.timer-controls .timer-main-action {
-  height: 76px;
-}
-.timer-controls .timer-reset {
-  height: 56px;
-  min-height: 56px;
-}
 .timer-meta,
 .mode-header {
   flex-shrink: 0;
@@ -904,37 +872,6 @@ details .field {
 }
 .mode-header .header-actions {
   margin-left: auto;
-}
-.rounds-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  width: min(780px, 100%);
-  margin: 20px 0 0;
-  flex-shrink: 0;
-}
-.round-tile {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 32px;
-  height: 32px;
-  flex: none;
-  border: 2px solid transparent;
-  border-radius: 3px;
-  background: var(--color-work);
-  color: #08090a;
-  font:
-    600 16px/1 "Oswald",
-    sans-serif;
-}
-.round-tile.is-completed {
-  background: #f5f5f5;
-}
-.round-tile.is-current {
-  border-color: #fff;
-  box-shadow: 0 0 0 1px #fff;
 }
 .phase-edge-glow {
   position: fixed;
@@ -1067,19 +1004,6 @@ details .field {
   .timer-footer {
     padding: 10px 16px max(12px, env(safe-area-inset-bottom));
   }
-  .timer-controls .timer-main-action {
-    height: 72px;
-    min-height: 72px;
-  }
-  .timer-controls .timer-reset {
-    height: 52px;
-    min-height: 52px;
-  }
-  .round-tile {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
 }
 @media (orientation: landscape) and (max-height: 600px) {
   .app-timer main {
@@ -1089,26 +1013,87 @@ details .field {
     padding-top: 6px;
     padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
-  .timer-controls .timer-main-action {
-    height: 60px;
-    min-height: 60px;
-  }
-  .timer-controls .timer-reset {
-    height: 48px;
-    min-height: 48px;
-  }
-  .rounds-grid {
-    margin-top: 10px;
-    gap: 6px;
-  }
-  .round-tile {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .phase-edge-glow {
     display: none;
   }
+}
+
+/* Desktop review: compact controls, a phase track and the workout timeline. */
+.preparation-options {
+  margin-bottom: 20px;
+}
+.preparation-options summary {
+  min-height: 40px;
+  padding: 8px 0 6px;
+  color: #ddd;
+  font-size: 15px;
+}
+.preparation-options .field {
+  margin: 0;
+}
+.field-unlabelled > .visually-hidden {
+  margin: -1px;
+}
+.setup .preview {
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+.setup .preview strong {
+  margin-left: 4px;
+}
+.timer-action-row {
+  min-height: 40px;
+}
+.workout-heading .back {
+  border: 1px solid #777b82;
+  border-radius: 50%;
+}
+.timer-title-detail {
+  font-weight: 400;
+  text-transform: none;
+}
+.workout-timeline {
+  display: flex;
+  width: min(780px, 88%);
+  height: 20px;
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+.timeline-segment {
+  flex-basis: 0;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--segment-color);
+  border-radius: 10px;
+  background: #55585f;
+}
+.timeline-segment.work {
+  --segment-color: var(--color-work);
+}
+.timeline-segment.rest {
+  --segment-color: var(--color-rest);
+}
+.timeline-segment-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--segment-color);
+  transform-origin: left;
+}
+.settings-statuses {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #46464d;
+}
+.settings-statuses .settings-status p {
+  font-size: 12px;
+  margin: 8px 0;
+  color: #b1b4bd;
+}
+.settings-statuses .quiet {
+  font-size: 12px;
+  padding-left: 0;
+  text-decoration: underline;
 }

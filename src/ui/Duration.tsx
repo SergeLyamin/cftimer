@@ -13,6 +13,7 @@ export function Duration({
   onLimit,
   error,
   id,
+  hideLabel = false,
 }: {
   label: string;
   value: number;
@@ -20,6 +21,7 @@ export function Duration({
   onLimit?: (message: string) => void;
   error?: string;
   id: string;
+  hideLabel?: boolean;
 }) {
   const [text, setText] = useState(() => durationText(value));
   const [localError, setLocalError] = useState<string>();
@@ -51,8 +53,16 @@ export function Duration({
     });
   }
   return (
-    <label className="field" htmlFor={id}>
-      <span id={`${id}-label`}>{label}</span>
+    <label
+      className={`field${hideLabel ? " field-unlabelled" : ""}`}
+      htmlFor={id}
+    >
+      <span
+        id={`${id}-label`}
+        className={hideLabel ? "visually-hidden" : undefined}
+      >
+        {label}
+      </span>
       <input
         id={id}
         type="text"
