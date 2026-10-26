@@ -31,12 +31,10 @@ test("pause, restart and confirmed menu exit preserve the intended workout", asy
     progress!,
   );
   await page.getByRole("button", { name: "Сброс", exact: true }).click();
-  await page.getByRole("button", { name: "Отмена", exact: true }).click();
-  await expect(page.locator(".phase")).toHaveText("ПАУЗА");
-  await page.getByRole("button", { name: "Сброс", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Начать заново", exact: true })
-    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Пауза", exact: true }),
+  ).toBeFocused();
   await expect(page.locator(".time")).toHaveText("02:00");
   await expect(
     page.getByRole("button", { name: "Пауза", exact: true }),

@@ -46,6 +46,15 @@ test("cached restart works offline alongside an active second tab", async ({
   await expect(
     reopened.getByRole("heading", { name: "Выберите режим" }),
   ).toBeVisible();
+  for (const asset of [
+    "/favicon.svg",
+    "/favicon.ico",
+    "/fonts/Oswald-Variable.ttf",
+  ]) {
+    expect(
+      await reopened.evaluate(async (url) => (await fetch(url)).ok, asset),
+    ).toBe(true);
+  }
   await reopened.getByRole("button", { name: /Tabata/ }).click();
   await reopened.getByRole("button", { name: /Начать/ }).click();
   await expect(
@@ -83,7 +92,7 @@ test("responsive screens and About preserve local session", async ({
     fullPage: true,
   });
   await page.getByRole("button", { name: /Начать/ }).click();
-  await page.getByRole("button", { name: "О проекте" }).click();
+  await page.getByRole("button", { name: "Настройки" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("button", { name: "Закрыть", exact: true }).click();
   await expect(

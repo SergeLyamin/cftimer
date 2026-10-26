@@ -7,6 +7,9 @@
   font-display: swap;
 }
 :root {
+  --color-preparation: #f2a541;
+  --color-work: #ef4a40;
+  --color-rest: #59b8e8;
   font-family: Arial, sans-serif;
   color: #f5f5f5;
   background: #08090a;
@@ -320,8 +323,8 @@ details .field {
 }
 .timer {
   width: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   text-align: center;
   gap: 24px;
 }
@@ -332,7 +335,8 @@ details .field {
   justify-content: space-between;
   gap: 12px;
 }
-.timer-meta h1 {
+.timer-meta h1,
+.mode-header h1 {
   font-size: clamp(18px, 2vw, 24px);
   letter-spacing: 1px;
   font-weight: 500;
@@ -349,6 +353,7 @@ details .field {
   opacity: 0.55;
 }
 .timer-readout {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -361,11 +366,9 @@ details .field {
   font-weight: 600;
   letter-spacing: 4px;
   margin: 0 0 24px;
-  color: #f3685e;
+  color: var(--phase-color, var(--color-work));
 }
-.rest .phase {
-  color: #91bedf;
-}
+
 .time {
   font-family: "Oswald", "Arial Narrow", sans-serif;
   font-size: clamp(84px, min(29vw, 32svh), 480px);
@@ -400,7 +403,7 @@ details .field {
 .workout-progress-fill {
   width: 100%;
   height: 100%;
-  background: #ef4a40;
+  background: var(--phase-color, var(--color-work));
   transform-origin: left;
   border-radius: inherit;
 }
@@ -430,7 +433,7 @@ details .field {
   grid-template-columns: minmax(0, 1fr) 0fr;
   align-items: center;
   gap: 0;
-  width: min(620px, calc(100% - 120px));
+  width: min(620px, 100%);
   transition:
     grid-template-columns 180ms ease,
     gap 180ms ease;
@@ -683,7 +686,8 @@ details .field {
   .timer-meta {
     gap: 0;
   }
-  .timer-meta h1 {
+  .timer-meta h1,
+  .mode-header h1 {
     font-size: 17px;
     letter-spacing: 0.3px;
   }
@@ -707,8 +711,8 @@ details .field {
     min-height: 72px;
   }
   .timer-controls {
-    width: calc(100% - 64px);
-    margin-left: 64px;
+    width: 100%;
+    margin-left: 0;
   }
   .timer-controls.is-paused {
     grid-template-columns: minmax(0, 1fr) 52px;
@@ -762,11 +766,12 @@ details .field {
   }
   .timer .phase {
     font-size: 18px;
+    line-height: 1.15;
     letter-spacing: 3px;
     margin: 0 0 4px;
   }
   .timer .time {
-    font-size: min(28vw, 29svh);
+    font-size: min(28vw, 24svh);
   }
   .timer .round {
     margin: 6px 0 0;
@@ -779,7 +784,7 @@ details .field {
     min-height: 56px;
   }
   .timer-controls .timer-main-action {
-    min-height: 56px;
+    min-height: 60px;
     font-size: 16px;
     padding: 10px 16px;
   }
@@ -853,4 +858,256 @@ details .field {
 
 .anchored-dialog:has(.dialog-close) h2 {
   padding-right: 40px;
+}
+
+/* 0.1.2: phase vocabulary shared by labels, remaining track and edge effects. */
+.app[data-phase="preparation"] {
+  --phase-color: var(--color-preparation);
+}
+.app[data-phase="work"] {
+  --phase-color: var(--color-work);
+}
+.app[data-phase="rest"] {
+  --phase-color: var(--color-rest);
+}
+.app[data-status="paused"] .phase,
+.app[data-status="completed"] .phase {
+  color: #f5f5f5;
+}
+.app-timer main {
+  padding-bottom: calc(var(--timer-footer-height, 140px) + 20px);
+}
+.timer-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  padding: 12px 4vw max(16px, env(safe-area-inset-bottom));
+  background: #08090a;
+}
+.timer-controls .timer-main-action {
+  height: 76px;
+}
+.timer-controls .timer-reset {
+  height: 56px;
+  min-height: 56px;
+}
+.timer-meta,
+.mode-header {
+  flex-shrink: 0;
+}
+.mode-header {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.mode-header .header-actions {
+  margin-left: auto;
+}
+.rounds-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: min(780px, 100%);
+  margin: 20px 0 0;
+  flex-shrink: 0;
+}
+.round-tile {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  background: var(--color-work);
+  color: #08090a;
+  font:
+    600 16px/1 "Oswald",
+    sans-serif;
+}
+.round-tile.is-completed {
+  background: #f5f5f5;
+}
+.round-tile.is-current {
+  border-color: #fff;
+  box-shadow: 0 0 0 1px #fff;
+}
+.phase-edge-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: inset 0 0 min(100px, 15vmin) min(18px, 3vmin) currentColor;
+  animation: edge-pulse 2s ease-in-out infinite;
+  opacity: 0;
+}
+.phase-edge-glow.work {
+  color: var(--color-work);
+}
+.phase-edge-glow.rest {
+  color: var(--color-rest);
+}
+@keyframes edge-pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.18;
+  }
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.setting-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 60px;
+  cursor: pointer;
+}
+.setting-switch input {
+  position: relative;
+  appearance: none;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  flex: none;
+  cursor: pointer;
+  margin: 0;
+}
+.setting-switch input::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 48px;
+  height: 28px;
+  border: 1px solid #6f737c;
+  border-radius: 999px;
+  background: #33363d;
+}
+.setting-switch input::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 14px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  transition: transform 160ms ease;
+}
+.setting-switch input:checked::before {
+  background: #ecf0f5;
+  border-color: #ecf0f5;
+}
+.setting-switch input:checked::after {
+  background: #08090a;
+  transform: translateX(20px);
+}
+.dialog .settings-test-sound {
+  width: auto;
+  padding-left: 0;
+  margin: 0;
+  text-align: left;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dialog .settings-note {
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+.dialog .hotkey-hint {
+  border-top: 1px solid #41444b;
+  padding-top: 16px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: #a4a8b1;
+  line-height: 1.8;
+}
+.settings-footer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #a4a8b1;
+}
+.settings-footer a {
+  align-self: flex-start;
+}
+@media (max-width: 640px) {
+  .mode-header {
+    gap: 0;
+  }
+  .mode-header h1 {
+    font-size: 17px;
+    letter-spacing: 0.3px;
+  }
+  .mode-header .workout-heading {
+    gap: 0;
+  }
+  .app-timer main {
+    padding-bottom: calc(var(--timer-footer-height, 140px) + 16px);
+  }
+  .timer-footer {
+    padding: 10px 16px max(12px, env(safe-area-inset-bottom));
+  }
+  .timer-controls .timer-main-action {
+    height: 72px;
+    min-height: 72px;
+  }
+  .timer-controls .timer-reset {
+    height: 52px;
+    min-height: 52px;
+  }
+  .round-tile {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .app-timer main {
+    padding-bottom: calc(var(--timer-footer-height, 140px) + 8px);
+  }
+  .timer-footer {
+    padding-top: 6px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .timer-controls .timer-main-action {
+    height: 60px;
+    min-height: 60px;
+  }
+  .timer-controls .timer-reset {
+    height: 48px;
+    min-height: 48px;
+  }
+  .rounds-grid {
+    margin-top: 10px;
+    gap: 6px;
+  }
+  .round-tile {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phase-edge-glow {
+    display: none;
+  }
 }

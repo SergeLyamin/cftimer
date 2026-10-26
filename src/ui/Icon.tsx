@@ -1,6 +1,12 @@
 import type { ReactNode } from "react";
 
 const shapes = {
+  settings: (
+    <>
+      <path d="m9 3-.5 2-2 1-2-.5-2 3 1.5 1.5v3L2.5 15l2 3 2-.5 2 1 .5 2h4l.5-2 2-1 2 .5 2-3-1.5-1.5v-3L20 9l-2-3-2 .5-2-1-.5-2H9Z" />
+      <circle cx="11.5" cy="12" r="3" />
+    </>
+  ),
   back: <path d="m14 5-7 7 7 7M7 12h14" />,
   arrow: <path d="M5 12h14m-7-7 7 7-7 7" />,
   info: (

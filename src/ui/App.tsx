@@ -1,7 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Icon } from "./Icon";
 import { AnchoredDialog } from "./AnchoredDialog";
 import { TimerReadout } from "./TimerReadout";
+import { Duration } from "./Duration";
+import { PhaseEffects } from "./PhaseEffects";
+import {
+  defaultPreferences,
+  preferencesStore,
+  type Preferences,
+} from "../platform/preferences";
 import {
   AudioSignals,
   createSettingsStore,
@@ -56,86 +69,6 @@ const defaults: TimerConfig = {
   preparationSeconds: 10,
 };
 const labels = { preparation: "ПОДГОТОВКА", work: "РАБОТА", rest: "ОТДЫХ" };
-function Duration({
-  label,
-  value,
-  onChange,
-  error,
-  id,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  error?: string;
-  id: string;
-}) {
-  const [text, setText] = useState(() => formatTime(value * 1000));
-  const focused = useRef(false);
-  useEffect(() => {
-    if (!focused.current && Number.isFinite(value))
-      setText(formatTime(value * 1000));
-  }, [value]);
-  function edit(input: HTMLInputElement) {
-    const raw = input.value;
-    const caret = input.selectionStart ?? raw.length;
-    const precedingDigits = raw.slice(0, caret).replace(/\D/g, "").length;
-    const digits = raw.replace(":", "");
-    if (!/^\d{0,4}$/.test(digits)) {
-      setText(raw);
-      onChange(NaN);
-      return;
-    }
-    const formatted =
-      digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
-    setText(formatted);
-    const nextCaret =
-      precedingDigits +
-      (precedingDigits > 2 || (precedingDigits === 2 && caret > 2) ? 1 : 0);
-    requestAnimationFrame(() => {
-      if (document.activeElement === input)
-        input.setSelectionRange(nextCaret, nextCaret);
-    });
-    const seconds = Number(digits.slice(2));
-    onChange(
-      digits.length === 4 && seconds < 60
-        ? Number(digits.slice(0, 2)) * 60 + seconds
-        : NaN,
-    );
-  }
-  return (
-    <label className="field" htmlFor={id}>
-      <span>
-        {label}
-        <small>мин : сек</small>
-      </span>
-      <input
-        id={id}
-        inputMode="numeric"
-        autoComplete="off"
-        placeholder="ММ:СС"
-        value={text}
-        aria-invalid={!!error}
-        aria-describedby={`${id}-hint${error ? ` ${id}-error` : ``}`}
-        onChange={(e) => edit(e.target)}
-        onFocus={(e) => {
-          focused.current = true;
-          e.target.select();
-        }}
-        onBlur={() => {
-          focused.current = false;
-        }}
-      />
-      <small id={`${id}-hint`}>4 цифры: ММСС, например 0130 → 01:30</small>
-      {error && (
-        <small className="error" id={`${id}-error`}>
-          {Number.isFinite(value)
-            ? error
-            : "Введите время полностью в формате ММ:СС; секунды от 00 до 59"}
-        </small>
-      )}
-    </label>
-  );
-}
 function settingsStore(mode: TimerConfig["mode"]) {
   return createSettingsStore<TimerConfig>(
     `cftimer.settings.${mode}`,
@@ -157,9 +90,21 @@ export default function App() {
   >({});
   const dialogRef = useRef<HTMLElement>(null);
   const dialogTrigger = useRef<HTMLElement | null>(null);
-  const [about, setAbout] = useState(false);
-  const [confirm, setConfirm] = useState<"menu" | "restart" | null>(null);
-  const [sound, setSound] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [confirm, setConfirm] = useState<"menu" | null>(null);
+  const [preferences, setPreferences] = useState<Preferences>(
+    () => preferencesStore.load() ?? { ...defaultPreferences },
+  );
+  const sound = preferences.sound;
+  const [reducedMotion, setReducedMotion] = useState(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [pageVisible, setPageVisible] = useState(
+    () => document.visibilityState === "visible",
+  );
+  const footerRef = useRef<HTMLDivElement>(null);
+  const [footerHeight, setFooterHeight] = useState(140);
+  const lastFullscreenExit = useRef(-Infinity);
   const [notice, setNotice] = useState("");
   const [online, setOnline] = useState(navigator.onLine);
   const audio = useRef(new AudioSignals());
@@ -169,16 +114,16 @@ export default function App() {
   const [wakeActive, setWakeActive] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [updateWaiting, setUpdateWaiting] = useState(false);
-  function openAbout(trigger: HTMLElement) {
+  function openSettings(trigger: HTMLElement) {
     dialogTrigger.current = trigger;
-    setAbout(true);
+    setSettingsOpen(true);
   }
-  function openConfirmation(type: "menu" | "restart", trigger: HTMLElement) {
+  function openConfirmation(type: "menu", trigger: HTMLElement) {
     dialogTrigger.current = trigger;
     setConfirm(type);
   }
   function closeDialog() {
-    setAbout(false);
+    setSettingsOpen(false);
     setConfirm(null);
   }
   function backToModes(trigger: HTMLElement) {
@@ -196,6 +141,58 @@ export default function App() {
         setNotice("Нажмите для проверки звука. Проверьте настройки браузера.");
     });
   }
+  function updatePreference(key: keyof Preferences, value: boolean) {
+    const next = { ...preferences, [key]: value };
+    setPreferences(next);
+    if (!preferencesStore.save(next))
+      setNotice(
+        "Настройки доступны до закрытия страницы: браузер запретил сохранение.",
+      );
+    if (key === "sound" && value)
+      void audio.current.unlock().then(setAudioReady);
+  }
+  function restart() {
+    action("reset");
+    action("start");
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLButtonElement>(".timer-main-action")?.focus(),
+    );
+  }
+  function toggleFullscreen() {
+    if (view === "timer" && snapshot.status !== "completed")
+      void display.current?.requestWakeLock();
+    void display.current?.toggleFullscreen().then((ok) => {
+      if (!ok) setNotice("Полный экран недоступен. Разверните окно вручную.");
+    });
+  }
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotion = () => setReducedMotion(media.matches);
+    const updateVisibility = () =>
+      setPageVisible(document.visibilityState === "visible");
+    const fullscreenChanged = () => {
+      if (!document.fullscreenElement)
+        lastFullscreenExit.current = performance.now();
+    };
+    media.addEventListener("change", updateMotion);
+    document.addEventListener("visibilitychange", updateVisibility);
+    document.addEventListener("fullscreenchange", fullscreenChanged);
+    return () => {
+      media.removeEventListener("change", updateMotion);
+      document.removeEventListener("visibilitychange", updateVisibility);
+      document.removeEventListener("fullscreenchange", fullscreenChanged);
+    };
+  }, []);
+  useEffect(() => {
+    if (view !== "timer" || !footerRef.current) return;
+    const element = footerRef.current;
+    const measure = () =>
+      setFooterHeight(Math.ceil(element.getBoundingClientRect().height));
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    measure();
+    return () => observer.disconnect();
+  }, [view]);
   useEffect(() => {
     const currentAudio = audio.current;
     const currentDisplay = createDisplaySupport(setWakeActive);
@@ -244,20 +241,53 @@ export default function App() {
       window.removeEventListener("offline", update);
     };
   }, []);
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (e.code !== "Space" || e.repeat || about || confirm) return;
-      const target = e.target as HTMLElement;
-      if (target.closest("input,textarea,select,button,a,[contenteditable]"))
-        return;
-      if (snapshot.status === "running" || snapshot.status === "paused") {
+  const handleHotkey = useEffectEvent((e: KeyboardEvent) => {
+    if (
+      e.repeat ||
+      e.defaultPrevented ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.altKey ||
+      e.shiftKey ||
+      settingsOpen ||
+      confirm
+    )
+      return;
+    const target = e.target as HTMLElement;
+    if (target.closest("input,textarea,select,[contenteditable]")) return;
+    if (e.code === "KeyF") {
+      e.preventDefault();
+      toggleFullscreen();
+    } else if (e.code === "Escape") {
+      if (document.fullscreenElement) {
         e.preventDefault();
-        action(snapshot.status === "running" ? "pause" : "resume");
+        void document
+          .exitFullscreen()
+          .catch(() =>
+            setNotice("Выйдите из полного экрана через меню браузера."),
+          );
+        return;
       }
-    };
+      if (performance.now() - lastFullscreenExit.current < 150) return;
+      if (view === "timer" && snapshot.status === "paused") {
+        e.preventDefault();
+        restart();
+      }
+    } else if (
+      e.code === "Space" &&
+      !target.closest("button,a") &&
+      view === "timer" &&
+      (snapshot.status === "running" || snapshot.status === "paused")
+    ) {
+      e.preventDefault();
+      action(snapshot.status === "running" ? "pause" : "resume");
+    }
+  });
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => handleHotkey(event);
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [snapshot.status, about, confirm]);
+  }, []);
   useEffect(() => {
     audio.current.update(
       {
@@ -270,16 +300,18 @@ export default function App() {
     );
   }, [snapshot, sound]);
   useEffect(() => {
-    if (!about && !confirm) return;
+    if (!settingsOpen && !confirm) return;
     const previous = dialogTrigger.current;
     const handler = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
+        event.stopPropagation();
         closeDialog();
       }
       if (event.key === "Tab") {
-        const items =
-          dialogRef.current?.querySelectorAll<HTMLElement>("button,a[href]");
+        const items = dialogRef.current?.querySelectorAll<HTMLElement>(
+          "button:not([disabled]),a[href],input:not([disabled]),[tabindex='0']",
+        );
         if (!items?.length) return;
         const first = items[0],
           last = items[items.length - 1];
@@ -306,7 +338,7 @@ export default function App() {
           .querySelector<HTMLElement>(".timer-main-action,.mode-card")
           ?.focus();
     };
-  }, [about, confirm]);
+  }, [settingsOpen, confirm]);
   function choose(mode: TimerConfig["mode"]) {
     let selected = {
       ...defaults,
@@ -350,8 +382,14 @@ export default function App() {
     action("start");
     setView("timer");
   }
-  const change = (key: keyof TimerConfig, value: number) =>
+  const change = (key: keyof TimerConfig, value: number) => {
     setConfig((c) => ({ ...c, [key]: value }));
+    setErrors((current) => {
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  };
   const interval = config.mode === "intervals" || config.mode === "tabata";
   const total =
     config.preparationSeconds +
@@ -391,36 +429,15 @@ export default function App() {
       {!online && <span className="network">Без сети</span>}
       <button
         className="quiet icon-button"
-        onClick={(event) => openAbout(event.currentTarget)}
-        aria-label="О проекте"
-        title="О проекте"
+        onClick={(event) => openSettings(event.currentTarget)}
+        aria-label="Настройки"
+        title="Настройки"
       >
-        <Icon name="info" />
+        <Icon name="settings" />
       </button>
-      {view === "timer" && (
-        <button
-          className={`quiet icon-button sound${sound ? "" : " muted"}`}
-          onClick={() => {
-            if (!sound) beep();
-            setSound(!sound);
-          }}
-          aria-label={sound ? "Выключить звук" : "Включить звук"}
-          aria-pressed={sound}
-          title={sound ? "Выключить звук" : "Включить звук"}
-        >
-          <Icon name={sound ? "volume" : "muted"} />
-        </button>
-      )}
       <button
         className="quiet icon-button fullscreen"
-        onClick={() => {
-          if (view === "timer" && snapshot.status !== "completed")
-            void display.current?.requestWakeLock();
-          void display.current?.toggleFullscreen().then((ok) => {
-            if (!ok)
-              setNotice("Полный экран недоступен. Разверните окно вручную.");
-          });
-        }}
+        onClick={toggleFullscreen}
         aria-label="Полный экран"
         title="Полный экран"
       >
@@ -429,15 +446,40 @@ export default function App() {
     </div>
   );
   return (
-    <div className={`app${view === "timer" ? " app-timer" : ""}`}>
+    <div
+      className={`app${view === "timer" ? " app-timer" : ""}`}
+      data-phase={view === "timer" ? snapshot.phase?.kind : undefined}
+      data-status={view === "timer" ? snapshot.status : undefined}
+      style={{ "--timer-footer-height": `${footerHeight}px` } as CSSProperties}
+    >
+      {view === "timer" && (
+        <PhaseEffects
+          snapshot={snapshot}
+          enabled={preferences.edgePulse && !reducedMotion && pageVisible}
+        />
+      )}
       {view !== "timer" && (
-        <header>
-          <button
-            className="brand"
-            onClick={(event) => backToModes(event.currentTarget)}
-          >
-            CF<span>TIMER</span>
-          </button>
+        <header className={view === "setup" ? "mode-header" : ""}>
+          {view === "home" ? (
+            <button
+              className="brand"
+              onClick={(event) => backToModes(event.currentTarget)}
+            >
+              CF<span>TIMER</span>
+            </button>
+          ) : (
+            <div className="workout-heading">
+              <button
+                className="back quiet icon-button"
+                onClick={(event) => backToModes(event.currentTarget)}
+                aria-label="Все режимы"
+                title="Все режимы"
+              >
+                <Icon name="back" />
+              </button>
+              <h1>{modeName}</h1>
+            </div>
+          )}
           {headerActions}
         </header>
       )}
@@ -504,18 +546,6 @@ export default function App() {
           </section>
         ) : view === "setup" ? (
           <section className="setup">
-            <p className="eyebrow">НАСТРОЙКА</p>
-            <div className="workout-heading setup-heading">
-              <button
-                className="back quiet icon-button"
-                onClick={(event) => backToModes(event.currentTarget)}
-                aria-label="Все режимы"
-                title="Все режимы"
-              >
-                <Icon name="back" />
-              </button>
-              <h1>{modeName}</h1>
-            </div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -582,30 +612,13 @@ export default function App() {
                   onChange={(v) => change("preparationSeconds", v)}
                   error={errors.preparationSeconds}
                 />
-                <label className="sound-toggle">
-                  <input
-                    type="checkbox"
-                    checked={sound}
-                    onChange={(e) => {
-                      setSound(e.target.checked);
-                      if (e.target.checked)
-                        void audio.current.unlock().then(setAudioReady);
-                    }}
-                  />{" "}
-                  Звуковые сигналы
-                </label>
-                <button
-                  type="button"
-                  className="quiet test-sound"
-                  onClick={beep}
-                >
-                  {audioReady
-                    ? "Звук разрешён браузером"
-                    : "Нажмите для проверки звука"}
-                </button>
               </details>
               <p className="preview">
-                {config.mode === "for-time" ? "Максимум" : "Всего"}{" "}
+                {config.mode === "for-time"
+                  ? "Максимум"
+                  : interval || config.mode === "emom"
+                    ? "Всего времени"
+                    : "Всего"}{" "}
                 <strong>
                   {Number.isFinite(total) ? formatTime(total * 1000) : "—"}
                 </strong>
@@ -627,6 +640,14 @@ export default function App() {
           <section className={`timer ${snapshot.phase?.kind ?? ""}`}>
             <div className="timer-meta">
               <div className="workout-heading">
+                <button
+                  className="back quiet icon-button"
+                  onClick={(event) => backToModes(event.currentTarget)}
+                  aria-label="Все режимы"
+                  title="Все режимы"
+                >
+                  <Icon name="back" />
+                </button>
                 <h1>{modeName}</h1>
               </div>
               {headerActions}
@@ -643,16 +664,8 @@ export default function App() {
                     : undefined
               }
             />
-            <div className="timer-footer">
+            <div className="timer-footer" ref={footerRef}>
               <div className="timer-action-row">
-                <button
-                  className="timer-exit quiet icon-button"
-                  onClick={(event) => backToModes(event.currentTarget)}
-                  aria-label="Все режимы"
-                  title="Вернуться к выбору режима"
-                >
-                  <Icon name="back" />
-                </button>
                 <div
                   className={`timer-controls ${snapshot.status === "paused" ? "is-paused" : ""}`}
                 >
@@ -689,9 +702,7 @@ export default function App() {
                           aria-label="Сброс"
                           title="Запустить заново"
                           disabled={snapshot.status !== "paused"}
-                          onClick={(event) =>
-                            openConfirmation("restart", event.currentTarget)
-                          }
+                          onClick={restart}
                         >
                           <Icon name="stop" className="action-icon" />
                           <span className="reset-label">Сброс</span>
@@ -727,63 +738,93 @@ export default function App() {
           </section>
         )}
       </main>
-      {(about || confirm) && (
+      {(settingsOpen || confirm) && (
         <AnchoredDialog
           anchor={dialogTrigger.current}
           dialogRef={dialogRef}
           onClose={closeDialog}
         >
-          {about && (
-            <button
-              className="dialog-close quiet icon-button"
-              autoFocus
-              onClick={closeDialog}
-              aria-label="Закрыть"
-              title="Закрыть"
-            >
-              <Icon name="close" />
-            </button>
-          )}
-          <h2 id="dialog-title">
-            {about
-              ? "CF Timer"
-              : confirm === "menu"
-                ? "Вернуться в меню?"
-                : "Начать заново?"}
-          </h2>
-          {about ? (
+          {settingsOpen ? (
             <>
-              <p id="dialog-description">
-                Простой таймер для вашей тренировки.
-              </p>
-              <p>Автор — SergeLyamin · Версия 0.1.0</p>
-              <p>Политика конфиденциальности готовится к публикации.</p>
-              <a
-                href="https://github.com/SergeLyamin/cftimer"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                className="dialog-close quiet icon-button"
+                autoFocus
+                onClick={closeDialog}
+                aria-label="Закрыть"
+                title="Закрыть"
               >
-                Репозиторий на GitHub ↗
-              </a>
+                <Icon name="close" />
+              </button>
+              <h2 id="dialog-title">Настройки</h2>
+              <p id="dialog-description" className="visually-hidden">
+                Параметры звука и визуальных эффектов
+              </p>
+              <label className="setting-switch">
+                <span>Звук</span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={sound}
+                  onChange={(e) => updatePreference("sound", e.target.checked)}
+                />
+              </label>
+              <button
+                type="button"
+                className="quiet settings-test-sound"
+                onClick={beep}
+              >
+                Проверить звук
+              </button>
+              {audioReady && (
+                <p className="settings-note">Звук разрешён браузером</p>
+              )}
+              <label className="setting-switch">
+                <span>Пульсация краёв</span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={preferences.edgePulse}
+                  onChange={(e) =>
+                    updatePreference("edgePulse", e.target.checked)
+                  }
+                />
+              </label>
+              {reducedMotion && (
+                <p className="settings-note">
+                  Пульсация отключена системным уменьшением движения.
+                </p>
+              )}
+              <p className="hotkey-hint">
+                Пробел — пауза / продолжить
+                <br />
+                Esc — заново на паузе
+                <br />F — полный экран
+              </p>
+              <div className="settings-footer">
+                <span>Версия {__APP_VERSION__}</span>
+                <a
+                  href="https://github.com/SergeLyamin/cftimer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GitHub автора →
+                </a>
+              </div>
             </>
           ) : (
             <>
-              <p id="dialog-description">
-                {confirm === "menu"
-                  ? "Текущая тренировка будет сброшена."
-                  : "Таймер начнёт ту же программу заново, включая подготовку."}
-              </p>
+              <h2 id="dialog-title">Вернуться в меню?</h2>
+              <p id="dialog-description">Текущая тренировка будет сброшена.</p>
               <div className="dialog-actions">
                 <button
                   className="primary"
                   onClick={() => {
                     action("reset");
-                    if (confirm === "restart") action("start");
-                    else setView("home");
+                    setView("home");
                     closeDialog();
                   }}
                 >
-                  {confirm === "menu" ? "В меню" : "Начать заново"}
+                  В меню
                 </button>
                 <button
                   className="dialog-cancel"

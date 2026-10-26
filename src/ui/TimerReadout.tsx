@@ -22,6 +22,23 @@ export function TimerReadout({
 }) {
   const remaining = getRemainingFraction(snapshot);
   const percentRemaining = Math.round(remaining * 100);
+  const hasRounds = ["intervals", "tabata", "emom"].includes(
+    snapshot.config.mode,
+  );
+  const currentRound =
+    snapshot.status !== "idle" && snapshot.phase?.kind !== "preparation"
+      ? (snapshot.phase?.round ?? 0)
+      : 0;
+  const roundSummary =
+    snapshot.status === "completed"
+      ? currentRound === 0
+        ? "Тренировка завершена до начала раундов"
+        : `Тренировка завершена. Раунд ${currentRound} из ${snapshot.config.rounds}`
+      : snapshot.status === "idle"
+        ? `Всего раундов: ${snapshot.config.rounds}`
+        : currentRound === 0
+          ? `Подготовка. Всего раундов: ${snapshot.config.rounds}`
+          : `Раунд ${currentRound} из ${snapshot.config.rounds}`;
 
   return (
     <div className="timer-readout">
@@ -53,7 +70,27 @@ export function TimerReadout({
           style={{ transform: `scaleX(${remaining})` }}
         />
       </div>
-      {roundLabel && <p className="round">{roundLabel}</p>}
+      {hasRounds ? (
+        <div className="rounds-grid" role="group" aria-label={roundSummary}>
+          {Array.from({ length: snapshot.config.rounds }, (_, index) => {
+            const round = index + 1;
+            const completed =
+              snapshot.status === "completed" || round < currentRound;
+            const current = !completed && round === currentRound;
+            return (
+              <span
+                key={round}
+                className={`round-tile${completed ? " is-completed" : current ? " is-current" : ""}`}
+                aria-hidden="true"
+              >
+                {round}
+              </span>
+            );
+          })}
+        </div>
+      ) : (
+        roundLabel && <p className="round">{roundLabel}</p>
+      )}
     </div>
   );
 }

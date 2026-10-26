@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { TimerEngine, type TimerConfig } from "../timer";
+import { TimerEngine, type TimerConfig, type TimerSnapshot } from "../timer";
 import { getRemainingFraction, TimerReadout } from "./TimerReadout";
 
 const intervals: TimerConfig = {
@@ -102,4 +102,116 @@ it("exposes one time label, fixed character classes and remaining progress", () 
   expect(markup).toContain('aria-label="Осталось времени"');
   expect(markup).toContain('aria-valuenow="50"');
   expect(markup).toContain("transform:scaleX(0.5)");
+});
+
+function readout(snapshot: TimerSnapshot, roundLabel?: string) {
+  return renderToStaticMarkup(
+    createElement(TimerReadout, {
+      snapshot,
+      displayedTime: "00:10",
+      phaseLabel: "РАБОТА",
+      roundLabel,
+    }),
+  );
+}
+
+function roundTiles(snapshot: TimerSnapshot) {
+  return Array.from(
+    readout(snapshot).matchAll(
+      /class="round-tile([^"]*)" aria-hidden="true">(\d+)<\/span>/g,
+    ),
+    ([, classes, number]) => ({
+      number: Number(number),
+      completed: classes.includes("is-completed"),
+      current: classes.includes("is-current"),
+    }),
+  );
+}
+
+describe("numbered round tiles", () => {
+  it("waits until the following rest is over before marking a round completed", () => {
+    const { engine, at } = fixture();
+    engine.dispatch({ type: "start" });
+    expect(roundTiles(engine.getSnapshot())).toEqual([
+      { number: 1, completed: false, current: false },
+      { number: 2, completed: false, current: false },
+    ]);
+    expect(readout(engine.getSnapshot())).toContain(
+      'aria-label="Подготовка. Всего раундов: 2"',
+    );
+    expect(roundTiles(at(10000))[0]).toMatchObject({
+      completed: false,
+      current: true,
+    });
+    expect(roundTiles(at(30000))[0]).toMatchObject({
+      completed: false,
+      current: true,
+    });
+    expect(roundTiles(at(39999))[0].completed).toBe(false);
+    expect(roundTiles(at(40000))).toEqual([
+      { number: 1, completed: true, current: false },
+      { number: 2, completed: false, current: true },
+    ]);
+    engine.dispatch({ type: "pause" });
+    expect(roundTiles(at(90000))[1].current).toBe(true);
+    engine.dispatch({ type: "resume" });
+    expect(roundTiles(at(110000))).toEqual([
+      { number: 1, completed: true, current: false },
+      { number: 2, completed: true, current: false },
+    ]);
+  });
+
+  it.each([
+    { mode: "emom" as const, rounds: 1 },
+    { mode: "tabata" as const, rounds: 8 },
+    { mode: "intervals" as const, rounds: 99 },
+  ])(
+    "renders all $rounds $mode rounds including the final number",
+    (config) => {
+      const { engine, at } = fixture({
+        ...intervals,
+        ...config,
+        workSeconds: 1,
+        restSeconds: 0,
+        preparationSeconds: 0,
+      });
+      expect(roundTiles(engine.getSnapshot())).toHaveLength(config.rounds);
+      expect(
+        roundTiles(engine.getSnapshot()).every((tile) => !tile.current),
+      ).toBe(true);
+      engine.dispatch({ type: "start" });
+      const finalRound = roundTiles(at((config.rounds - 1) * 1000));
+      expect(finalRound.at(-1)).toEqual({
+        number: config.rounds,
+        completed: false,
+        current: true,
+      });
+      expect(finalRound.filter((tile) => tile.completed)).toHaveLength(
+        config.rounds - 1,
+      );
+      const completed = roundTiles(at(config.rounds * 1000));
+      expect(completed.every((tile) => tile.completed && !tile.current)).toBe(
+        true,
+      );
+    },
+  );
+
+  it("keeps one short accessible summary and no interactive round controls", () => {
+    const { engine, at } = fixture();
+    engine.dispatch({ type: "start" });
+    const markup = readout(at(40000), "Раунд 2 / 2");
+    expect(markup).toContain('role="group" aria-label="Раунд 2 из 2"');
+    expect(markup).not.toContain('class="round"');
+    expect(markup).not.toContain("<button");
+  });
+
+  it.each(["amrap", "for-time"] as const)(
+    "keeps %s free of round tiles and accepts its optional caption",
+    (mode) => {
+      const { engine } = fixture({ ...intervals, mode });
+      const markup = readout(engine.getSnapshot(), "До начала работы");
+      expect(markup).not.toContain("rounds-grid");
+      expect(markup).toContain('<p class="round">До начала работы</p>');
+    },
+  );
 });
