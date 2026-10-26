@@ -1066,9 +1066,9 @@ details .field {
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--segment-color);
-  border-radius: 10px;
-  background: #55585f;
+  border: 0;
+  border-radius: 0;
+  background: #292b30;
 }
 .timeline-segment.work {
   --segment-color: var(--color-work);

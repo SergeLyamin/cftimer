@@ -14,6 +14,7 @@ export function getTimelineSegments(
     return [];
 
   let startMs = 0;
+  const countsUp = snapshot.countDirection === "up";
   const segments: TimelineSegment[] = [];
   for (const phase of compileProgram(snapshot.config)) {
     const elapsedMs = snapshot.elapsedMs - startMs;
@@ -23,14 +24,22 @@ export function getTimelineSegments(
       (snapshot.config.mode === "emom" && phase.kind === "rest")
     )
       continue;
+    const elapsedFraction = Math.max(
+      0,
+      Math.min(1, elapsedMs / phase.durationMs),
+    );
     segments.push({
       kind: phase.kind,
       round: phase.round,
       durationMs: phase.durationMs,
       fraction:
         snapshot.status === "completed"
-          ? 1
-          : Math.max(0, Math.min(1, elapsedMs / phase.durationMs)),
+          ? countsUp
+            ? 1
+            : 0
+          : countsUp
+            ? elapsedFraction
+            : 1 - elapsedFraction,
     });
   }
   return segments;

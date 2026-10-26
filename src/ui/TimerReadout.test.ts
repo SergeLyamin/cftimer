@@ -157,6 +157,16 @@ function timelineFractions(snapshot: TimerSnapshot) {
 }
 
 describe("segmented workout timeline", () => {
+  it("fills segments in the opposite direction for a count-up snapshot", () => {
+    const { engine, at } = fixture();
+    engine.dispatch({ type: "start" });
+    const upward = (ms: number) =>
+      timelineFractions({ ...at(ms), countDirection: "up" });
+    expect(upward(5000)).toEqual([0, 0, 0]);
+    expect(upward(20000)).toEqual([0.5, 0, 0]);
+    expect(upward(35000)).toEqual([1, 0.5, 0]);
+    expect(upward(60000)).toEqual([1, 1, 1]);
+  });
   it("uses proportional work/rest segments without preparation or a final rest", () => {
     const { engine, at } = fixture();
     engine.dispatch({ type: "start" });
@@ -172,24 +182,24 @@ describe("segmented workout timeline", () => {
       { kind: "rest", round: 1, durationMs: 10000 },
       { kind: "work", round: 2, durationMs: 20000 },
     ]);
-    expect(timelineFractions(at(5000))).toEqual([0, 0, 0]);
-    expect(timelineFractions(at(20000))).toEqual([0.5, 0, 0]);
-    expect(timelineFractions(at(30000))).toEqual([1, 0, 0]);
-    expect(timelineFractions(at(35000))).toEqual([1, 0.5, 0]);
-    expect(timelineFractions(at(40000))).toEqual([1, 1, 0]);
-    expect(timelineFractions(at(60000))).toEqual([1, 1, 1]);
+    expect(timelineFractions(at(5000))).toEqual([1, 1, 1]);
+    expect(timelineFractions(at(20000))).toEqual([0.5, 1, 1]);
+    expect(timelineFractions(at(30000))).toEqual([0, 1, 1]);
+    expect(timelineFractions(at(35000))).toEqual([0, 0.5, 1]);
+    expect(timelineFractions(at(40000))).toEqual([0, 0, 1]);
+    expect(timelineFractions(at(60000))).toEqual([0, 0, 0]);
   });
 
-  it("freezes each fill on pause and fills all segments on completion", () => {
+  it("freezes each fill on pause and empties all countdown segments on completion", () => {
     const { engine, at } = fixture();
     engine.dispatch({ type: "start" });
     at(35000);
     engine.dispatch({ type: "pause" });
-    expect(timelineFractions(at(95000))).toEqual([1, 0.5, 0]);
+    expect(timelineFractions(at(95000))).toEqual([0, 0.5, 1]);
     engine.dispatch({ type: "finish" });
-    expect(timelineFractions(engine.getSnapshot())).toEqual([1, 1, 1]);
-    engine.dispatch({ type: "repeat" });
     expect(timelineFractions(engine.getSnapshot())).toEqual([0, 0, 0]);
+    engine.dispatch({ type: "repeat" });
+    expect(timelineFractions(engine.getSnapshot())).toEqual([1, 1, 1]);
   });
 
   it("shows only minute work segments for EMOM", () => {
@@ -209,7 +219,7 @@ describe("segmented workout timeline", () => {
       { kind: "work", durationMs: 60000 },
       { kind: "work", durationMs: 60000 },
     ]);
-    expect(timelineFractions(engine.getSnapshot())).toEqual([1, 0.5, 0]);
+    expect(timelineFractions(engine.getSnapshot())).toEqual([0, 0.5, 1]);
   });
 
   it("exposes a short round summary and noninteractive proportional fills", () => {
