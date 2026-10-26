@@ -1,10 +1,11 @@
 # Источники ресурсов новой реализации
 
-Обновлено 23.10.2026. Активная версия не импортирует ресурсы из archive/.
+Обновлено 26.10.2026 для интерфейса 0.1.2. Активная версия не импортирует ресурсы из archive/.
 
-- Шрифт заголовков и цифр: Oswald Variable (200–700), оригинальный файл из [Google Fonts](https://github.com/google/fonts/tree/main/ofl/oswald), загружен 23.10.2026; `public/fonts/Oswald-Variable.ttf`. Copyright 2016 The Oswald Project Authors. Лицензия SIL OFL 1.1 сохранена рядом в `public/fonts/OFL-Oswald.txt`. Есть кириллица и табличные цифры. Файл раздаётся локально и включён в PWA precache; внешних font API при работе нет. Основной текст — системный Arial/sans-serif.
+- Шрифт заголовков и цифр: Oswald Variable (200–700), оригинальный файл из [Google Fonts](https://github.com/google/fonts/tree/main/ofl/oswald), загружен 23.10.2026; `public/fonts/Oswald-Variable.ttf`. Copyright 2016 The Oswald Project Authors. Лицензия SIL OFL 1.1 сохранена рядом в `public/fonts/OFL-Oswald.txt`. Есть кириллица; основное время использует фиксированные ячейки цифр и разделителя для стабильной геометрии. Файл раздаётся локально и включён в PWA precache; внешних font API при работе нет. Основной текст — системный Arial/sans-serif.
 - Звуки: локально синтезируются Web Audio API в src/platform/audio.ts; внешние записи не используются.
 - Иконка public/icon.svg: простая оригинальная геометрия секундомера, созданная для проекта. Иконки режимов, действий и панели управления — оригинальные inline SVG в `src/ui/Icon.tsx`, созданные для проекта; наследуют цвет, не требуют сети или растровых ресурсов.
+- Favicon 0.1.2: `public/favicon.svg` — оригинальная геометрия букв CF на тёмном фоне, созданная непосредственно SVG-кодом для проекта; `public/favicon.ico` — растровые варианты той же геометрии 16×16, 32×32 и 48×48 внутри ICO. Создание кодом, без ImageGen и сторонних изображений. SVG и ICO включены в PWA precache; тёплый offline-тест проверяет доступность обоих файлов и локального шрифта. Favicon отличается от manifest-иконки секундомера `public/icon.svg`.
 - ImageGen PNG в design/concepts — проектные референсы; не входят в production bundle.
 - LICENSE восстановлен как полный стандартный Apache-2.0 (тот же выбор, который уже был в исходном LICENSE). NOTICE сохраняет авторство Serge Lyamin. Шаблон [license name] удалён. Текст взят из установленного TypeScript LICENSE.txt; это стандарт лицензии, не импорт его кода.
 - Зависимости закреплены в package-lock.json; их собственные лицензии остаются применимыми.
