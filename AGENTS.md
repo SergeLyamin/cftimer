@@ -8,6 +8,14 @@ The legacy code is archived by explicit owner request. Local runtime is implemen
 
 ## Workflow
 
+Production deployment requires the owner's explicit go-ahead after their manual review of the local version. Automated checks, an accepted implementation plan, and authorization for an earlier release do not authorize a subsequent deployment. Prepare the local implementation and review evidence, then wait for the owner's release approval.
+
+For UI changes, use a staged review workflow:
+1. Implement locally and check the desktop version first. At this stage, run only the checks needed to launch and assess the changed desktop UI.
+2. Give the owner access to the local desktop version, briefly describe what to review, and wait for their explicit UI approval. If revisions are requested, repeat this desktop review before proceeding.
+3. Only after UI approval, run the remaining mobile/responsive, cross-browser, regression, offline/PWA and other applicable checks. Do not front-load these checks before the owner has reviewed the interface.
+4. Deploy only after the checks pass and the owner has explicitly authorized publication, as required above.
+
 Use OpenSpec 1.14.3 via `npm run spec -- <command>` and validate with `npm run spec:validate`. Tooling install: `npm ci --prefix tooling/openspec --ignore-scripts`. No global installation is required. Generated `.agents/skills/openspec-*` are CLI-managed; project rules live here and in config.
 
 Current specifications are in openspec/specs. Proposed runtime behavior is in changes, first bootstrap-timer-pilot then add-qr-remote-control. Keep task checkboxes honest. Only sync/archive implemented and verified requirements. Validate checks the documents, not runtime correctness.
