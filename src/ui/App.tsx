@@ -406,6 +406,12 @@ export default function App() {
       return next;
     });
   };
+  function togglePause() {
+    if (view !== "timer" || settingsOpen || confirm) return;
+    const status = engine.current.getSnapshot().status;
+    if (status === "running" || status === "paused")
+      action(status === "running" ? "pause" : "resume");
+  }
   const interval = config.mode === "intervals" || config.mode === "tabata";
   const total =
     config.preparationSeconds +
@@ -668,6 +674,7 @@ export default function App() {
             </div>
             <TimerReadout
               snapshot={snapshot}
+              onToggle={togglePause}
               displayedTime={displayedTime}
               phaseLabel={phase}
               roundLabel={

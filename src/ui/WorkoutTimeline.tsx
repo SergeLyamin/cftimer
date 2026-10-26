@@ -45,7 +45,13 @@ export function getTimelineSegments(
   return segments;
 }
 
-export function WorkoutTimeline({ snapshot }: { snapshot: TimerSnapshot }) {
+export function WorkoutTimeline({
+  snapshot,
+  onToggle,
+}: {
+  snapshot: TimerSnapshot;
+  onToggle?: () => void;
+}) {
   const segments = getTimelineSegments(snapshot);
   if (!segments.length) return null;
   const currentRound =
@@ -64,7 +70,12 @@ export function WorkoutTimeline({ snapshot }: { snapshot: TimerSnapshot }) {
           : `Раунд ${currentRound} из ${snapshot.config.rounds}`;
 
   return (
-    <div className="workout-timeline" role="group" aria-label={roundSummary}>
+    <div
+      className="workout-timeline"
+      data-direction={snapshot.countDirection}
+      role="group"
+      aria-label={roundSummary}
+    >
       {segments.map((segment) => (
         <div
           key={`${segment.kind}:${segment.round}`}
@@ -78,6 +89,15 @@ export function WorkoutTimeline({ snapshot }: { snapshot: TimerSnapshot }) {
           />
         </div>
       ))}
+      {onToggle &&
+        (snapshot.status === "running" || snapshot.status === "paused") && (
+          <button
+            className="readout-toggle"
+            type="button"
+            aria-label="Пауза / продолжение: раунды"
+            onClick={onToggle}
+          />
+        )}
     </div>
   );
 }

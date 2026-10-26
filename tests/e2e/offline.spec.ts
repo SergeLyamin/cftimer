@@ -6,6 +6,7 @@ test("cached restart works offline alongside an active second tab", async ({
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto("/");
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
   await expect(page.getByText("Готов к запуску без сети")).toBeVisible({
     timeout: 25000,
   });
@@ -23,6 +24,7 @@ test("cached restart works offline alongside an active second tab", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Подготовить офлайн" }).click();
   await expect(page.getByText("Готов к запуску без сети")).toBeVisible();
+  await page.getByRole("button", { name: "Закрыть", exact: true }).click();
   await page.reload();
   await expect
     .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
@@ -30,7 +32,7 @@ test("cached restart works offline alongside an active second tab", async ({
   const second = await context.newPage();
   await second.goto("/");
   await second.getByRole("button", { name: /AMRAP/ }).click();
-  await second.getByRole("button", { name: /Начать/ }).click();
+  await second.getByRole("button", { name: /Старт/ }).click();
   await expect(second.locator(".phase")).toHaveText("ПОДГОТОВКА");
   await page.evaluate(async () => {
     const r = await navigator.serviceWorker.getRegistration();
@@ -56,7 +58,7 @@ test("cached restart works offline alongside an active second tab", async ({
     ).toBe(true);
   }
   await reopened.getByRole("button", { name: /Tabata/ }).click();
-  await reopened.getByRole("button", { name: /Начать/ }).click();
+  await reopened.getByRole("button", { name: /Старт/ }).click();
   await expect(
     reopened.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeVisible();
@@ -82,16 +84,16 @@ test("responsive screens and About preserve local session", async ({
       ),
     ).toBe(true);
     await page.screenshot({
-      path: `output/playwright/home-${size.width}.png`,
+      path: `output/playwright/v013-home-${size.width}.png`,
       fullPage: true,
     });
   }
   await page.getByRole("button", { name: /Tabata/ }).click();
   await page.screenshot({
-    path: "output/playwright/setup-desktop.png",
+    path: "output/playwright/v013-setup-desktop.png",
     fullPage: true,
   });
-  await page.getByRole("button", { name: /Начать/ }).click();
+  await page.getByRole("button", { name: /Старт/ }).click();
   await page.getByRole("button", { name: "Настройки" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("button", { name: "Закрыть", exact: true }).click();
@@ -99,12 +101,12 @@ test("responsive screens and About preserve local session", async ({
     page.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeVisible();
   await page.screenshot({
-    path: "output/playwright/timer-desktop.png",
+    path: "output/playwright/v013-timer-desktop.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
-    path: "output/playwright/timer-mobile.png",
+    path: "output/playwright/v013-timer-mobile.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 844, height: 390 });
@@ -114,7 +116,7 @@ test("responsive screens and About preserve local session", async ({
     ),
   ).toBe(true);
   await page.screenshot({
-    path: "output/playwright/timer-landscape.png",
+    path: "output/playwright/v013-timer-landscape.png",
     fullPage: true,
   });
 });

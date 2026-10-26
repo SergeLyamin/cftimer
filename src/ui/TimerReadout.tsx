@@ -24,15 +24,20 @@ export function TimerReadout({
   displayedTime,
   phaseLabel,
   roundLabel,
+  onToggle,
 }: {
   snapshot: TimerSnapshot;
   displayedTime: string;
   phaseLabel: string;
   roundLabel?: string;
+  onToggle?: () => void;
 }) {
   const progress = getPhaseProgressFraction(snapshot);
   const percent = Math.round(progress * 100);
   const countsUp = isCountUpPhase(snapshot);
+  const interactive =
+    !!onToggle &&
+    (snapshot.status === "running" || snapshot.status === "paused");
   const hasRounds = ["intervals", "tabata", "emom"].includes(
     snapshot.config.mode,
   );
@@ -42,7 +47,12 @@ export function TimerReadout({
       <p className="phase" aria-live="polite">
         {phaseLabel}
       </p>
-      <div className="time" role="timer" aria-label={`Время ${displayedTime}`}>
+      <div className="time">
+        <span
+          className="visually-hidden"
+          role="timer"
+          aria-label={`Время ${displayedTime}`}
+        />
         {Array.from(displayedTime, (character, index) => (
           <span
             key={index}
@@ -52,22 +62,42 @@ export function TimerReadout({
             {character}
           </span>
         ))}
+        {interactive && (
+          <button
+            className="readout-toggle"
+            type="button"
+            aria-label="Пауза / продолжение: время"
+            onClick={onToggle}
+          />
+        )}
       </div>
-      <div
-        className="workout-progress"
-        role="progressbar"
-        aria-label={countsUp ? "Прошло времени фазы" : "Осталось времени фазы"}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
-        aria-valuetext={`${countsUp ? "Прошло" : "Осталось"} ${percent}% времени текущей фазы`}
-      >
+      <div className="workout-progress">
         <div
-          className="workout-progress-fill"
-          style={{ transform: `scaleX(${progress})` }}
-        />
+          className="progress-meter"
+          role="progressbar"
+          aria-label={
+            countsUp ? "Прошло времени фазы" : "Осталось времени фазы"
+          }
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percent}
+          aria-valuetext={`${countsUp ? "Прошло" : "Осталось"} ${percent}% времени текущей фазы`}
+        >
+          <div
+            className="workout-progress-fill"
+            style={{ transform: `scaleX(${progress})` }}
+          />
+        </div>
+        {interactive && (
+          <button
+            className="readout-toggle"
+            type="button"
+            aria-label="Пауза / продолжение: фаза"
+            onClick={onToggle}
+          />
+        )}
       </div>
-      <WorkoutTimeline snapshot={snapshot} />
+      <WorkoutTimeline snapshot={snapshot} onToggle={onToggle} />
       {!hasRounds && roundLabel && <p className="round">{roundLabel}</p>}
     </div>
   );

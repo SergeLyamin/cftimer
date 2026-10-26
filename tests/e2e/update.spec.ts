@@ -52,7 +52,7 @@ test("new worker waits while another tab runs, activates only after all tabs clo
     const active = await context.newPage();
     await active.goto("http://127.0.0.1:4181");
     await active.getByRole("button", { name: /AMRAP/ }).click();
-    await active.getByRole("button", { name: /Начать/ }).click();
+    await active.getByRole("button", { name: /Старт/ }).click();
     version = 2;
     await idle.evaluate(async () => {
       const reg = await navigator.serviceWorker.getRegistration();

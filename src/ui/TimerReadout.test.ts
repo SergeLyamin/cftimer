@@ -227,7 +227,7 @@ describe("segmented workout timeline", () => {
     engine.dispatch({ type: "start" });
     const markup = readout(at(35000), "Раунд 1 / 2");
     expect(markup).toContain(
-      'class="workout-timeline" role="group" aria-label="Раунд 1 из 2"',
+      'class="workout-timeline" data-direction="down" role="group" aria-label="Раунд 1 из 2"',
     );
     expect(
       markup.match(/class="timeline-segment work" style="flex-grow:20000"/g),

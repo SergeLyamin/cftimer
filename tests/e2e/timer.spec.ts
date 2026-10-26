@@ -3,9 +3,12 @@ async function setup(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /AMRAP/ }).click();
   await page.getByLabel("Длительность").fill("0200");
-  await page.getByText("Дополнительно", { exact: true }).click();
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Подготовка$/ })
+    .click();
   await page.getByLabel("Подготовка").fill("0000");
-  await page.getByRole("button", { name: "Начать" }).click();
+  await page.getByRole("button", { name: "Старт" }).click();
 }
 test("pause, restart and confirmed menu exit preserve the intended workout", async ({
   page,
@@ -96,8 +99,46 @@ test("mobile setup has numeric masks and no remote controls", async ({
   await work.fill("0130");
   await expect(work).toHaveValue("01:30");
   await work.fill("0061");
-  await page.getByRole("button", { name: "Начать" }).click();
-  await expect(work).toHaveAttribute("aria-invalid", "true");
-  await expect(page.locator(".timer")).toHaveCount(0);
   await expect(page.getByText(/QR|Подключить пульт/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Старт" }).click();
+  await expect(page.locator(".timer")).toBeVisible();
+  await expect(page.locator(".time")).toHaveText("00:10");
+});
+
+test("digits and both progress tracks toggle pause without changing the program", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/");
+  await page.getByRole("button", { name: /Интервалы/ }).click();
+  await page.getByLabel("Раунды", { exact: true }).fill("2");
+  await page.getByLabel("Работа", { exact: true }).fill("0020");
+  await page.getByLabel("Отдых", { exact: true }).fill("0010");
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Подготовка$/ })
+    .click();
+  await page.getByLabel("Подготовка", { exact: true }).fill("0000");
+  await page.getByRole("button", { name: "Старт", exact: true }).click();
+  for (const selector of [".time", ".workout-progress", ".workout-timeline"]) {
+    await page.clock.runFor(500);
+    await page.locator(selector).click();
+    await expect(page.locator(".phase")).toHaveText("ПАУЗА");
+    const time = await page.locator(".time").textContent();
+    const progress = await page
+      .getByRole("progressbar")
+      .getAttribute("aria-valuenow");
+    await page.clock.runFor(1000);
+    await expect(page.locator(".time")).toHaveText(time!);
+    await expect(page.getByRole("progressbar")).toHaveAttribute(
+      "aria-valuenow",
+      progress!,
+    );
+    await page.locator(selector).click();
+    await expect(page.locator(".phase")).toHaveText("РАБОТА");
+    await expect(page.locator(".timer-meta h1")).toContainText("1 из 2");
+  }
+  // An unrelated blank area must not invoke the readout action.
+  await page.locator(".timer-meta h1").click();
+  await expect(page.locator(".phase")).toHaveText("РАБОТА");
 });
