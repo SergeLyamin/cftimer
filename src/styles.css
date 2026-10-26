@@ -281,8 +281,7 @@ h1 {
   line-height: 1.5;
 }
 details {
-  border-top: 1px solid #303036;
-  padding-top: 8px;
+  border: 0;
 }
 summary {
   cursor: pointer;
@@ -394,7 +393,7 @@ details .field {
 }
 .workout-progress {
   width: min(780px, 88%);
-  height: 16px;
+  height: 50px;
   margin-top: 24px;
   overflow: hidden;
   border-radius: 999px;
@@ -741,7 +740,7 @@ details .field {
   }
   .workout-progress {
     width: 100%;
-    height: 12px;
+    height: 50px;
     margin-top: 20px;
   }
   .screen-hint {
@@ -793,7 +792,7 @@ details .field {
     padding: 10px;
   }
   .workout-progress {
-    height: 12px;
+    height: 50px;
     margin-top: 10px;
     width: min(620px, 86%);
   }
@@ -823,37 +822,39 @@ details .field {
   opacity: 0.5;
   cursor: default;
 }
-@media (min-width: 900px) {
-  .setup {
-    max-width: 960px;
+.limit-toast {
+  position: fixed;
+  z-index: 30;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 14px 22px;
+  border: 1px solid #46464d;
+  border-radius: 8px;
+  background: #242428;
+  color: #f5f5f5;
+  font-size: 14px;
+  pointer-events: none;
+  animation: limit-toast-expiry 10s linear forwards;
+}
+@keyframes limit-toast-expiry {
+  0%,
+  94% {
+    opacity: 1;
   }
-  .setup form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 72px;
-    align-items: start;
+  100% {
+    opacity: 0;
   }
-  .setup form > .field,
-  .setup form > details {
-    grid-column: 1;
-  }
-  .setup form > .preview {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    margin: 0;
-    align-self: center;
-    font-size: 18px;
-  }
-  .setup form > .preview strong {
-    display: block;
-    margin: 12px 0;
-    font-size: 64px;
-    line-height: 1;
-  }
-  .setup form > .primary {
-    grid-column: 2;
-    grid-row: 3;
-  }
+}
+.completion-confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
 }
 
 .anchored-dialog:has(.dialog-close) h2 {

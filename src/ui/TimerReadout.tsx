@@ -1,11 +1,20 @@
 import type { TimerSnapshot } from "../timer";
 
-export function getRemainingFraction(snapshot: TimerSnapshot): number {
-  if (snapshot.status === "completed") return 0;
-  if (snapshot.status === "idle") return 1;
+function isCountUpPhase(snapshot: TimerSnapshot): boolean {
+  return snapshot.config.mode === "for-time" && snapshot.phase?.kind === "work";
+}
+
+export function getPhaseProgressFraction(snapshot: TimerSnapshot): number {
+  const countsUp = isCountUpPhase(snapshot);
+  if (snapshot.status === "completed") return countsUp ? 1 : 0;
+  if (!snapshot.phase || snapshot.phase.durationMs <= 0) return 0;
   return Math.max(
     0,
-    Math.min(1, (snapshot.totalMs - snapshot.elapsedMs) / snapshot.totalMs),
+    Math.min(
+      1,
+      (countsUp ? snapshot.phaseElapsedMs : snapshot.remainingMs) /
+        snapshot.phase.durationMs,
+    ),
   );
 }
 
@@ -20,8 +29,9 @@ export function TimerReadout({
   phaseLabel: string;
   roundLabel?: string;
 }) {
-  const remaining = getRemainingFraction(snapshot);
-  const percentRemaining = Math.round(remaining * 100);
+  const progress = getPhaseProgressFraction(snapshot);
+  const percent = Math.round(progress * 100);
+  const countsUp = isCountUpPhase(snapshot);
   const hasRounds = ["intervals", "tabata", "emom"].includes(
     snapshot.config.mode,
   );
@@ -59,15 +69,15 @@ export function TimerReadout({
       <div
         className="workout-progress"
         role="progressbar"
-        aria-label="Осталось времени"
+        aria-label={countsUp ? "Прошло времени фазы" : "Осталось времени фазы"}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={percentRemaining}
-        aria-valuetext={`Осталось ${percentRemaining}% времени тренировки`}
+        aria-valuenow={percent}
+        aria-valuetext={`${countsUp ? "Прошло" : "Осталось"} ${percent}% времени текущей фазы`}
       >
         <div
           className="workout-progress-fill"
-          style={{ transform: `scaleX(${remaining})` }}
+          style={{ transform: `scaleX(${progress})` }}
         />
       </div>
       {hasRounds ? (

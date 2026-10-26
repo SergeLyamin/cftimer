@@ -14,6 +14,7 @@ it("restores choices together and falls back for corrupt or outdated preferences
   expect(preferencesStore.load() ?? defaultPreferences).toEqual({
     sound: false,
     edgePulse: true,
+    confetti: true,
   });
   expect(preferencesStore.save({ sound: true, edgePulse: false })).toBe(true);
   expect(preferencesStore.load()).toEqual({ sound: true, edgePulse: false });

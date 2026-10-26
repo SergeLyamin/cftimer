@@ -25,12 +25,37 @@ function fixture(config = base) {
   };
 }
 describe("configuration", () => {
-  it.each([NaN, Infinity, -1, 0, 1.5, 3600])(
+  it.each([NaN, Infinity, -1, 0, 1.5, 6040])(
     "rejects invalid work duration %s",
     (workSeconds) => {
       expect(validateConfig({ ...base, workSeconds }).workSeconds).toBeTruthy();
     },
   );
+  it("accepts durations through 99:99 with the existing four-hour program limit", () => {
+    const maximum = {
+      ...base,
+      rounds: 1,
+      workSeconds: 6039,
+      restSeconds: 6039,
+    };
+    expect(validateConfig(maximum)).toEqual({});
+    expect(compileProgram(maximum).at(-1)?.durationMs).toBe(6039000);
+    expect(
+      compileProgram({ ...maximum, rounds: 2, workSeconds: 1 }).find(
+        (phase) => phase.kind === "rest",
+      )?.durationMs,
+    ).toBe(6039000);
+    expect(
+      validateConfig({ ...maximum, restSeconds: 6040 }).restSeconds,
+    ).toBeTruthy();
+    expect(validateConfig({ ...maximum, rounds: 2 }).rounds).toBeTruthy();
+    expect(
+      validateConfig({ ...maximum, preparationSeconds: 31 }).preparationSeconds,
+    ).toBeTruthy();
+    expect(
+      validateConfig({ ...base, rounds: 2, workSeconds: 6039, restSeconds: 0 }),
+    ).toEqual({});
+  });
   it("rejects oversized programs and rounds outside bounds", () => {
     expect(
       validateConfig({ ...base, rounds: 99, workSeconds: 3599 }).rounds,

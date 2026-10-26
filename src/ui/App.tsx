@@ -10,6 +10,7 @@ import { AnchoredDialog } from "./AnchoredDialog";
 import { TimerReadout } from "./TimerReadout";
 import { Duration } from "./Duration";
 import { PhaseEffects } from "./PhaseEffects";
+import { CompletionConfetti } from "./CompletionConfetti";
 import {
   defaultPreferences,
   preferencesStore,
@@ -92,9 +93,10 @@ export default function App() {
   const dialogTrigger = useRef<HTMLElement | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [confirm, setConfirm] = useState<"menu" | null>(null);
-  const [preferences, setPreferences] = useState<Preferences>(
-    () => preferencesStore.load() ?? { ...defaultPreferences },
-  );
+  const [preferences, setPreferences] = useState<Preferences>(() => ({
+    ...defaultPreferences,
+    ...preferencesStore.load(),
+  }));
   const sound = preferences.sound;
   const [reducedMotion, setReducedMotion] = useState(
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -106,6 +108,11 @@ export default function App() {
   const [footerHeight, setFooterHeight] = useState(140);
   const lastFullscreenExit = useRef(-Infinity);
   const [notice, setNotice] = useState("");
+  const [limitNotice, setLimitNotice] = useState<{
+    id: number;
+    message: string;
+  } | null>(null);
+  const limitNoticeId = useRef(0);
   const [online, setOnline] = useState(navigator.onLine);
   const audio = useRef(new AudioSignals());
   const display = useRef<ReturnType<typeof createDisplaySupport> | null>(null);
@@ -114,6 +121,14 @@ export default function App() {
   const [wakeActive, setWakeActive] = useState(false);
   const [repairing, setRepairing] = useState(false);
   const [updateWaiting, setUpdateWaiting] = useState(false);
+  function notifyLimit(message: string) {
+    setLimitNotice({ id: ++limitNoticeId.current, message });
+  }
+  useEffect(() => {
+    if (!limitNotice) return;
+    const timeout = window.setTimeout(() => setLimitNotice(null), 10000);
+    return () => window.clearTimeout(timeout);
+  }, [limitNotice]);
   function openSettings(trigger: HTMLElement) {
     dialogTrigger.current = trigger;
     setSettingsOpen(true);
@@ -371,6 +386,7 @@ export default function App() {
     }
     if (!settingsStore(config.mode).save(config))
       setNotice("Настройки не сохраняются после закрытия страницы.");
+    setLimitNotice(null);
     if (sound) {
       void audio.current.unlock().then((ready) => {
         setAudioReady(ready);
@@ -452,6 +468,14 @@ export default function App() {
       data-status={view === "timer" ? snapshot.status : undefined}
       style={{ "--timer-footer-height": `${footerHeight}px` } as CSSProperties}
     >
+      {view === "timer" && (
+        <CompletionConfetti
+          snapshot={snapshot}
+          enabled={
+            preferences.confetti !== false && !reducedMotion && pageVisible
+          }
+        />
+      )}
       {view === "timer" && (
         <PhaseEffects
           snapshot={snapshot}
@@ -565,12 +589,21 @@ export default function App() {
                       errors.rounds ? "rounds-error" : undefined
                     }
                     onFocus={(e) => e.target.select()}
-                    onChange={(e) =>
-                      change(
-                        "rounds",
-                        e.target.value === "" ? NaN : Number(e.target.value),
-                      )
-                    }
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (!/^\d*$/.test(raw)) {
+                        e.target.value = Number.isNaN(config.rounds)
+                          ? ""
+                          : String(config.rounds);
+                        return;
+                      }
+                      const value = raw === "" ? NaN : Number(raw);
+                      if (value > 99) {
+                        e.target.value = "99";
+                        change("rounds", 99);
+                        notifyLimit("Раунды — не более 99");
+                      } else change("rounds", value);
+                    }}
                   />
                   {errors.rounds && (
                     <small id="rounds-error" className="error">
@@ -592,6 +625,7 @@ export default function App() {
                   value={config.workSeconds}
                   onChange={(v) => change("workSeconds", v)}
                   error={errors.workSeconds}
+                  onLimit={notifyLimit}
                 />
               )}{" "}
               {interval && (
@@ -601,10 +635,11 @@ export default function App() {
                   value={config.restSeconds}
                   onChange={(v) => change("restSeconds", v)}
                   error={errors.restSeconds}
+                  onLimit={notifyLimit}
                 />
               )}
               <details>
-                <summary>Дополнительно</summary>
+                <summary>Время подготовки</summary>
                 <Duration
                   id="prep"
                   label="Подготовка"
@@ -632,7 +667,7 @@ export default function App() {
                 </span>
               </p>
               <button className="primary" type="submit">
-                Начать <Icon name="arrow" className="action-icon" />
+                Старт <Icon name="arrow" className="action-icon" />
               </button>
             </form>
           </section>
@@ -738,6 +773,11 @@ export default function App() {
           </section>
         )}
       </main>
+      {limitNotice && (
+        <div key={limitNotice.id} className="limit-toast" role="status">
+          {limitNotice.message}
+        </div>
+      )}
       {(settingsOpen || confirm) && (
         <AnchoredDialog
           anchor={dialogTrigger.current}
@@ -791,9 +831,20 @@ export default function App() {
               </label>
               {reducedMotion && (
                 <p className="settings-note">
-                  Пульсация отключена системным уменьшением движения.
+                  Анимации отключены системным уменьшением движения.
                 </p>
               )}
+              <label className="setting-switch">
+                <span>Конфетти в конце</span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={preferences.confetti !== false}
+                  onChange={(e) =>
+                    updatePreference("confetti", e.target.checked)
+                  }
+                />
+              </label>
               <p className="hotkey-hint">
                 Пробел — пауза / продолжить
                 <br />

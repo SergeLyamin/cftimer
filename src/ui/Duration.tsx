@@ -10,12 +10,14 @@ export function Duration({
   label,
   value,
   onChange,
+  onLimit,
   error,
   id,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
+  onLimit?: (message: string) => void;
   error?: string;
   id: string;
 }) {
@@ -33,13 +35,16 @@ export function Duration({
     (error &&
       (Number.isFinite(value)
         ? error
-        : "Введите время полностью; секунды от 00 до 59"));
+        : "Введите время полностью в формате ММ:СС"));
   function apply(input: HTMLInputElement, edit: DurationEdit) {
     // Restore the bounded text even when React state already contains it.
     input.value = edit.text;
     setText(edit.text);
-    setLocalError(edit.error);
-    onChange(edit.value);
+    if (edit.limited) onLimit?.("Максимум — 99:99");
+    if (!edit.ignored) {
+      setLocalError(edit.error);
+      onChange(edit.value);
+    }
     requestAnimationFrame(() => {
       if (document.activeElement === input)
         input.setSelectionRange(edit.caret, edit.caret);

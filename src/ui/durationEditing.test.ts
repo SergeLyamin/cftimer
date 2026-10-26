@@ -71,9 +71,6 @@ describe("bounded duration editing", () => {
   });
   it("rejects an entire invalid clipboard payload without truncating or retaining a valid numeric value", () => {
     for (const clipboard of [
-      "12345",
-      "0".repeat(10000),
-      "01:300",
       "01:3",
       "1:30",
       "90 seconds",
@@ -99,18 +96,67 @@ describe("bounded duration editing", () => {
       expect(corrected).toEqual({ text: "01:40", caret: 5, value: 100 });
     }
   });
-  it("does not silently discard extra digits pasted into a full field", () => {
+  it("caps oversized numeric insertion at 99:99 and reports the limit", () => {
     const edit = pasteDuration("01:30", "2", 5, 5);
-    expect(edit.text).toBe("01:30");
-    expect(edit.value).toBeNaN();
-    expect(edit.error).toBeTruthy();
+    expect(edit).toEqual({
+      text: "99:99",
+      caret: 5,
+      value: 6039,
+      limited: true,
+    });
+    for (const clipboard of ["12345", "9".repeat(10000), "0".repeat(10000)]) {
+      expect(pasteDuration("01:30", clipboard, 0, 5)).toEqual({
+        text: "99:99",
+        caret: 5,
+        value: 6039,
+        limited: true,
+      });
+    }
   });
-  it("keeps seconds out of range and partial input visible but invalid", () => {
+  it("caps each oversized formatted segment separately", () => {
+    expect(pasteDuration("01:30", "100:00", 0, 5)).toEqual({
+      text: "99:00",
+      caret: 5,
+      value: 5940,
+      limited: true,
+    });
+    expect(pasteDuration("01:30", "00:100", 0, 5)).toEqual({
+      text: "00:99",
+      caret: 5,
+      value: 99,
+      limited: true,
+    });
+    expect(pasteDuration("01:30", "100:100", 0, 5)).toEqual({
+      text: "99:99",
+      caret: 5,
+      value: 6039,
+      limited: true,
+    });
+  });
+  it("ignores the fifth typed digit without invalidating or changing the prior value", () => {
+    for (const [previous, raw, caret] of [
+      ["01:30", "01:305", 6],
+      ["99:99", "999:99", 3],
+      ["00:61", "00:161", 4],
+    ] as const) {
+      const edit = editDuration(previous, raw, caret, "insertText");
+      expect(edit.text).toBe(previous);
+      expect(edit.value).toBe(
+        Number(previous.slice(0, 2)) * 60 + Number(previous.slice(3)),
+      );
+      expect(edit.ignored).toBe(true);
+      expect(edit.limited).toBe(true);
+      expect(edit.error).toBeUndefined();
+    }
+  });
+  it("accepts seconds through 99 while keeping partial input invalid", () => {
     expect(editDuration("", "0061", 4)).toMatchObject({
       text: "00:61",
       caret: 5,
     });
-    expect(editDuration("", "0061", 4).value).toBeNaN();
+    expect(editDuration("", "0061", 4).value).toBe(61);
+    expect(editDuration("", "9999", 4).value).toBe(6039);
+    expect(editDuration("", "0099", 4).value).toBe(99);
     expect(editDuration("", "013", 3).value).toBeNaN();
     expect(editDuration("", "0059", 4).value).toBe(59);
     expect(editDuration("", "0000", 4).value).toBe(0);
@@ -118,7 +164,9 @@ describe("bounded duration editing", () => {
   it("formats external values only within the bounded MM:SS representation", () => {
     expect(durationText(90)).toBe("01:30");
     expect(durationText(5999)).toBe("99:59");
-    for (const value of [NaN, Infinity, -1, 6000, 1.5])
+    expect(durationText(6000)).toBe("99:60");
+    expect(durationText(6039)).toBe("99:99");
+    for (const value of [NaN, Infinity, -1, 6040, 1.5])
       expect(durationText(value)).toBe("");
   });
 });

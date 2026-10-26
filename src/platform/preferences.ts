@@ -3,11 +3,13 @@ import { createSettingsStore } from "./storage";
 export interface Preferences {
   sound: boolean;
   edgePulse: boolean;
+  confetti?: boolean;
 }
 
 export const defaultPreferences: Preferences = {
   sound: false,
   edgePulse: true,
+  confetti: true,
 };
 export const preferencesStore = createSettingsStore<Preferences>(
   "cftimer.preferences",
@@ -17,5 +19,6 @@ export const preferencesStore = createSettingsStore<Preferences>(
     "sound" in value &&
     typeof value.sound === "boolean" &&
     "edgePulse" in value &&
-    typeof value.edgePulse === "boolean",
+    typeof value.edgePulse === "boolean" &&
+    (!("confetti" in value) || typeof value.confetti === "boolean"),
 );

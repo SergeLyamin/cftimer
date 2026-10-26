@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TimerEngine, type TimerConfig, type TimerSnapshot } from "../timer";
-import { getRemainingFraction, TimerReadout } from "./TimerReadout";
+import { getPhaseProgressFraction, TimerReadout } from "./TimerReadout";
 
 const intervals: TimerConfig = {
   mode: "intervals",
@@ -24,37 +24,40 @@ function fixture(config = intervals) {
   };
 }
 
-describe("whole-workout remaining progress", () => {
-  it("includes preparation and rest without restarting at phase boundaries", () => {
+describe("current-phase progress", () => {
+  it("starts full for each preparation, work and rest countdown", () => {
     const { engine, at } = fixture();
-    expect(getRemainingFraction(engine.getSnapshot())).toBe(1);
+    expect(getPhaseProgressFraction(engine.getSnapshot())).toBe(1);
     engine.dispatch({ type: "start" });
+    expect(getPhaseProgressFraction(at(5000))).toBe(0.5);
     expect(at(10000).phase?.kind).toBe("work");
-    expect(getRemainingFraction(engine.getSnapshot())).toBeCloseTo(5 / 6);
+    expect(getPhaseProgressFraction(engine.getSnapshot())).toBe(1);
+    expect(getPhaseProgressFraction(at(25000))).toBe(0.25);
     expect(at(30000).phase?.kind).toBe("rest");
-    expect(getRemainingFraction(engine.getSnapshot())).toBe(0.5);
+    expect(getPhaseProgressFraction(engine.getSnapshot())).toBe(1);
+    expect(getPhaseProgressFraction(at(35000))).toBe(0.5);
     expect(at(40000).phase?.round).toBe(2);
-    expect(getRemainingFraction(engine.getSnapshot())).toBeCloseTo(1 / 3);
+    expect(getPhaseProgressFraction(engine.getSnapshot())).toBe(1);
     expect(at(60000).status).toBe("completed");
-    expect(getRemainingFraction(engine.getSnapshot())).toBe(0);
+    expect(getPhaseProgressFraction(engine.getSnapshot())).toBe(0);
   });
 
-  it("freezes on pause and restarts with the full preparation after reset", () => {
+  it("freezes the current phase on pause and restarts its preparation after reset", () => {
     const { engine, at } = fixture();
     engine.dispatch({ type: "start" });
     at(15000);
     engine.dispatch({ type: "pause" });
-    expect(getRemainingFraction(at(45000))).toBe(0.75);
+    expect(getPhaseProgressFraction(at(45000))).toBe(0.75);
     engine.dispatch({ type: "resume" });
-    expect(getRemainingFraction(at(60000))).toBe(0.5);
+    expect(getPhaseProgressFraction(at(55000))).toBe(0.25);
     engine.dispatch({ type: "reset" });
     engine.dispatch({ type: "start" });
     const restarted = engine.getSnapshot();
     expect(restarted.phase?.kind).toBe("preparation");
-    expect(getRemainingFraction(restarted)).toBe(1);
+    expect(getPhaseProgressFraction(restarted)).toBe(1);
   });
 
-  it("decreases for For Time while its digits count upwards", () => {
+  it("counts preparation down but fills For Time work from zero to one", () => {
     const { engine, at } = fixture({
       ...intervals,
       mode: "for-time",
@@ -63,22 +66,31 @@ describe("whole-workout remaining progress", () => {
       restSeconds: 0,
     });
     engine.dispatch({ type: "start" });
+    expect(getPhaseProgressFraction(at(5000))).toBe(0.5);
+    expect(getPhaseProgressFraction(at(10000))).toBe(0);
     const snapshot = at(30000);
     expect(snapshot.countDirection).toBe("up");
     expect(snapshot.displayMs).toBe(20000);
-    expect(getRemainingFraction(snapshot)).toBe(0.5);
+    expect(getPhaseProgressFraction(snapshot)).toBe(0.4);
+    expect(getPhaseProgressFraction(at(60000))).toBe(1);
   });
 
-  it("empties on early completion and fills again on repeat", () => {
-    const { engine, at } = fixture();
-    engine.dispatch({ type: "start" });
-    at(15000);
-    engine.dispatch({ type: "finish" });
-    expect(getRemainingFraction(engine.getSnapshot())).toBe(0);
-    engine.dispatch({ type: "repeat" });
-    expect(engine.getSnapshot().phase?.kind).toBe("preparation");
-    expect(getRemainingFraction(engine.getSnapshot())).toBe(1);
-  });
+  it.each([
+    { mode: "intervals" as const, completed: 0 },
+    { mode: "for-time" as const, completed: 1 },
+  ])(
+    "finishes $mode at its terminal fill and resets on repeat",
+    ({ mode, completed }) => {
+      const { engine, at } = fixture({ ...intervals, mode });
+      engine.dispatch({ type: "start" });
+      at(15000);
+      engine.dispatch({ type: "finish" });
+      expect(getPhaseProgressFraction(engine.getSnapshot())).toBe(completed);
+      engine.dispatch({ type: "repeat" });
+      expect(engine.getSnapshot().phase?.kind).toBe("preparation");
+      expect(getPhaseProgressFraction(engine.getSnapshot())).toBe(1);
+    },
+  );
 });
 
 it("exposes one time label, fixed character classes and remaining progress", () => {
@@ -86,22 +98,46 @@ it("exposes one time label, fixed character classes and remaining progress", () 
   engine.dispatch({ type: "start" });
   const markup = renderToStaticMarkup(
     createElement(TimerReadout, {
-      snapshot: at(30000),
-      displayedTime: "00:10",
+      snapshot: at(35000),
+      displayedTime: "00:05",
       phaseLabel: "ОТДЫХ",
       roundLabel: "Раунд 1 / 2",
     }),
   );
-  expect(markup).toContain('role="timer" aria-label="Время 00:10"');
+  expect(markup).toContain('role="timer" aria-label="Время 00:05"');
   expect(markup.match(/class="time-digit" aria-hidden="true"/g)).toHaveLength(
     4,
   );
   expect(
     markup.match(/class="time-separator" aria-hidden="true"/g),
   ).toHaveLength(1);
-  expect(markup).toContain('aria-label="Осталось времени"');
+  expect(markup).toContain('aria-label="Осталось времени фазы"');
   expect(markup).toContain('aria-valuenow="50"');
+  expect(markup).toContain(
+    'aria-valuetext="Осталось 50% времени текущей фазы"',
+  );
   expect(markup).toContain("transform:scaleX(0.5)");
+});
+
+it("describes elapsed progress for For Time work", () => {
+  const { engine, at } = fixture({
+    ...intervals,
+    mode: "for-time",
+    workSeconds: 40,
+    restSeconds: 0,
+  });
+  engine.dispatch({ type: "start" });
+  const markup = renderToStaticMarkup(
+    createElement(TimerReadout, {
+      snapshot: at(20000),
+      displayedTime: "00:10",
+      phaseLabel: "РАБОТА",
+    }),
+  );
+  expect(markup).toContain('aria-label="Прошло времени фазы"');
+  expect(markup).toContain('aria-valuenow="25"');
+  expect(markup).toContain('aria-valuetext="Прошло 25% времени текущей фазы"');
+  expect(markup).toContain("transform:scaleX(0.25)");
 });
 
 function readout(snapshot: TimerSnapshot, roundLabel?: string) {

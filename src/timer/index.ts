@@ -41,8 +41,8 @@ export function validateConfig(
     errors.mode = "Выберите режим";
   const bounds = {
     rounds: [1, 99],
-    workSeconds: [1, 3599],
-    restSeconds: [0, 3599],
+    workSeconds: [1, 6039],
+    restSeconds: [0, 6039],
     preparationSeconds: [0, 30],
   } as const;
   for (const key of Object.keys(bounds) as (keyof typeof bounds)[]) {
