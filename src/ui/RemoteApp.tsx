@@ -6,6 +6,7 @@ import { defaults, modes } from "./App";
 import { RemoteSetup } from "./RemoteSetup";
 import { AnchoredDialog } from "./AnchoredDialog";
 import { Icon } from "./Icon";
+import "./RemoteApp.css";
 
 const accessText: Record<string, string> = {
   waiting: "Ждём передачу управления",
@@ -66,6 +67,52 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
   }>();
   const dialogRef = useRef<HTMLElement>(null);
   const [notice, setNotice] = useState("");
+  const [statusOpen, setStatusOpen] = useState(false);
+  const statusContainer = useRef<HTMLDivElement>(null);
+  const statusTrigger = useRef<HTMLButtonElement>(null);
+  const statusMenu = useRef<HTMLDivElement>(null);
+  function closeStatus() {
+    setStatusOpen(false);
+    statusTrigger.current?.focus();
+  }
+  useEffect(() => {
+    if (!statusOpen) return;
+    statusMenu.current
+      ?.querySelector<HTMLElement>("button:not([disabled])")
+      ?.focus();
+    const outside = (event: PointerEvent) => {
+      if (!statusContainer.current?.contains(event.target as Node)) {
+        setStatusOpen(false);
+        statusTrigger.current?.focus();
+      }
+    };
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        setStatusOpen(false);
+        statusTrigger.current?.focus();
+      }
+      if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        statusMenu.current
+          ?.querySelector<HTMLElement>("button:not([disabled])")
+          ?.focus();
+      }
+    };
+    const focus = (event: FocusEvent) => {
+      if (!statusContainer.current?.contains(event.target as Node))
+        setStatusOpen(false);
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", key, true);
+    document.addEventListener("focusin", focus);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", key, true);
+      document.removeEventListener("focusin", focus);
+    };
+  }, [statusOpen]);
   useEffect(() => {
     if (!confirm) return;
     const trigger = confirm.trigger;
@@ -97,7 +144,7 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
       else
         document
           .querySelector<HTMLElement>(
-            ".remote-main-action,.remote-modes button",
+            ".remote-main-action,.remote-repeat-action,.remote-modes button",
           )
           ?.focus();
     };
@@ -176,33 +223,131 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
       ? "waiting"
       : "disconnected";
   const modeName = workoutName(config);
+  function backToMenu(trigger: HTMLElement) {
+    if (!application) return;
+    if (setup) {
+      setDraft(undefined);
+      if (application.view === "setup") send({ type: "returnToMenu" });
+    } else if (timer?.status === "completed") send({ type: "returnToMenu" });
+    else setConfirm({ revision: application.revision, trigger });
+  }
+  const statusLabel =
+    linkState === "connected"
+      ? "Подключён"
+      : linkState === "waiting"
+        ? "Ожидание"
+        : "Отключён";
   return (
-    <div className="remote-app">
+    <div
+      className="remote-app"
+      data-phase={
+        application?.view === "timer" ? timer?.phase?.kind : undefined
+      }
+    >
       <header className="remote-header">
         <h1>Пульт</h1>
-        <span
-          className="remote-link-status"
-          data-state={linkState}
-          role="status"
-        >
-          <span className="status-dot" aria-hidden="true" />
-          {linkState === "connected"
-            ? "Подключён"
-            : linkState === "waiting"
-              ? "Ожидание"
-              : "Отключён"}
-        </span>
+        <div className="remote-status-control" ref={statusContainer}>
+          <button
+            ref={statusTrigger}
+            className="remote-link-status remote-status-button"
+            data-state={linkState}
+            aria-haspopup="menu"
+            aria-expanded={statusOpen}
+            aria-controls="remote-status-menu"
+            onClick={() => (statusOpen ? closeStatus() : setStatusOpen(true))}
+          >
+            <span className="status-dot" aria-hidden="true" />
+            {statusLabel}
+            <span className="remote-status-chevron" aria-hidden="true">
+              ⌄
+            </span>
+          </button>
+          {statusOpen && (
+            <div
+              className="remote-status-menu"
+              id="remote-status-menu"
+              ref={statusMenu}
+              role="menu"
+              aria-label="Управление подключением"
+            >
+              {state.access === "ready" ? (
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    runtime.release();
+                    closeStatus();
+                  }}
+                >
+                  <span
+                    className="status-dot disconnect-dot"
+                    aria-hidden="true"
+                  />
+                  Отключить пульт
+                </button>
+              ) : state.access === "waiting" ||
+                state.access === "no-display" ? (
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    runtime.cancelRequest();
+                    closeStatus();
+                  }}
+                >
+                  Отменить запрос
+                </button>
+              ) : fatal &&
+                [
+                  "incompatible_version",
+                  "invitation_invalid",
+                  "room_expired",
+                  "unauthorized",
+                ].includes(state.error ?? "") ? (
+                <p>
+                  Отсканируйте новый QR на экране после обновления страницы.
+                </p>
+              ) : (
+                <button
+                  role="menuitem"
+                  disabled={!fatal && state.connection !== "connected"}
+                  onClick={() => {
+                    if (fatal) runtime.retry();
+                    else runtime.requestControl();
+                    closeStatus();
+                  }}
+                >
+                  {fatal ? "Повторить подключение" : "Запросить управление"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </header>
       <main className="remote-content">
-        <div className="remote-connection">
-          <p role="status">
-            {state.connection !== "connected"
-              ? fatal
-                ? "Подключение недоступно"
-                : "Связь потеряна · подключаемся…"
-              : (accessLabel ?? "Подключение…")}
-          </p>
-        </div>
+        {application && (setup || application.view === "timer") && (
+          <div className="remote-workout-heading">
+            <button
+              className="quiet icon-button"
+              aria-label="Все режимы"
+              title="Все режимы"
+              disabled={!enabled}
+              onClick={(event) => backToMenu(event.currentTarget)}
+            >
+              <Icon name="back" />
+            </button>
+            <h2>{setup ? modeName : workoutName(timer?.config)}</h2>
+          </div>
+        )}
+        {(state.access !== "ready" || state.connection !== "connected") && (
+          <div className="remote-connection">
+            <p role="status">
+              {state.connection !== "connected"
+                ? fatal
+                  ? "Подключение недоступно"
+                  : "Связь потеряна · подключаемся…"
+                : (accessLabel ?? "Подключение…")}
+            </p>
+          </div>
+        )}
         {notice && (
           <p className="remote-alert" role="status">
             {notice}
@@ -348,7 +493,6 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
             )}
             {setup && config ? (
               <>
-                <h2>{modeName}</h2>
                 <RemoteSetup
                   key={`${config.mode}-${hasDraft ? draft.revision : application.revision}`}
                   initial={config}
@@ -379,7 +523,6 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
             ) : (
               timer && (
                 <section className="remote-timer">
-                  <h2>{workoutName(timer.config)}</h2>
                   <p className="remote-phase">
                     {timer.status === "paused"
                       ? "ПАУЗА"
@@ -399,58 +542,67 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
                       Раунд {timer.phase?.round ?? 1} / {timer.config.rounds}
                     </p>
                   )}
-                  <button
-                    className="primary remote-main-action"
-                    disabled={!enabled}
-                    onClick={() =>
-                      send({
-                        type:
-                          timer.status === "completed"
-                            ? "repeat"
-                            : timer.status === "paused"
-                              ? "resume"
-                              : "pause",
-                      })
-                    }
-                  >
-                    {timer.status === "completed"
-                      ? "Повторить"
-                      : timer.status === "paused"
-                        ? "Продолжить"
-                        : "Пауза"}
-                  </button>
-                  {timer.status === "paused" && (
-                    <div className="remote-actions">
+                  <div className="remote-controls">
+                    {timer.status === "completed" ? (
                       <button
-                        className="secondary"
+                        className="primary remote-repeat-action"
                         disabled={!enabled}
-                        onClick={() => send({ type: "edit" })}
+                        onClick={() => send({ type: "repeat" })}
                       >
-                        Редактировать
+                        <Icon name="repeat" />
+                        Повторить
                       </button>
-                      <button
-                        className="secondary"
-                        disabled={!enabled}
-                        onClick={() => send({ type: "restart" })}
-                      >
-                        Заново
-                      </button>
-                    </div>
-                  )}
-                  <button
-                    className="quiet"
-                    disabled={!enabled}
-                    onClick={(event) =>
-                      timer.status === "completed"
-                        ? send({ type: "returnToMenu" })
-                        : setConfirm({
-                            revision: application.revision,
-                            trigger: event.currentTarget,
-                          })
-                    }
-                  >
-                    В меню
-                  </button>
+                    ) : (
+                      <>
+                        <div className="remote-side-slot">
+                          {timer.status === "paused" && (
+                            <button
+                              className="remote-side-action"
+                              aria-label="Редактировать тренировку"
+                              title="Редактировать тренировку"
+                              disabled={!enabled}
+                              onClick={() => send({ type: "edit" })}
+                            >
+                              <Icon name="edit" />
+                            </button>
+                          )}
+                        </div>
+                        <button
+                          className="primary remote-main-action"
+                          aria-label={
+                            timer.status === "paused" ? "Продолжить" : "Пауза"
+                          }
+                          title={
+                            timer.status === "paused" ? "Продолжить" : "Пауза"
+                          }
+                          disabled={!enabled}
+                          onClick={() =>
+                            send({
+                              type:
+                                timer.status === "paused" ? "resume" : "pause",
+                            })
+                          }
+                        >
+                          <Icon
+                            name={timer.status === "paused" ? "play" : "pause"}
+                          />
+                        </button>
+                        <div className="remote-side-slot">
+                          {timer.status === "paused" && (
+                            <button
+                              className="remote-side-action"
+                              aria-label="Начать заново"
+                              title="Начать заново"
+                              disabled={!enabled}
+                              onClick={() => send({ type: "restart" })}
+                            >
+                              <Icon name="stop" />
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </section>
               )
             )}
@@ -497,10 +649,6 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
           </AnchoredDialog>
         )}
         <footer className="remote-footer">
-          <p>
-            Звук воспроизводится на общем экране. При отключении пульта таймер
-            продолжает работать.
-          </p>
           {"vibrate" in navigator && (
             <>
               <label className="setting-switch">
@@ -526,11 +674,6 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
               </button>
               <p role="status">{hapticNotice}</p>
             </>
-          )}
-          {state.access === "ready" && (
-            <button className="quiet" onClick={() => runtime.release()}>
-              Отключить пульт
-            </button>
           )}
         </footer>
       </main>

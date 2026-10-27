@@ -48,3 +48,5 @@
 ## Migration Plan
 
 После разрешения владельца на изолированную разработку реализовать application contract и protocol, rooms, display integration, controller UI; для нового UI соблюсти desktop review gate. Тестировать два зала и реальные WSS через staging proxy. Deployment change выбирает host/domain/rollback. При откате remote экран не должен терять локальный mode; архивный общий server.js не используется. До полного прохождения сценариев этот change остаётся открытым.
+
+20. **Компактный пульт после просмотра владельца.** Header15px, статус — menu trigger, disconnect с красной точкой внутри меню. Mode caps+back слева под header; активный back требует подтверждения. Нейтральная pause/resume56px, sidehit48px. Удалены ready helper, нижние menu/disconnect и footer пояснение звука. ACK/revision/право доступа не меняются. Общая палитра preparation #B59CFF согласована с bootstrap.

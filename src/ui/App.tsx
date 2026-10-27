@@ -148,6 +148,9 @@ export default function App({
   const [offlineReady, setOfflineReady] = useState(false);
   const [wakeActive, setWakeActive] = useState(false);
   const [repairing, setRepairing] = useState(false);
+  const supportsWakeLock = window.isSecureContext && "wakeLock" in navigator;
+  const supportsOffline =
+    window.isSecureContext && "serviceWorker" in navigator;
   const [updateWaiting, setUpdateWaiting] = useState(false);
   function notifyLimit(message: string) {
     setLimitNotice({ id: ++limitNoticeId.current, message });
@@ -186,7 +189,10 @@ export default function App({
       if (!ready) setNotice("Звук недоступен. Проверьте настройки браузера.");
     });
   }
-  function updatePreference(key: keyof Preferences, value: boolean) {
+  function updatePreference<K extends keyof Preferences>(
+    key: K,
+    value: Preferences[K],
+  ) {
     const next = { ...preferences, [key]: value };
     setPreferences(next);
     if (!preferencesStore.save(next))
@@ -520,7 +526,12 @@ export default function App({
       className={`app${view === "timer" ? " app-timer" : ""}`}
       data-phase={view === "timer" ? snapshot.phase?.kind : undefined}
       data-status={view === "timer" ? snapshot.status : undefined}
-      style={{ "--timer-footer-height": `${footerHeight}px` } as CSSProperties}
+      style={
+        {
+          "--timer-footer-height": `${footerHeight}px`,
+          "--progress-opacity": (preferences.progressOpacity ?? 100) / 100,
+        } as CSSProperties
+      }
     >
       {(view === "timer" || settingsOpen) && (
         <CompletionConfetti
@@ -842,9 +853,6 @@ export default function App({
                   onChange={(e) => updatePreference("sound", e.target.checked)}
                 />
               </label>
-              {audioReady && (
-                <p className="settings-note">Звук разрешён браузером</p>
-              )}
               <label className="setting-switch">
                 <span>Пульсация краёв</span>
                 <input
@@ -872,68 +880,95 @@ export default function App({
                   }
                 />
               </label>
+              <label className="setting-range">
+                <span>
+                  Непрозрачность полосы
+                  <output>{preferences.progressOpacity ?? 100}%</output>
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={preferences.progressOpacity ?? 100}
+                  aria-label="Непрозрачность полосы прогресса"
+                  aria-valuetext={`${preferences.progressOpacity ?? 100}%`}
+                  onChange={(event) =>
+                    updatePreference(
+                      "progressOpacity",
+                      event.target.valueAsNumber,
+                    )
+                  }
+                />
+              </label>
               <p className="hotkey-hint">
                 Пробел — пауза / продолжить
                 <br />
                 Esc — заново на паузе
                 <br />F — полный экран
               </p>
-              <div
-                className="settings-statuses"
-                aria-label="Состояние приложения"
-              >
-                {view === "timer" && snapshot.status !== "completed" && (
-                  <div className="settings-status" role="status">
-                    <p>
-                      {wakeActive
-                        ? "Экран остаётся включённым"
-                        : "Удержание экрана не подтверждено"}
-                    </p>
-                    {!wakeActive && (
-                      <>
+              {(supportsWakeLock || supportsOffline) && (
+                <section
+                  className="settings-statuses"
+                  aria-label="Возможности устройства"
+                >
+                  {supportsWakeLock && (
+                    <div className="settings-status" role="status">
+                      <h3>Экран</h3>
+                      <p>
+                        {wakeActive
+                          ? "Остаётся включённым"
+                          : "Удержание пока не включено"}
+                      </p>
+                      {!wakeActive && (
+                        <>
+                          <button
+                            className="secondary wake-retry"
+                            onClick={() => {
+                              void display.current?.requestWakeLock();
+                            }}
+                          >
+                            Не выключать экран
+                          </button>
+                          <p className="settings-note">
+                            Если браузер не разрешит — отключите автоблокировку
+                            в настройках устройства.
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {supportsOffline && (
+                    <div className="settings-status" role="status">
+                      <h3>Офлайн-запуск</h3>
+                      <p>
+                        {offlineReady
+                          ? "Готов к запуску без сети"
+                          : "Копия приложения ещё не готова"}
+                      </p>
+                      {!offlineReady && (
                         <button
-                          className="quiet wake-retry"
+                          className="secondary offline-repair"
+                          disabled={repairing || !online}
                           onClick={() => {
-                            void display.current?.requestWakeLock();
+                            setRepairing(true);
+                            void repairOfflineCache()
+                              .then((ok) => {
+                                if (!ok)
+                                  setNotice(
+                                    "Офлайн-копия пока не готова. Проверьте соединение и повторите подготовку.",
+                                  );
+                              })
+                              .finally(() => setRepairing(false));
                           }}
                         >
-                          Не выключать экран
+                          {repairing ? "Подготовка…" : "Подготовить офлайн"}
                         </button>
-                        <p className="settings-note">
-                          Если браузер не разрешит — отключите автоблокировку в
-                          настройках устройства.
-                        </p>
-                      </>
-                    )}
-                  </div>
-                )}
-                <div className="settings-status" role="status">
-                  <p>
-                    {offlineReady
-                      ? "Готов к запуску без сети"
-                      : "Офлайн-запуск пока не готов"}
-                  </p>
-                  {!offlineReady && (
-                    <button
-                      className="quiet offline-repair"
-                      disabled={repairing || !online}
-                      onClick={() => {
-                        setRepairing(true);
-                        void repairOfflineCache()
-                          .then((ok) => {
-                            if (!ok)
-                              setNotice(
-                                "Офлайн-копия пока не готова. Проверьте соединение и повторите подготовку.",
-                              );
-                          })
-                          .finally(() => setRepairing(false));
-                      }}
-                    >
-                      {repairing ? "Подготовка…" : "Подготовить офлайн"}
-                    </button>
+                      )}
+                    </div>
                   )}
-                </div>
-              </div>
+                </section>
+              )}
               <div className="settings-footer">
                 <span>Версия {__APP_VERSION__}</span>
                 <a

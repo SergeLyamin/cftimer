@@ -7,7 +7,7 @@
   font-display: swap;
 }
 :root {
-  --color-preparation: #f2a541;
+  --color-preparation: #b59cff;
   --color-work: #ef4a40;
   --color-rest: #59b8e8;
   font-family: Arial, sans-serif;
@@ -368,9 +368,19 @@ details .field {
   color: var(--phase-color, var(--color-work));
 }
 
+.timer-clock {
+  display: flex;
+  flex-direction: column;
+  font-size: min(
+    clamp(92.4px, min(31.9vw, 35.2svh), 528px),
+    calc((100vw - max(8vw, 32px)) / var(--time-units))
+  );
+  width: calc(var(--time-units) * 1em);
+  max-width: 100%;
+}
 .time {
   font-family: "Oswald", "Arial Narrow", sans-serif;
-  font-size: clamp(84px, min(29vw, 32svh), 480px);
+  font-size: inherit;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
@@ -392,7 +402,8 @@ details .field {
   width: 0.22em;
 }
 .workout-progress {
-  width: min(780px, 88%);
+  opacity: var(--progress-opacity, 1);
+  width: 100%;
   height: 50px;
   flex-shrink: 0;
   margin-top: 24px;
@@ -767,8 +778,12 @@ details .field {
     letter-spacing: 3px;
     margin: 0 0 4px;
   }
-  .timer .time {
-    font-size: min(28vw, 24svh);
+  .timer .timer-clock {
+    font-size: min(
+      30.8vw,
+      26.4svh,
+      calc((100vw - max(8vw, 32px)) / var(--time-units))
+    );
   }
   .timer .round {
     margin: 6px 0 0;
@@ -783,7 +798,7 @@ details .field {
   .workout-progress {
     height: 50px;
     margin-top: 10px;
-    width: min(620px, 86%);
+    width: 100%;
   }
   .screen-hint {
     margin-top: 6px;
@@ -908,7 +923,7 @@ details .field {
     opacity: 0;
   }
   50% {
-    opacity: 0.18;
+    opacity: 0.198;
   }
 }
 .visually-hidden {
@@ -1061,7 +1076,8 @@ details .field {
 }
 .workout-timeline {
   display: flex;
-  width: min(780px, 88%);
+  gap: min(3px, calc(100% / var(--segment-count) * 0.4));
+  width: 100%;
   height: 3px;
   margin-top: 16px;
   flex-shrink: 0;
@@ -1142,7 +1158,7 @@ details .field {
 }
 @media (orientation: landscape) and (max-height: 600px) {
   .workout-timeline {
-    width: min(620px, 86%);
+    width: 100%;
   }
 }
 
@@ -1421,4 +1437,82 @@ details .field {
 }
 .remote-footer .setting-switch {
   font-size: 14px;
+}
+
+/* Compact display settings; unavailable browser capabilities are omitted. */
+.dialog:has(.setting-range) {
+  padding: 24px;
+}
+.dialog:has(.setting-range) h2 {
+  margin-bottom: 12px;
+  font-size: 23px;
+}
+.dialog .setting-switch {
+  min-height: 50px;
+}
+.setting-range {
+  display: block;
+  padding-top: 12px;
+}
+.setting-range > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.setting-range output {
+  color: #c4c8d0;
+  font-variant-numeric: tabular-nums;
+}
+.setting-range input {
+  width: 100%;
+  min-height: 36px;
+  margin: 4px 0 0;
+  accent-color: #c7cbd2;
+  cursor: pointer;
+}
+.dialog .hotkey-hint {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  line-height: 1.6;
+}
+.settings-statuses {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+}
+.settings-status {
+  padding: 12px;
+  border: 1px solid #3b3e44;
+  border-radius: 10px;
+  background: #151719;
+}
+.settings-status h3 {
+  font-size: 13px;
+  margin: 0;
+  color: #f5f5f5;
+  font-weight: 600;
+}
+.settings-statuses .settings-status p {
+  margin: 6px 0;
+}
+.dialog .settings-status button {
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  min-height: 40px;
+}
+.dialog .settings-status .settings-note {
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+.settings-footer {
+  margin-top: 12px;
+  gap: 2px;
+  font-size: 12px;
+}
+.settings-footer a {
+  min-height: 36px;
+  padding: 8px 0;
 }

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { compileProgram, type TimerSnapshot } from "../timer";
 
 interface TimelineSegment {
@@ -73,6 +74,7 @@ export function WorkoutTimeline({
     <div
       className="workout-timeline"
       data-direction={snapshot.countDirection}
+      style={{ "--segment-count": segments.length } as CSSProperties}
       role="group"
       aria-label={roundSummary}
     >

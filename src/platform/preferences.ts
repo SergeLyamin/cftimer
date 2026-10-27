@@ -4,12 +4,14 @@ export interface Preferences {
   sound: boolean;
   edgePulse: boolean;
   confetti?: boolean;
+  progressOpacity?: number;
 }
 
 export const defaultPreferences: Preferences = {
   sound: false,
   edgePulse: true,
   confetti: true,
+  progressOpacity: 100,
 };
 export const preferencesStore = createSettingsStore<Preferences>(
   "cftimer.preferences",
@@ -20,5 +22,10 @@ export const preferencesStore = createSettingsStore<Preferences>(
     typeof value.sound === "boolean" &&
     "edgePulse" in value &&
     typeof value.edgePulse === "boolean" &&
-    (!("confetti" in value) || typeof value.confetti === "boolean"),
+    (!("confetti" in value) || typeof value.confetti === "boolean") &&
+    (!("progressOpacity" in value) ||
+      (typeof value.progressOpacity === "number" &&
+        Number.isFinite(value.progressOpacity) &&
+        value.progressOpacity >= 0 &&
+        value.progressOpacity <= 100)),
 );

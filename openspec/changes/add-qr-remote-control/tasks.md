@@ -41,6 +41,8 @@
 
 - [x] 4.7 Применить правки владельца 27.10 по remote-flow-v1: статус с точкой в шапке пульта, без номеров, QR в шапке общего экрана и мягкий фон; desktop walkthrough проверяет connected/waiting/disconnected, focus/Escape и доступность QR на home/setup/timer.
 
+- [x] 4.8 Выполнить уточнения владельца: компактный header/status-menu, disconnect внутри меню, верхняя навигация и круг pause; общий экран preparation violet, digits+10%, track width/opacity, gaps3px, edge+10%; компактные capability-aware настройки. Desktop walkthrough проверяет управление, геометрию и opacity; повторное одобрение владельца остаётся в 5.0.
+
 ## 5. Integration acceptance
 
 - [ ] 5.0 Предоставить владельцу новый desktop QR UI и получить явное UI approval; замечания возвращают на desktop review до расширенных проверок.
