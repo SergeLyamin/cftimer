@@ -1,3 +1,4 @@
+import { randomToken } from "./remote/random-token";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App, { defaults } from "./ui/App";
@@ -30,7 +31,7 @@ if (location.pathname === "/remote" || location.pathname === "/remote/") {
             kind: "join",
             roomId,
             invitation,
-            claimSecret: crypto.randomUUID().replaceAll("-", ""),
+            claimSecret: randomToken(),
           }
         : undefined;
     const controller = new ControllerRuntime({

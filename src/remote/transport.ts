@@ -1,3 +1,4 @@
+import { randomToken } from "./random-token";
 import {
   CONTACT_TIMEOUT_MS,
   HEARTBEAT_MS,
@@ -26,7 +27,7 @@ export interface RemoteOptions {
   random?: () => number;
 }
 export function token(): string {
-  return crypto.randomUUID().replaceAll("-", "");
+  return randomToken();
 }
 export function defaultUrl(): string {
   return `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/ws`;
