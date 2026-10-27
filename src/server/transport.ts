@@ -1,12 +1,35 @@
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
+import { isIP } from "node:net";
 import { WebSocketServer, WebSocket } from "ws";
 import { MAX_MESSAGE_BYTES, parseClientMessage } from "../protocol/index.ts";
 import { RoomService } from "./room-service.ts";
 
+export function isLoopbackAddress(address: string): boolean {
+  return ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(address);
+}
+
+/** Trust only the single address overwritten by an explicitly trusted local proxy. */
+export function connectionSource(
+  remoteAddress: string | undefined,
+  forwardedFor: string | string[] | undefined,
+  trustLoopbackProxy = false,
+): string {
+  const direct = remoteAddress ?? "unknown";
+  if (
+    !trustLoopbackProxy ||
+    !isLoopbackAddress(direct) ||
+    typeof forwardedFor !== "string"
+  )
+    return direct;
+  const forwarded = forwardedFor.trim();
+  return !forwarded.includes("%") && isIP(forwarded) ? forwarded : direct;
+}
+
 export function createRelayServer(options: {
   origins: string[];
   service?: RoomService;
+  trustLoopbackProxy?: boolean;
 }) {
   const service = options.service ?? new RoomService();
   const origins = new Set(options.origins);
@@ -28,7 +51,11 @@ export function createRelayServer(options: {
   });
   const ips = new Map<string, number>();
   server.on("upgrade", (request, socket, head) => {
-    const source = request.socket.remoteAddress ?? "unknown";
+    const source = connectionSource(
+      request.socket.remoteAddress,
+      request.headers["x-forwarded-for"],
+      options.trustLoopbackProxy,
+    );
     if (
       wsServer.clients.size >= 128 ||
       request.url !== "/ws" ||

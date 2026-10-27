@@ -1,6 +1,6 @@
 {
   "name": "cf-timer",
-  "version": "0.2.0-dev.0",
+  "version": "0.2.0",
   "private": true,
   "description": "CF Timer — local-first workout timer",
   "engines": {
@@ -23,7 +23,8 @@
     "test:remote": "vitest run src/application src/protocol src/remote src/server",
     "build:relay": "node tools/build-relay.mjs",
     "start:relay": "node --env-file-if-exists=.env dist-relay/main.js",
-    "preview:qr": "node --env-file-if-exists=.env tools/dev-remote.mjs --preview"
+    "preview:qr": "node --env-file-if-exists=.env tools/dev-remote.mjs --preview",
+    "release:package": "node tools/package-release.mjs"
   },
   "type": "module",
   "license": "Apache-2.0",

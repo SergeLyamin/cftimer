@@ -226,9 +226,17 @@ describe("segmented workout timeline", () => {
     const { engine, at } = fixture();
     engine.dispatch({ type: "start" });
     const markup = readout(at(35000), "Раунд 1 / 2");
-    expect(markup).toContain(
-      'class="workout-timeline" data-direction="down" role="group" aria-label="Раунд 1 из 2"',
-    );
+    const timelineTag = markup.match(
+      /<[^>]+class="workout-timeline"[^>]*>/,
+    )?.[0];
+    expect(timelineTag).toBeDefined();
+    for (const attribute of [
+      'data-direction="down"',
+      'role="group"',
+      'aria-label="Раунд 1 из 2"',
+    ]) {
+      expect(timelineTag).toContain(attribute);
+    }
     expect(
       markup.match(/class="timeline-segment work" style="flex-grow:20000"/g),
     ).toHaveLength(2);

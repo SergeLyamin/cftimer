@@ -1,0 +1,37 @@
+CF Timer — независимая расширенная browser/UX-приёмка, 27.10.2026
+Рабочая копия: /private/tmp/cf-timer-qr-20261027
+Проверенный LAN preview: http://10.10.10.48:43970/; relay 43980.
+Assets: index-BLwuFIlp.js / index-CO8G2hjU.css.
+Источники приложения не изменялись; публичная публикация не выполнялась.
+
+PASS — Chromium 156.0.8078.48, реальный browser, отдельные контексты:
+• Первое QR-подключение, start принят display.
+• Две комнаты: команды A не меняют B; B остаётся на главной. После reload A комната B также неизменна. Это UI-сценарий изоляции, не отдельная атака подменой credentials.
+• Reload действующего телефона восстанавливает пульт; экран продолжает running без сброса.
+• Второй телефон: deny сохраняет первого владельца; последующий accept передаёт управление; старый владелец не имеет активной команды pause.
+• Короткая потеря сети текущего пульта и reconnect восстанавливают подтверждённый paused snapshot; экран не сбрасывается.
+• 60-секундный grace: после потери связи текущего пульта старый претендент ждёт. До окончания наблюдался countdown 11 с из 60; затем право выдано. Вернувшийся прежний владелец получает replaced, Resume недоступна. Точное срабатывание на миллисекундной границе 59/60 в этом браузерном прогоне не измерялось.
+• Reload display возвращает home, прежний пульт теряет connected/право управления.
+
+PASS — геометрия пульта в Chromium viewport emulation:
+375×667: горизонтального overflow нет, dropdown внутри viewport, controls не перекрывают время/heading; нижний край controls 600.31 px.
+390×844: те же условия, нижний край controls 759.61 px.
+844×390 landscape: overflow/перекрытий нет, dropdown внутри; нижний край controls 412 px, требуется небольшая вертикальная прокрутка. Это нормальный flow, не fixed overlay.
+Дополнительно Chromium isMobile:true/hasTouch:true 390×844: pair/start/pause/resume/confirmed menu PASS, dropdown не выходит за viewport, Escape возвращает focus статусу.
+
+PASS — Firefox 157.0 (installed executable через CLI config), desktop host + 390×844 controller:
+QR pair, start/pause/resume приняты экраном; подтверждённый returnToMenu; горизонтального overflow нет; status dropdown внутри viewport; Escape возвращает фокус статусу.
+Стандартный CLI initially искал firefox-1553, установлен firefox-1555; использован explicit executablePath без загрузки браузера.
+
+НЕ ПРОВЕРЕНО — WebKit/Safari:
+Две CLI-попытки с установленным WebKit не завершили инициализацию. После закрытия получено: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled. Это несовместимость установленного runner/browser, не результат теста приложения. Обе тестовые WebKit-сессии закрыты.
+
+НАЙДЕНО — неточная подпись cooldown (передано root):
+После отказа немедленный повторный requestControl в пределах30с возвращает server access busy, UI пишет «Другой запрос уже ожидает ответа», хотя других запросов нет. После cooldown запрос/accept работают. Authority/runtime нарушения не обнаружено. Нужно различить cooldown или использовать нейтральный текст, не утверждающий чужой запрос.
+
+Ранее отдельно подтверждено в desktop UI review:
+• Белая подготовка #f5f5f5, все14 gap при8раундах по6px.
+• Controls bottom900 при viewport1000; обычные pause/resume не создают alert.
+• Узкая задержка commandResult1000мс: alerts0, aria-busy true, action disabled. При3600мс появляется «Нет подтверждения…» после3с.
+
+Не дублировались full Chromium E2E/PWA из работы UI-инженера. Реальные iOS/Android, аппаратный PC+TV, звук и часовой прогон не проверялись. Кроссбраузерная проверка не означает физическую приёмку пилота. Секреты приглашений/credentials не записывались в evidence.

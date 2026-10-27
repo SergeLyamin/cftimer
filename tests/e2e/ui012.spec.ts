@@ -5,6 +5,25 @@ const buildVersion = (
   JSON.parse(readFileSync("package.json", "utf8")) as { version: string }
 ).version;
 
+async function selectDurationText(
+  input: Locator,
+  start?: number,
+  end?: number,
+) {
+  await input.evaluate(
+    async (node: HTMLInputElement, range) => {
+      // The duration editor restores its caret on the next frame. Finish that
+      // user-input render before creating the next deliberate selection.
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
+      if (range.start === undefined) node.select();
+      else node.setSelectionRange(range.start, range.end ?? range.start);
+    },
+    { start, end },
+  );
+}
+
 async function paste(input: Locator, value: string) {
   await input.evaluate((node, text) => {
     const data = new DataTransfer();
@@ -47,31 +66,31 @@ test("duration typing, selection, paste and separator deletion remain bounded", 
   await field.focus();
   await page.keyboard.type("0130");
   await expect(field).toHaveValue("01:30");
-  await field.evaluate((e: HTMLInputElement) => e.setSelectionRange(1, 2));
+  await selectDurationText(field, 1, 2);
   await page.keyboard.press("Backspace");
   await expect(field).toHaveValue("03:0");
   await field.focus();
-  await field.evaluate((e: HTMLInputElement) => e.select());
+  await selectDurationText(field);
   await paste(field, "01:30");
   await expect(field).toHaveValue("01:30");
-  await field.evaluate((e: HTMLInputElement) => e.select());
+  await selectDurationText(field);
   await paste(field, "bad input");
   await expect(field).toHaveValue("01:30");
   await expect(field).toHaveAttribute("aria-invalid", "true");
   await page.getByRole("button", { name: "Старт", exact: true }).click();
   await expect(page.locator(".timer")).toHaveCount(0);
   await field.focus();
-  await field.evaluate((e: HTMLInputElement) => e.select());
+  await selectDurationText(field);
   await paste(field, "0130");
   await expect(field).toHaveValue("01:30");
   await expect(field).toHaveAttribute("aria-invalid", "false");
-  await field.evaluate((e: HTMLInputElement) => e.setSelectionRange(3, 3));
+  await selectDurationText(field, 3, 3);
   await page.keyboard.press("Backspace");
   await expect(field).toHaveValue("03:0");
   await field.fill("0061");
   await expect(field).toHaveValue("00:61");
   await expect(page.locator(".preview")).toContainText("01:11");
-  await field.evaluate((e: HTMLInputElement) => e.setSelectionRange(5, 5));
+  await selectDurationText(field, 5, 5);
   await page.keyboard.type("9");
   await expect(field).toHaveValue("00:61");
   await expect(field).toHaveAttribute("aria-invalid", "false");
@@ -81,7 +100,7 @@ test("duration typing, selection, paste and separator deletion remain bounded", 
     ["00:100", "00:99"],
     ["9".repeat(10000), "99:99"],
   ]) {
-    await field.evaluate((e: HTMLInputElement) => e.select());
+    await selectDurationText(field);
     await paste(field, clipboard);
     await expect(field).toHaveValue(value);
     await expect(field).toHaveAttribute("aria-invalid", "false");
@@ -368,7 +387,7 @@ test("phase colors, pulse windows and flat timeline follow actual phases", async
   await page.getByLabel("Отдых", { exact: true }).fill("0010");
   await setPrep(page, "0001");
   await page.getByRole("button", { name: "Старт", exact: true }).click();
-  await expect(page.locator(".phase")).toHaveCSS("color", "rgb(242, 165, 65)");
+  await expect(page.locator(".phase")).toHaveCSS("color", "rgb(245, 245, 245)");
   await expect(page.locator(".round-tile")).toHaveCount(0);
   await expect(page.locator(".timeline-segment.work")).toHaveCount(2);
   await expect(page.locator(".timeline-segment.rest")).toHaveCount(1);

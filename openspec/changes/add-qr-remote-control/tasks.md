@@ -47,7 +47,7 @@
 
 ## 5. Integration acceptance
 
-- [ ] 5.0 Предоставить владельцу новый desktop QR UI и получить явное UI approval; замечания возвращают на desktop review до расширенных проверок.
+- [x] 5.0 Предоставить владельцу новый desktop QR UI и получить явное UI approval; замечания возвращают на desktop review до расширенных проверок.
 - [ ] 5.4 После нового UI approval проверить mobile375×667/390×844, responsive/landscape, cross-browser, regression, offline/PWA, несовместимые версии и reload; результаты записать отдельно от физических устройств.
 - [ ] 5.5 Проверить потерянный fence ACK, отмену выдачи, release без кандидата и late command, controller/host generation, bounded resources и malformed messages; целевые model/integration tests сохраняют one-writer/monotonic-epoch/room-isolation.
 

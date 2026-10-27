@@ -17,7 +17,7 @@ const accessText: Record<string, string> = {
   "no-display": "Нет связи с экраном",
   cancelled: "Запрос отменён",
   released: "Пульт отключён",
-  busy: "Другой запрос уже ожидает ответа",
+  busy: "Запрос сейчас недоступен. Попробуйте чуть позже",
 };
 function workoutName(config?: TimerConfig) {
   return config?.mode === "tabata" &&

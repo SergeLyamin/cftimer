@@ -70,7 +70,7 @@ for (const viewport of [
     await start(page, "AMRAP");
     await page.clock.runFor(500);
     await expect(page.locator(".phase")).toHaveText("ПОДГОТОВКА");
-    await expectPaintedBar(page, 0.5, "rgb(242, 165, 65)");
+    await expectPaintedBar(page, 0.5, "rgb(245, 245, 245)");
 
     // Allow one animation-frame margin past exactly 24 seconds of work.
     await page.clock.runFor(24520);

@@ -1,0 +1,34 @@
+[Unit]
+Description=CF Timer QR relay
+After=network.target
+
+[Service]
+Type=simple
+User=timer
+Group=timer
+WorkingDirectory=/home/timer/timer.lyamin.org/relay/current
+ExecStart=/home/timer/.local/node24/bin/node /home/timer/timer.lyamin.org/relay/current/main.js
+Environment=NODE_ENV=production
+Environment=CF_TIMER_HOST=127.0.0.1
+Environment=CF_TIMER_PORT=43980
+Environment=CF_TIMER_ORIGINS=https://timer.lyamin.org
+Environment=CF_TIMER_TRUST_LOOPBACK_PROXY=1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0077
+MemoryMax=256M
+TasksMax=64
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cf-timer-relay
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=100
+
+[Install]
+WantedBy=multi-user.target
