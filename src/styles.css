@@ -7,7 +7,7 @@
   font-display: swap;
 }
 :root {
-  --color-preparation: #b59cff;
+  --color-preparation: #f5f5f5;
   --color-work: #ef4a40;
   --color-rest: #59b8e8;
   font-family: Arial, sans-serif;
@@ -1076,7 +1076,7 @@ details .field {
 }
 .workout-timeline {
   display: flex;
-  gap: min(3px, calc(100% / var(--segment-count) * 0.4));
+  gap: min(6px, calc(100% / var(--segment-count) * 0.4));
   width: 100%;
   height: 3px;
   margin-top: 16px;

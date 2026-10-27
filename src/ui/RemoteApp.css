@@ -168,3 +168,26 @@
   background: #191b1e;
   border-color: #fff;
 }
+
+/* Keep the timer controls near the lower edge without covering content.
+   Long notices and short viewports extend the page; haptics follow below. */
+.remote-app[data-view="timer"] .remote-workspace {
+  min-height: calc(100svh - 84px);
+  display: flex;
+  flex-direction: column;
+}
+.remote-app[data-view="timer"] .remote-timer {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+.remote-app[data-view="timer"] .remote-controls {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 32px;
+  margin-bottom: max(10svh, env(safe-area-inset-bottom, 0px));
+}
+.remote-app .remote-controls[data-pending="true"] button:disabled {
+  opacity: 1;
+}

@@ -240,6 +240,7 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
   return (
     <div
       className="remote-app"
+      data-view={setup ? "setup" : application?.view}
       data-phase={
         application?.view === "timer" ? timer?.phase?.kind : undefined
       }
@@ -323,331 +324,338 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
         </div>
       </header>
       <main className="remote-content">
-        {application && (setup || application.view === "timer") && (
-          <div className="remote-workout-heading">
-            <button
-              className="quiet icon-button"
-              aria-label="Все режимы"
-              title="Все режимы"
-              disabled={!enabled}
-              onClick={(event) => backToMenu(event.currentTarget)}
-            >
-              <Icon name="back" />
-            </button>
-            <h2>{setup ? modeName : workoutName(timer?.config)}</h2>
-          </div>
-        )}
-        {(state.access !== "ready" || state.connection !== "connected") && (
-          <div className="remote-connection">
-            <p role="status">
-              {state.connection !== "connected"
-                ? fatal
-                  ? "Подключение недоступно"
-                  : "Связь потеряна · подключаемся…"
-                : (accessLabel ?? "Подключение…")}
-            </p>
-          </div>
-        )}
-        {notice && (
-          <p className="remote-alert" role="status">
-            {notice}
-          </p>
-        )}
-        {state.error && (
-          <p className="remote-alert" role="alert">
-            {state.error === "incompatible_version"
-              ? "Версии экрана и пульта несовместимы. После тренировки обновите обе страницы и отсканируйте новый QR."
-              : state.error === "invitation_invalid" ||
-                  state.error === "room_expired" ||
-                  state.error === "unauthorized"
-                ? "Приглашение больше не действует. Отсканируйте новый QR на экране."
-                : "Не удалось выполнить запрос. Проверьте связь и попробуйте снова."}
-          </p>
-        )}
-        {state.stopped &&
-          ![
-            "incompatible_version",
-            "invitation_invalid",
-            "room_expired",
-            "unauthorized",
-          ].includes(state.error ?? "") && (
-            <button className="secondary" onClick={() => runtime.retry()}>
-              Повторить подключение
-            </button>
+        <div className="remote-workspace">
+          {application && (setup || application.view === "timer") && (
+            <div className="remote-workout-heading">
+              <button
+                className="quiet icon-button"
+                aria-label="Все режимы"
+                title="Все режимы"
+                disabled={!enabled}
+                onClick={(event) => backToMenu(event.currentTarget)}
+              >
+                <Icon name="back" />
+              </button>
+              <h2>{setup ? modeName : workoutName(timer?.config)}</h2>
+            </div>
           )}
-        {state.pending && (
-          <p className="remote-alert" role="status">
-            {state.pending.state === "pending"
-              ? "Ждём подтверждения экрана…"
-              : "Нет подтверждения от экрана. Команда могла выполниться"}
-            {state.pending.state !== "pending" && (
+          {(state.access !== "ready" || state.connection !== "connected") && (
+            <div className="remote-connection">
+              <p role="status">
+                {state.connection !== "connected"
+                  ? fatal
+                    ? "Подключение недоступно"
+                    : "Связь потеряна · подключаемся…"
+                  : (accessLabel ?? "Подключение…")}
+              </p>
+            </div>
+          )}
+          {notice && (
+            <p className="remote-alert" role="status">
+              {notice}
+            </p>
+          )}
+          {state.error && (
+            <p className="remote-alert" role="alert">
+              {state.error === "incompatible_version"
+                ? "Версии экрана и пульта несовместимы. После тренировки обновите обе страницы и отсканируйте новый QR."
+                : state.error === "invitation_invalid" ||
+                    state.error === "room_expired" ||
+                    state.error === "unauthorized"
+                  ? "Приглашение больше не действует. Отсканируйте новый QR на экране."
+                  : "Не удалось выполнить запрос. Проверьте связь и попробуйте снова."}
+            </p>
+          )}
+          {state.stopped &&
+            ![
+              "incompatible_version",
+              "invitation_invalid",
+              "room_expired",
+              "unauthorized",
+            ].includes(state.error ?? "") && (
+              <button className="secondary" onClick={() => runtime.retry()}>
+                Повторить подключение
+              </button>
+            )}
+          {state.pending && state.pending.state !== "pending" && (
+            <p className="remote-alert" role="status">
+              Нет подтверждения от экрана. Команда могла выполниться
               <button className="quiet" onClick={() => runtime.checkStatus()}>
                 Проверить состояние
               </button>
-            )}
-          </p>
-        )}
-        {!state.pending && state.lastResult?.status === "history_expired" && (
-          <p className="remote-alert" role="status">
-            Нет подтверждения от экрана. Команда могла выполниться
-          </p>
-        )}
-        {!state.pending && state.lastResult?.status === "not_seen" && (
-          <p className="remote-alert" role="status">
-            Команда не была выполнена. Проверьте состояние экрана перед новым
-            действием.
-          </p>
-        )}
-        {!state.pending && state.lastResult?.status === "rejected" && (
-          <p className="remote-alert" role="status">
-            Команда не выполнена. Состояние экрана изменилось — проверьте его и
-            повторите действие.
-          </p>
-        )}
-        {state.transferRequest && (
-          <section className="remote-card" aria-label="Запрос передачи">
-            <h2>Передать управление?</h2>
-            <p>
-              Другой телефон просит пульт. На ответ — 20 секунд. Осталось{" "}
-              {Math.max(
-                0,
-                Math.ceil(
-                  (state.transferRequest.expiresAt - performance.now()) / 1000,
-                ),
-              )}{" "}
-              с.
             </p>
-            <div className="remote-actions">
-              <button
-                className="secondary"
-                onClick={() =>
-                  runtime.transferDecision(
-                    state.transferRequest!.requestId,
-                    false,
-                  )
-                }
-              >
-                Оставить у меня
-              </button>
-              <button
-                className="primary"
-                onClick={() =>
-                  runtime.transferDecision(
-                    state.transferRequest!.requestId,
-                    true,
-                  )
-                }
-              >
-                Передать
-              </button>
-            </div>
-          </section>
-        )}
-        {state.access !== "ready" && (
-          <section className="remote-card">
-            <h2>{accessLabel ?? "Подключаем пульт"}</h2>
-            {state.access === "waiting" || state.access === "no-display" ? (
-              <>
-                <p>
-                  {state.access === "no-display"
-                    ? "Нет связи с общим экраном. Уже запущенный таймер на нём продолжает работать."
-                    : state.waitUntil
-                      ? `Активный пульт потерял связь. До освобождения управления: ${Math.max(0, Math.ceil((state.waitUntil - performance.now()) / 1000))} с из 60 секунд после последнего контакта.`
-                      : state.approvalUntil
-                        ? `Ждём ответа активного пульта: ${Math.max(0, Math.ceil((state.approvalUntil - performance.now()) / 1000))} с. На ответ даётся 20 секунд; без ответа управление не передаётся.`
-                        : "Ожидаем подтверждения экрана…"}
-                </p>
+          )}
+          {!state.pending && state.lastResult?.status === "history_expired" && (
+            <p className="remote-alert" role="status">
+              Нет подтверждения от экрана. Команда могла выполниться
+            </p>
+          )}
+          {!state.pending && state.lastResult?.status === "not_seen" && (
+            <p className="remote-alert" role="status">
+              Команда не была выполнена. Проверьте состояние экрана перед новым
+              действием.
+            </p>
+          )}
+          {!state.pending && state.lastResult?.status === "rejected" && (
+            <p className="remote-alert" role="status">
+              Команда не выполнена. Состояние экрана изменилось — проверьте его
+              и повторите действие.
+            </p>
+          )}
+          {state.transferRequest && (
+            <section className="remote-card" aria-label="Запрос передачи">
+              <h2>Передать управление?</h2>
+              <p>
+                Другой телефон просит пульт. На ответ — 20 секунд. Осталось{" "}
+                {Math.max(
+                  0,
+                  Math.ceil(
+                    (state.transferRequest.expiresAt - performance.now()) /
+                      1000,
+                  ),
+                )}{" "}
+                с.
+              </p>
+              <div className="remote-actions">
                 <button
                   className="secondary"
-                  onClick={() => runtime.cancelRequest()}
+                  onClick={() =>
+                    runtime.transferDecision(
+                      state.transferRequest!.requestId,
+                      false,
+                    )
+                  }
                 >
-                  Отменить запрос
+                  Оставить у меня
                 </button>
-              </>
-            ) : (
-              <>
-                <p>
-                  {state.access === "replaced"
-                    ? "Этот телефон больше не управляет таймером."
-                    : "Тренировка на общем экране продолжается."}
-                </p>
-                {
+                <button
+                  className="primary"
+                  onClick={() =>
+                    runtime.transferDecision(
+                      state.transferRequest!.requestId,
+                      true,
+                    )
+                  }
+                >
+                  Передать
+                </button>
+              </div>
+            </section>
+          )}
+          {state.access !== "ready" && (
+            <section className="remote-card">
+              <h2>{accessLabel ?? "Подключаем пульт"}</h2>
+              {state.access === "waiting" || state.access === "no-display" ? (
+                <>
+                  <p>
+                    {state.access === "no-display"
+                      ? "Нет связи с общим экраном. Уже запущенный таймер на нём продолжает работать."
+                      : state.waitUntil
+                        ? `Активный пульт потерял связь. До освобождения управления: ${Math.max(0, Math.ceil((state.waitUntil - performance.now()) / 1000))} с из 60 секунд после последнего контакта.`
+                        : state.approvalUntil
+                          ? `Ждём ответа активного пульта: ${Math.max(0, Math.ceil((state.approvalUntil - performance.now()) / 1000))} с. На ответ даётся 20 секунд; без ответа управление не передаётся.`
+                          : "Ожидаем подтверждения экрана…"}
+                  </p>
                   <button
                     className="secondary"
-                    disabled={state.connection !== "connected" || fatal}
-                    onClick={() => runtime.requestControl()}
+                    onClick={() => runtime.cancelRequest()}
                   >
-                    Запросить управление
+                    Отменить запрос
                   </button>
-                }
-              </>
-            )}
-          </section>
-        )}
-        {application && (
-          <>
-            {!linked && (
-              <p className="remote-frozen">
-                Последнее подтверждённое состояние
-              </p>
-            )}
-            {setup && config ? (
-              <>
-                <RemoteSetup
-                  key={`${config.mode}-${hasDraft ? draft.revision : application.revision}`}
-                  initial={config}
-                  disabled={!enabled}
-                  onStart={(c) => send({ type: "start", config: c })}
-                  onBack={() => {
-                    setDraft(undefined);
-                    if (application.view === "setup")
-                      send({ type: "returnToMenu" });
-                  }}
-                />
-              </>
-            ) : application.view === "home" ? (
-              <div className="remote-modes">
-                {modes.map((mode) => (
-                  <button
-                    key={mode.id}
-                    className="mode-card"
-                    disabled={!enabled}
-                    onClick={() => choose(mode.id)}
-                  >
-                    <Icon name={mode.icon} />
-                    <strong>{mode.name}</strong>
-                    <span>{mode.detail}</span>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              timer && (
-                <section className="remote-timer">
-                  <p className="remote-phase">
-                    {timer.status === "paused"
-                      ? "ПАУЗА"
-                      : timer.status === "completed"
-                        ? "ГОТОВО!"
-                        : timer.phase?.kind === "preparation"
-                          ? "ПОДГОТОВКА"
-                          : timer.phase?.kind === "rest"
-                            ? "ОТДЫХ"
-                            : "РАБОТА"}
+                </>
+              ) : (
+                <>
+                  <p>
+                    {state.access === "replaced"
+                      ? "Этот телефон больше не управляет таймером."
+                      : "Тренировка на общем экране продолжается."}
                   </p>
-                  <div className="remote-time">
-                    {formatTime(timer.displayMs, timer.countDirection)}
-                  </div>
-                  {timer.config.rounds > 1 && (
-                    <p>
-                      Раунд {timer.phase?.round ?? 1} / {timer.config.rounds}
-                    </p>
-                  )}
-                  <div className="remote-controls">
-                    {timer.status === "completed" ? (
-                      <button
-                        className="primary remote-repeat-action"
-                        disabled={!enabled}
-                        onClick={() => send({ type: "repeat" })}
-                      >
-                        <Icon name="repeat" />
-                        Повторить
-                      </button>
-                    ) : (
-                      <>
-                        <div className="remote-side-slot">
-                          {timer.status === "paused" && (
-                            <button
-                              className="remote-side-action"
-                              aria-label="Редактировать тренировку"
-                              title="Редактировать тренировку"
-                              disabled={!enabled}
-                              onClick={() => send({ type: "edit" })}
-                            >
-                              <Icon name="edit" />
-                            </button>
-                          )}
-                        </div>
-                        <button
-                          className="primary remote-main-action"
-                          aria-label={
-                            timer.status === "paused" ? "Продолжить" : "Пауза"
-                          }
-                          title={
-                            timer.status === "paused" ? "Продолжить" : "Пауза"
-                          }
-                          disabled={!enabled}
-                          onClick={() =>
-                            send({
-                              type:
-                                timer.status === "paused" ? "resume" : "pause",
-                            })
-                          }
-                        >
-                          <Icon
-                            name={timer.status === "paused" ? "play" : "pause"}
-                          />
-                        </button>
-                        <div className="remote-side-slot">
-                          {timer.status === "paused" && (
-                            <button
-                              className="remote-side-action"
-                              aria-label="Начать заново"
-                              title="Начать заново"
-                              disabled={!enabled}
-                              onClick={() => send({ type: "restart" })}
-                            >
-                              <Icon name="stop" />
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </section>
-              )
-            )}
-          </>
-        )}
-        {confirm && (
-          <AnchoredDialog
-            anchor={confirm.trigger}
-            dialogRef={dialogRef}
-            onClose={() => setConfirm(undefined)}
-          >
-            <h2 id="dialog-title">Вернуться в меню?</h2>
-            <p id="dialog-description">
-              Текущий отсчёт будет сброшен на общем экране
-            </p>
-            <div className="dialog-actions">
-              <button
-                className="primary"
-                disabled={!enabled}
-                onClick={() => {
-                  if (
-                    runtime.getSnapshot().remote?.application.revision !==
-                    confirm.revision
-                  ) {
-                    setConfirm(undefined);
-                    setNotice(
-                      "Состояние экрана изменилось. Проверьте таймер и подтвердите возврат в меню ещё раз.",
-                    );
-                    return;
+                  {
+                    <button
+                      className="secondary"
+                      disabled={state.connection !== "connected" || fatal}
+                      onClick={() => runtime.requestControl()}
+                    >
+                      Запросить управление
+                    </button>
                   }
-                  send({ type: "returnToMenu" }, confirm.revision);
-                }}
-              >
-                В меню
-              </button>
-              <button
-                className="dialog-cancel"
-                autoFocus
-                onClick={() => setConfirm(undefined)}
-              >
-                Отмена
-              </button>
-            </div>
-          </AnchoredDialog>
-        )}
+                </>
+              )}
+            </section>
+          )}
+          {application && (
+            <>
+              {!linked && (
+                <p className="remote-frozen">
+                  Последнее подтверждённое состояние
+                </p>
+              )}
+              {setup && config ? (
+                <>
+                  <RemoteSetup
+                    key={`${config.mode}-${hasDraft ? draft.revision : application.revision}`}
+                    initial={config}
+                    disabled={!enabled}
+                    onStart={(c) => send({ type: "start", config: c })}
+                    onBack={() => {
+                      setDraft(undefined);
+                      if (application.view === "setup")
+                        send({ type: "returnToMenu" });
+                    }}
+                  />
+                </>
+              ) : application.view === "home" ? (
+                <div className="remote-modes">
+                  {modes.map((mode) => (
+                    <button
+                      key={mode.id}
+                      className="mode-card"
+                      disabled={!enabled}
+                      onClick={() => choose(mode.id)}
+                    >
+                      <Icon name={mode.icon} />
+                      <strong>{mode.name}</strong>
+                      <span>{mode.detail}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                timer && (
+                  <section className="remote-timer">
+                    <p className="remote-phase">
+                      {timer.status === "paused"
+                        ? "ПАУЗА"
+                        : timer.status === "completed"
+                          ? "ГОТОВО!"
+                          : timer.phase?.kind === "preparation"
+                            ? "ПОДГОТОВКА"
+                            : timer.phase?.kind === "rest"
+                              ? "ОТДЫХ"
+                              : "РАБОТА"}
+                    </p>
+                    <div className="remote-time">
+                      {formatTime(timer.displayMs, timer.countDirection)}
+                    </div>
+                    {timer.config.rounds > 1 && (
+                      <p>
+                        Раунд {timer.phase?.round ?? 1} / {timer.config.rounds}
+                      </p>
+                    )}
+                    <div
+                      className="remote-controls"
+                      data-pending={state.pending?.state === "pending"}
+                      aria-busy={state.pending?.state === "pending"}
+                    >
+                      {timer.status === "completed" ? (
+                        <button
+                          className="primary remote-repeat-action"
+                          disabled={!enabled}
+                          onClick={() => send({ type: "repeat" })}
+                        >
+                          <Icon name="repeat" />
+                          Повторить
+                        </button>
+                      ) : (
+                        <>
+                          <div className="remote-side-slot">
+                            {timer.status === "paused" && (
+                              <button
+                                className="remote-side-action"
+                                aria-label="Редактировать тренировку"
+                                title="Редактировать тренировку"
+                                disabled={!enabled}
+                                onClick={() => send({ type: "edit" })}
+                              >
+                                <Icon name="edit" />
+                              </button>
+                            )}
+                          </div>
+                          <button
+                            className="primary remote-main-action"
+                            aria-label={
+                              timer.status === "paused" ? "Продолжить" : "Пауза"
+                            }
+                            title={
+                              timer.status === "paused" ? "Продолжить" : "Пауза"
+                            }
+                            disabled={!enabled}
+                            onClick={() =>
+                              send({
+                                type:
+                                  timer.status === "paused"
+                                    ? "resume"
+                                    : "pause",
+                              })
+                            }
+                          >
+                            <Icon
+                              name={
+                                timer.status === "paused" ? "play" : "pause"
+                              }
+                            />
+                          </button>
+                          <div className="remote-side-slot">
+                            {timer.status === "paused" && (
+                              <button
+                                className="remote-side-action"
+                                aria-label="Начать заново"
+                                title="Начать заново"
+                                disabled={!enabled}
+                                onClick={() => send({ type: "restart" })}
+                              >
+                                <Icon name="stop" />
+                              </button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </section>
+                )
+              )}
+            </>
+          )}
+          {confirm && (
+            <AnchoredDialog
+              anchor={confirm.trigger}
+              dialogRef={dialogRef}
+              onClose={() => setConfirm(undefined)}
+            >
+              <h2 id="dialog-title">Вернуться в меню?</h2>
+              <p id="dialog-description">
+                Текущий отсчёт будет сброшен на общем экране
+              </p>
+              <div className="dialog-actions">
+                <button
+                  className="primary"
+                  disabled={!enabled}
+                  onClick={() => {
+                    if (
+                      runtime.getSnapshot().remote?.application.revision !==
+                      confirm.revision
+                    ) {
+                      setConfirm(undefined);
+                      setNotice(
+                        "Состояние экрана изменилось. Проверьте таймер и подтвердите возврат в меню ещё раз.",
+                      );
+                      return;
+                    }
+                    send({ type: "returnToMenu" }, confirm.revision);
+                  }}
+                >
+                  В меню
+                </button>
+                <button
+                  className="dialog-cancel"
+                  autoFocus
+                  onClick={() => setConfirm(undefined)}
+                >
+                  Отмена
+                </button>
+              </div>
+            </AnchoredDialog>
+          )}
+        </div>
         <footer className="remote-footer">
           {"vibrate" in navigator && (
             <>

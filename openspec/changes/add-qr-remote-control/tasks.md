@@ -43,6 +43,8 @@
 
 - [x] 4.8 Выполнить уточнения владельца: компактный header/status-menu, disconnect внутри меню, верхняя навигация и круг pause; общий экран preparation violet, digits+10%, track width/opacity, gaps3px, edge+10%; компактные capability-aware настройки. Desktop walkthrough проверяет управление, геометрию и opacity; повторное одобрение владельца остаётся в 5.0.
 
+- [x] 4.9 Уточнить preparation white, увеличить зазоры timeline до6px, перенести controls пульта в нижнюю зону с отступом10svh и убрать обычный pendingACK alert; desktop проверяет геометрию и отсутствие вспышек, unknown/error остаются видимыми.
+
 ## 5. Integration acceptance
 
 - [ ] 5.0 Предоставить владельцу новый desktop QR UI и получить явное UI approval; замечания возвращают на desktop review до расширенных проверок.
