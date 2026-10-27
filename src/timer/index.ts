@@ -116,9 +116,8 @@ export class TimerEngine {
   private get total() {
     return this.phases.reduce((sum, p) => sum + p.durationMs, 0);
   }
-  private sync() {
+  private sync(now: number) {
     if (this.status !== "running") return;
-    const now = this.clock.now();
     this.elapsed = Math.min(
       this.total,
       this.elapsed + Math.max(0, now - this.anchor),
@@ -129,8 +128,8 @@ export class TimerEngine {
     while (index < this.phases.length - 1 && this.elapsed >= boundary)
       boundary += this.phases[++index].durationMs;
     if (index !== this.phaseIndex) {
+      this.revision += index - this.phaseIndex;
       this.phaseIndex = index;
-      this.revision++;
     }
     if (this.elapsed >= this.total) {
       this.status = "completed";
@@ -139,7 +138,11 @@ export class TimerEngine {
     }
   }
   dispatch(action: TimerAction): TimerSnapshot {
-    this.sync();
+    return this.dispatchAt(action, this.clock.now());
+  }
+  /** Execute against one captured clock sample, including any due transitions. */
+  dispatchAt(action: TimerAction, now: number): TimerSnapshot {
+    this.sync(now);
     switch (action.type) {
       case "configure":
         if (this.status === "running" || this.status === "paused") break;
@@ -149,12 +152,12 @@ export class TimerEngine {
         break;
       case "start":
         if (this.status !== "idle") break;
-        this.begin();
+        this.begin(now);
         break;
       case "repeat":
         if (this.status !== "completed") break;
         this.clear();
-        this.begin();
+        this.begin(now);
         break;
       case "pause":
         if (this.status !== "running") break;
@@ -164,7 +167,7 @@ export class TimerEngine {
       case "resume":
         if (this.status !== "paused") break;
         this.status = "running";
-        this.anchor = this.clock.now();
+        this.anchor = now;
         this.revision++;
         break;
       case "finish":
@@ -177,11 +180,11 @@ export class TimerEngine {
         if (this.status !== "idle") this.clear();
         break;
     }
-    return this.getSnapshot();
+    return this.peekSnapshot();
   }
-  private begin() {
+  private begin(now: number) {
     this.status = "running";
-    this.anchor = this.clock.now();
+    this.anchor = now;
     this.runId++;
     this.revision++;
   }
@@ -193,7 +196,15 @@ export class TimerEngine {
     this.revision++;
   }
   getSnapshot(): TimerSnapshot {
-    this.sync();
+    return this.advanceTo(this.clock.now());
+  }
+  /** Advance using an externally sampled clock; no clock reads occur here. */
+  advanceTo(now: number): TimerSnapshot {
+    this.sync(now);
+    return this.peekSnapshot();
+  }
+  /** Pure read for transaction owners that already advanced time. */
+  peekSnapshot(): TimerSnapshot {
     const phase = this.phases[this.phaseIndex];
     const before = this.phases
       .slice(0, this.phaseIndex)

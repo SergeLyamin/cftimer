@@ -7,8 +7,26 @@ import { VitePWA } from "vite-plugin-pwa";
 const appPackage = JSON.parse(
   await readFile(new URL("./package.json", import.meta.url), "utf8"),
 );
+const relay = process.env.CF_TIMER_RELAY_URL ?? "http://127.0.0.1:43980";
+const proxy = {
+  "/ws": { target: relay, ws: true },
+  "/healthz": { target: relay },
+};
+const headers = {
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff",
+};
 export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(appPackage.version) },
+  server: {
+    proxy,
+    headers,
+    ...(process.env.CF_TIMER_DESKTOP_REVIEW === "1" ? { hmr: false } : {}),
+  },
+  preview: { proxy, headers: {
+    ...headers,
+    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  } },
   plugins: [
     react(),
     tailwindcss(),

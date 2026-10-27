@@ -1178,3 +1178,219 @@ details .field {
   bottom: auto;
   height: 24px;
 }
+
+/* Optional display pairing and explicitly routed controller. */
+.app-with-remote main {
+  padding-right: 320px;
+}
+.display-remote {
+  position: fixed;
+  right: 4vw;
+  top: 105px;
+  width: 280px;
+  z-index: 5;
+  background: #131518;
+  border: 1px solid #303239;
+  border-radius: 16px;
+}
+.display-remote.is-collapsed {
+  width: auto;
+}
+.remote-panel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  width: 100%;
+}
+.remote-panel-body {
+  padding: 0 24px 24px;
+  text-align: center;
+}
+.remote-panel-body h2 {
+  font-size: 20px;
+  margin: 4px 0 12px;
+}
+.remote-panel-body p {
+  color: #b6b8bf;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.remote-panel-body img {
+  display: block;
+  width: 224px;
+  height: 224px;
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 18px auto;
+}
+.remote-panel-body .remote-screen-name {
+  color: #fff;
+  font-weight: 700;
+}
+.remote-panel-body .remote-help {
+  font-size: 13px;
+}
+.qr-unavailable {
+  min-height: 224px;
+  display: grid;
+  place-items: center;
+  color: #b6b8bf;
+  line-height: 1.5;
+  padding: 20px;
+}
+.display-remote-timer {
+  top: 80px;
+  right: 24px;
+}
+.remote-app {
+  min-height: 100dvh;
+  background: radial-gradient(ellipse at top, #202124, #08090a 70%);
+}
+.remote-content {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px 24px 48px;
+}
+.remote-content h1 {
+  font-size: 24px;
+  margin: 0 0 8px;
+}
+.remote-content h2 {
+  font-size: 22px;
+  margin: 16px 0;
+}
+.remote-content p {
+  line-height: 1.5;
+  color: #bbbfc7;
+}
+.remote-badge {
+  color: #b6b8bf;
+  border: 1px solid #363941;
+  padding: 7px 14px;
+  border-radius: 20px;
+}
+.remote-connection {
+  margin-bottom: 28px;
+}
+.remote-connection p {
+  margin: 4px 0;
+}
+.remote-alert,
+.remote-card {
+  background: #202126;
+  border: 1px solid #41434b;
+  padding: 18px;
+  border-radius: 12px;
+  margin: 18px 0;
+}
+.remote-alert {
+  border-color: #946c32;
+}
+.remote-content .remote-frozen {
+  color: #eeb65e;
+}
+.remote-modes {
+  display: grid;
+  gap: 12px;
+}
+.remote-modes .mode-card {
+  width: 100%;
+  min-height: 90px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 5px 16px;
+  text-align: left;
+}
+.remote-modes .mode-card strong {
+  font-size: 23px;
+}
+.remote-modes .mode-card span {
+  grid-column: 2;
+  font-size: 14px;
+  color: #b6b8bf;
+}
+.remote-modes .mode-card .icon {
+  grid-row: span 2;
+  align-self: center;
+}
+.remote-setup.setup {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.remote-setup fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.remote-app button {
+  min-height: 48px;
+}
+.remote-app button:disabled,
+.remote-app fieldset:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.remote-app .primary,
+.remote-app .secondary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.remote-actions {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+}
+.remote-actions button {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+}
+.remote-timer {
+  text-align: center;
+  padding: 16px 0;
+}
+.remote-timer .remote-phase {
+  color: #ef6b61;
+  letter-spacing: 2px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.remote-time {
+  font-family: "Oswald", sans-serif;
+  font-size: clamp(72px, 18vw, 110px);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.remote-main-action {
+  margin-top: 24px;
+}
+.remote-footer {
+  border-top: 1px solid #303239;
+  margin-top: 36px;
+  padding-top: 16px;
+}
+.remote-footer p {
+  font-size: 13px;
+}
+.remote-footer .setting-switch {
+  font-size: 14px;
+}
+@media (max-width: 1000px) {
+  .app-with-remote main {
+    padding-right: 0;
+  }
+  .display-remote:not(.display-remote-timer) {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 28px auto;
+  }
+}

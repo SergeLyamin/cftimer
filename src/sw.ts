@@ -13,7 +13,8 @@ const manifest = self.__WB_MANIFEST;
 precacheAndRoute(manifest);
 registerRoute(
   new NavigationRoute(createHandlerBoundToURL("index.html"), {
-    allowlist: [/^\/$/, /^\/index\.html$/],
+    allowlist: [/^\/$/, /^\/index\.html$/, /^\/remote\/?$/],
+    denylist: [/^\/api(?:\/|$)/, /^\/ws(?:\/|$)/, /^\/healthz$/],
   }),
 );
 // Intentionally no skipWaiting/clientsClaim: updates activate only after all old tabs close.

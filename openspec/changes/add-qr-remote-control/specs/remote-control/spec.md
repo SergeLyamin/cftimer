@@ -60,7 +60,7 @@
 - **THEN** новый пульт остаётся waiting/no display и не объявляет готовность; после ACK запоздалая команда старой controlEpoch отклоняется также экраном
 
 ### Requirement: Allow takeover after sixty seconds without contact
-При отсутствии подтверждённого контакта текущего пульта 60 секунд новый претендент SHALL получать управление без согласия. До этого срока право MUST сохраняться. Explicit disconnect SHALL освобождать его сразу. Возврат старого пульта MUST не отменять уже совершённую передачу.
+При отсутствии подтверждённого контакта текущего пульта 60 секунд новый претендент SHALL получать управление без согласия. До этого срока право MUST сохраняться. Explicit disconnect SHALL немедленно начинать отзыв через новое поколение с владельцем none; готовность нового пульта SHALL ждать подтверждения экрана. Возврат старого пульта MUST не отменять уже совершённую передачу.
 
 #### Scenario: Grace period
 - **WHEN** новый телефон запрашивает управление через 59 секунд после последнего контакта первого
@@ -90,7 +90,7 @@ Reload/закрытие и повторное открытие страницы 
 - **THEN** он получает актуальный snapshot и продолжает управление той же тренировкой без reset
 
 ### Requirement: Acknowledge only display-accepted commands
-Пульт SHALL отправлять явные команды configure/start/pause/resume/finish/reset с уникальным commandId, sessionEpoch, controlEpoch и expectedRevision. Успех MUST означать принятие экраном. Повторы, устаревшие revision/epoch и команды без полномочий SHALL не менять состояние.
+Пульт SHALL отправлять явные команды start(config)/pause/resume/restart/edit/returnToMenu/repeat с уникальным commandId, монотонным commandSeq, sessionEpoch, controlEpoch, expectedRevision и sampleSeq. Успех MUST означать принятие экраном. Повторы, устаревшие revision/epoch и команды без полномочий SHALL не менять состояние.
 
 #### Scenario: Repeated command ID
 - **WHEN** команда start с одним commandId доставлена дважды
@@ -104,13 +104,17 @@ Reload/закрытие и повторное открытие страницы 
 - **WHEN** сервер получил команду, но экран не подтвердил её за 3 секунды
 - **THEN** пульт показывает «Нет подтверждения», а не успех; повторная попытка того же действия сохраняет commandId до выяснения результата
 
-#### Scenario: Configure from phone
-- **WHEN** текущий владелец пульта отправляет configure в idle с валидными параметрами и актуальной revision
-- **THEN** экран принимает настройки по тем же правилам, что локальная форма, и возвращает их в snapshot; configure во время preparing/running/paused отклоняется
+#### Scenario: Start configured workout from phone
+- **WHEN** владелец пульта отправляет start(config) в idle с валидными параметрами и актуальной revision
+- **THEN** экран атомарно применяет настройки и стартует, публикует согласованный timer/view/config; вмешательство между configure и start невозможно
 
-#### Scenario: Finish from phone
-- **WHEN** пользователь подтверждает finish активного For Time на телефоне
-- **THEN** экран завершает программу с фактическим прошедшим временем один раз; телефон показывает результат после display ACK
+#### Scenario: Restart and edit from phone
+- **WHEN** на paused пульт отправляет restart либо edit
+- **THEN** restart немедленно начинает ту же программу с подготовкой, а edit прекращает прежний отсчёт и открывает прежние параметры; новая программа после edit начинается только по start
+
+#### Scenario: Leave and repeat from phone
+- **WHEN** пользователь подтверждает returnToMenu активной тренировки либо нажимает repeat на completed
+- **THEN** первый сценарий открывает меню без результата, второй начинает ту же программу заново; отдельный finish в пульте отсутствует
 
 #### Scenario: Lost acknowledgment followed by reconnect
 - **WHEN** экран выполнил команду, ACK потерялся, а пульт после snapshot повторяет тот же commandId
@@ -165,11 +169,11 @@ Reload/закрытие и повторное открытие страницы 
 - **THEN** сервер освобождает комнату; повторное сетевое подключение создаёт новую epoch без перезапуска локального таймера
 
 ### Requirement: Optimize the phone as a controller
-Пульт SHALL показывать имя экрана, состояние связи/доступа, подтверждённые фазу/время и крупное основное действие. Звук SHALL по умолчанию исходить только от экрана; команды reset/выход внутри UI MUST требовать подтверждения (не закрытие вкладки или browser reload). Сетевой fullscreen SHALL не обещать обход локального действия браузера.
+Пульт SHALL показывать имя экрана, состояние связи/доступа, подтверждённые фазу/время и крупное основное действие. Звук SHALL исходить только от экрана; returnToMenu активной тренировки внутри UI MUST требовать подтверждения (не закрытие вкладки или browser reload). Restart на паузе SHALL выполняться немедленно без подтверждения. Отключение пульта SHALL быть отдельным действием, не сбрасывающим тренировку. Сетевой fullscreen SHALL не обещать обход локального действия браузера.
 
 #### Scenario: Normal coaching flow
 - **WHEN** пользователь подключён и программа running
-- **THEN** на телефоне доступны пауза и защищённое завершение с targets минимум 48 CSS px, а звук не дублируется телефоном
+- **THEN** на телефоне доступна пауза, выход в меню защищён подтверждением, targets минимум 48 CSS px, звук не дублируется телефоном
 
 #### Scenario: Time to pair in pilot
 - **WHEN** 10 первых попыток подключения выполнены пользовательами с современными телефонами на стабильной сети
@@ -224,3 +228,48 @@ Reload/закрытие и повторное открытие страницы 
 #### Scenario: Local preferences are unavailable
 - **WHEN** браузер запрещает запись предпочтения видимости QR
 - **THEN** сворачивание/раскрытие работает до конца текущей страницы и не блокирует таймер или пульт
+
+
+### Requirement: Execute atomic application intentions
+Local и remote SHALL проходить одну таблицу предусловий application runtime. Runtime MUST продвигать время и проверять expectedRevision на одном замере часов до исполнения; pure snapshot read MUST не изменять состояние. UI SHALL показывать активную конфигурацию из authoritative snapshot, не из старого черновика.
+
+#### Scenario: Phase boundary during submission
+- **WHEN** команда пришла на границе смены фазы
+- **THEN** runtime сначала учитывает границу на одном now, затем отклоняет старую revision без исполнения; промежуточный idle при restart не публикуется
+
+#### Scenario: StrictMode replay
+- **WHEN** React повторяет render/effect lifecycle
+- **THEN** документ сохраняет один runtime/host identity; новое сетевое подключение не сбрасывает таймер
+
+### Requirement: Resolve unknown outcomes without replay
+Пульт SHALL сохранять pending intention до отправки и иметь не более одной незавершённой изменяющей команды. Reconnect MUST запрашивать результат по ID отдельно от snapshot. Экран SHALL возвращать известный терминальный результат, not_seen или history_expired без выполнения. Старые seq MUST не исполняться после вытеснения результата. Один ID с другим payload MUST отклоняться.
+
+#### Scenario: Reload after lost acknowledgment
+- **WHEN** пульт обновлён после отправки restart с потерянным ACK
+- **THEN** восстанавливается pending identity, запрашивается результат; restart автоматически не отправляется и не выполняется второй раз
+
+#### Scenario: Delayed new command
+- **WHEN** ранее не исполненная команда ссылается на sampleSeq старше 3 секунд по часам экрана
+- **THEN** она отклоняется как expired_command; повтор уже исполненного ID возвращает прежний результат независимо от срока
+
+### Requirement: Fence revocation and cancelled acquisition
+Release, отзыв с экрана и отмена начатой выдачи SHALL устанавливать новое поколение с владельцем none. ACK MUST соответствовать текущему acquisitionId и поколениям транспорта/управления. Поколения MUST не откатываться.
+
+#### Scenario: Cancel after lost fence acknowledgment
+- **WHEN** экран установил новое право, ACK потерялся, а кандидат отменил запрос
+- **THEN** следующая epoch отзывает право; поздний ACK не делает отменённого кандидата ready, старое право не восстанавливается автоматически
+
+#### Scenario: Recover a consumed invitation
+- **WHEN** выдача credential по QR состоялась, но ответ потерян и телефон повторяет тот же invitation+claimSecret
+- **THEN** он восстанавливает ту же привязку; другое использование уже потраченного приглашения отклоняется
+
+### Requirement: Bound resources and negotiate protocol versions
+Сервер SHALL ограничивать rooms, sockets, waiting principals, unauthenticated lifetime и outbound buffers. Handshake MUST согласовать protocolVersion до выдачи данных/доступа. Tokens MUST не попадать в query strings/logs. App shell SHALL обслуживать /remote без создания local runtime; auth/session/ws MUST не кэшироваться.
+
+#### Scenario: Slow or unauthenticated connection
+- **WHEN** сокет не авторизовался за 5 с либо превысил ограничение буфера
+- **THEN** он закрывается без неограниченного накопления памяти; другие комнаты и локальный таймер продолжают работу
+
+#### Scenario: Old display and incompatible phone
+- **WHEN** телефон использует неподдерживаемую версию протокола
+- **THEN** пульт получает объяснение несовместимости, работающий экран не перезагружается и сохраняет локальное управление

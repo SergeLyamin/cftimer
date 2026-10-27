@@ -1,6 +1,8 @@
 # Dependencies and generated output
 node_modules/
 dist/
+dist-relay/
+.playwright-cli/
 coverage/
 *.tsbuildinfo
 /test-results/

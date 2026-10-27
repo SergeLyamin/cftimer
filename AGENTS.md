@@ -4,7 +4,7 @@ Read README.md, openspec/config.yaml, and the relevant change before implementat
 
 ## Current boundary
 
-The legacy code is archived by explicit owner request. Local runtime is implemented; real-device acceptance remains open. The static local timer is published at timer.lyamin.org; QR remote and relay deployment are not implemented. Do not import archive code into production wholesale or claim planned features work. `archive/` is reference material, not active instructions. Do not modify archived snapshots: their bytes are recorded in archive/manifest-2026-10-22.json. Design references remain in design/.
+The legacy code is archived by explicit owner request. Local runtime is implemented; real-device acceptance remains open. The static local timer is published at timer.lyamin.org; A QR remote desktop candidate exists on feat/qr-remote-control; owner UI approval, extended verification, diagnostics and relay deployment remain open. Do not import archive code into production wholesale or claim planned features work. `archive/` is reference material, not active instructions. Do not modify archived snapshots: their bytes are recorded in archive/manifest-2026-10-22.json. Design references remain in design/.
 
 ## Workflow
 

@@ -1,8 +1,12 @@
+import { DisplayRemotePanel } from "./DisplayRemotePanel";
+import type { DisplayBridge } from "../remote/display";
+import { DisplayRuntime, type ApplicationIntent } from "../application";
 import {
   useEffect,
   useEffectEvent,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
 } from "react";
 import { Icon } from "./Icon";
@@ -23,14 +27,9 @@ import {
   observeOfflineReadiness,
   repairOfflineCache,
 } from "../platform";
-import {
-  TimerEngine,
-  formatTime,
-  validateConfig,
-  type TimerConfig,
-} from "../timer";
+import { formatTime, validateConfig, type TimerConfig } from "../timer";
 
-const modes = [
+export const modes = [
   {
     id: "intervals",
     name: "Интервалы",
@@ -62,7 +61,7 @@ const modes = [
     icon: "clock",
   },
 ] as const;
-const defaults: TimerConfig = {
+export const defaults: TimerConfig = {
   mode: "intervals",
   rounds: 8,
   workSeconds: 20,
@@ -81,11 +80,35 @@ function settingsStore(mode: TimerConfig["mode"]) {
       Object.keys(validateConfig(value as TimerConfig)).length === 0,
   );
 }
-export default function App() {
-  const engine = useRef(new TimerEngine(defaults));
-  const [snapshot, setSnapshot] = useState(() => engine.current.getSnapshot());
-  const [view, setView] = useState<"home" | "setup" | "timer">("home");
-  const [config, setConfig] = useState<TimerConfig>(defaults);
+export default function App({
+  runtime,
+  bridge,
+}: {
+  runtime: DisplayRuntime;
+  bridge?: DisplayBridge;
+}) {
+  const application = useSyncExternalStore(
+    runtime.subscribe,
+    runtime.getSnapshot,
+  );
+  const snapshot = application.timer;
+  const [draft, setDraft] = useState({ revision: -1, config: defaults });
+  const view =
+    application.view === "timer"
+      ? "timer"
+      : draft.revision === application.revision
+        ? "setup"
+        : application.view;
+  const config =
+    view === "setup" && draft.revision === application.revision
+      ? draft.config
+      : snapshot.config;
+  function setConfig(value: TimerConfig) {
+    setDraft({ revision: runtime.getSnapshot().revision, config: value });
+  }
+  function setView(value: "home" | "setup" | "timer") {
+    if (value === "home") setDraft({ revision: -1, config: defaults });
+  }
   const [errors, setErrors] = useState<
     Partial<Record<keyof TimerConfig, string>>
   >({});
@@ -96,6 +119,7 @@ export default function App() {
   const [pulsePreview, setPulsePreview] = useState(0);
   const [confettiPreview, setConfettiPreview] = useState(0);
   const [confirm, setConfirm] = useState<"menu" | null>(null);
+  const confirmationRevision = useRef<number | undefined>(undefined);
   const [preferences, setPreferences] = useState<Preferences>(() => ({
     ...defaultPreferences,
     ...preferencesStore.load(),
@@ -138,6 +162,7 @@ export default function App() {
   }
   function openConfirmation(type: "menu", trigger: HTMLElement) {
     dialogTrigger.current = trigger;
+    confirmationRevision.current = runtime.getSnapshot().revision;
     setConfirm(type);
   }
   function closeDialog() {
@@ -151,7 +176,7 @@ export default function App() {
       openConfirmation("menu", trigger);
       return;
     }
-    if (view === "timer") action("reset");
+    if (application.view !== "home") action("returnToMenu");
     setView("home");
   }
   function beep() {
@@ -174,16 +199,15 @@ export default function App() {
       setConfettiPreview(value ? ++previewSequence.current : 0);
   }
   function restart() {
-    action("reset");
-    action("start");
+    action("restart");
     requestAnimationFrame(() =>
       document.querySelector<HTMLButtonElement>(".timer-main-action")?.focus(),
     );
   }
   function editWorkout() {
-    if (engine.current.getSnapshot().status !== "paused") return;
-    setConfig({ ...engine.current.getSnapshot().config });
-    action("reset");
+    if (runtime.getSnapshot().timer.status !== "paused") return;
+    action("edit");
+    setConfig({ ...runtime.getSnapshot().timer.config });
     setErrors({});
     setView("setup");
     requestAnimationFrame(() =>
@@ -245,25 +269,12 @@ export default function App() {
       void display.current?.requestWakeLock();
     } else void display.current?.releaseWakeLock();
   }, [snapshot.status]);
-  function action(
-    type: "start" | "pause" | "resume" | "finish" | "reset" | "repeat",
-  ) {
-    engine.current.dispatch({ type });
-    const next = engine.current.getSnapshot();
-    setSnapshot(next);
-    // Request within the local gesture as well as the lifecycle effect.
+  function action(type: Exclude<ApplicationIntent["type"], "start">) {
+    runtime.execute({ type });
+    const next = runtime.getSnapshot().timer;
     if (next.status === "running" || next.status === "paused")
       void display.current?.requestWakeLock();
   }
-  useEffect(() => {
-    let frame: number;
-    const tick = () => {
-      setSnapshot(engine.current.getSnapshot());
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, []);
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
     window.addEventListener("online", update);
@@ -411,12 +422,21 @@ export default function App() {
           setNotice("Звук заблокирован браузером. Таймер работает без звука.");
       });
     }
-    engine.current.dispatch({ type: "configure", config });
-    action("start");
+    const expectedRevision =
+      draft.revision === application.revision
+        ? draft.revision
+        : application.revision;
+    const result = runtime.execute({ type: "start", config }, expectedRevision);
+    if (result.status === "rejected") {
+      setNotice(
+        "Состояние таймера изменилось. Проверьте параметры и нажмите Старт ещё раз.",
+      );
+      return;
+    }
     setView("timer");
   }
   const change = (key: keyof TimerConfig, value: number) => {
-    setConfig((c) => ({ ...c, [key]: value }));
+    setConfig({ ...config, [key]: value });
     setErrors((current) => {
       const next = { ...current };
       delete next[key];
@@ -425,7 +445,7 @@ export default function App() {
   };
   function togglePause() {
     if (view !== "timer" || settingsOpen || confirm) return;
-    const status = engine.current.getSnapshot().status;
+    const status = runtime.getSnapshot().timer.status;
     if (status === "running" || status === "paused")
       action(status === "running" ? "pause" : "resume");
   }
@@ -492,7 +512,7 @@ export default function App() {
   );
   return (
     <div
-      className={`app${view === "timer" ? " app-timer" : ""}`}
+      className={`app${view === "timer" ? " app-timer" : ""}${bridge && view === "home" ? " app-with-remote" : ""}`}
       data-phase={view === "timer" ? snapshot.phase?.kind : undefined}
       data-status={view === "timer" ? snapshot.status : undefined}
       style={{ "--timer-footer-height": `${footerHeight}px` } as CSSProperties}
@@ -547,6 +567,12 @@ export default function App() {
           >
             <Icon name="close" />
           </button>
+        </div>
+      )}
+      {view === "timer" && sound && !audioReady && (
+        <div className="notice" role="status">
+          Звук на экране не включён.{" "}
+          <button onClick={beep}>Включить звук</button>
         </div>
       )}
       {updateWaiting && (
@@ -776,6 +802,13 @@ export default function App() {
           </section>
         )}
       </main>
+      {bridge && (
+        <DisplayRemotePanel
+          key={view === "timer" ? "timer" : "local"}
+          bridge={bridge}
+          timer={view === "timer"}
+        />
+      )}
       {limitNotice && (
         <div key={limitNotice.id} className="limit-toast" role="status">
           {limitNotice.message}
@@ -922,8 +955,15 @@ export default function App() {
                 <button
                   className="primary"
                   onClick={() => {
-                    action("reset");
-                    setView("home");
+                    const result = runtime.execute(
+                      { type: "returnToMenu" },
+                      confirmationRevision.current,
+                    );
+                    if (result.status === "accepted") setView("home");
+                    else
+                      setNotice(
+                        "Состояние таймера изменилось. Проверьте экран и подтвердите возврат в меню ещё раз.",
+                      );
                     closeDialog();
                   }}
                 >
