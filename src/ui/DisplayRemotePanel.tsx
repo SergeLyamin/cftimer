@@ -1,23 +1,59 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import QRCode from "qrcode";
+import { Icon } from "./Icon";
 import type { DisplayBridge } from "../remote/display";
 
 export function DisplayRemotePanel({
   bridge,
-  timer,
+  open,
+  setOpen,
 }: {
   bridge: DisplayBridge;
-  timer: boolean;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }) {
   const state = useSyncExternalStore(bridge.subscribe, bridge.getSnapshot);
-  const [collapsed, setCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem("cftimer.qr.collapsed") === "true";
-    } catch {
-      return false;
-    }
-  });
-  const [timerExpanded, setTimerExpanded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const connected =
+    state.connection === "connected" &&
+    !state.stopped &&
+    state.controller?.hasOwner === true &&
+    state.controller.connected;
+  function close(returnFocus = true) {
+    setOpen(false);
+    if (returnFocus) triggerRef.current?.focus();
+  }
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const outside = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    const focus = (event: FocusEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", key, true);
+    document.addEventListener("focusin", focus);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", key, true);
+      document.removeEventListener("focusin", focus);
+    };
+  }, [open, setOpen]);
   const [image, setImage] = useState<{ url: string; data: string }>();
   const [now, setNow] = useState(performance.now());
   useEffect(() => {
@@ -48,86 +84,91 @@ export function DisplayRemotePanel({
       active = false;
     };
   }, [url]);
-  const expanded = timer ? timerExpanded : !collapsed;
-  function toggle() {
-    if (timer) setTimerExpanded(!timerExpanded);
-    else {
-      setCollapsed(!collapsed);
-      try {
-        localStorage.setItem("cftimer.qr.collapsed", String(!collapsed));
-      } catch {
-        /* Memory state remains available. */
-      }
-    }
-  }
   return (
-    <aside
-      className={`display-remote ${timer ? "display-remote-timer" : ""} ${expanded ? "is-expanded" : "is-collapsed"}`}
-      aria-label="Управление с телефона"
-    >
+    <div className="display-remote-control" ref={containerRef}>
       <button
-        className="quiet remote-panel-toggle"
-        onClick={toggle}
-        aria-expanded={expanded}
+        ref={triggerRef}
+        className="quiet icon-button remote-qr-button"
+        onClick={() => (open ? close() : setOpen(true))}
+        aria-label={`Пульт с телефона${connected ? ": подключён" : ""}`}
+        title="Пульт с телефона"
+        aria-expanded={open}
+        aria-controls="display-remote-popover"
+        aria-haspopup="dialog"
       >
-        {expanded ? "Свернуть" : "Пульт"}
-        <span aria-hidden="true">{expanded ? "−" : "+"}</span>
+        <Icon name="qr" />
+        {connected && (
+          <span className="remote-connected-dot" aria-hidden="true" />
+        )}
       </button>
-      {expanded && (
-        <div className="remote-panel-body">
-          <h2>Пульт на телефоне</h2>
-          <p>Наведите камеру на QR</p>
-          {url && image?.url === url ? (
-            <img
-              src={image.data}
-              width="224"
-              height="224"
-              alt="QR-приглашение для управления этим экраном"
-            />
-          ) : (
-            <div className="qr-unavailable" role="status">
-              {state.error === "incompatible_version"
-                ? "Версия экрана несовместима с сервером. Обновите страницу после тренировки."
-                : state.error === "rate_limited"
-                  ? "Слишком много подключений. Повторите попытку позже. Локальный таймер работает."
-                  : state.error === "capacity"
-                    ? "Сервер временно занят. Повторите попытку позже. Локальный таймер работает."
-                    : state.connection === "connected"
-                      ? "Обновляем приглашение…"
-                      : "Нет связи с сервером. Локальный таймер работает."}
-            </div>
-          )}
-          {state.stopped && state.error !== "incompatible_version" && (
-            <button className="secondary" onClick={() => bridge.retry()}>
-              Повторить подключение
-            </button>
-          )}
-          <p className="remote-screen-name">
-            {state.screenName ?? "Общий экран"}
-          </p>
-          {valid && (
-            <>
-              <p role="status">
-                {state.controller?.hasOwner
-                  ? state.controller.connected
-                    ? "Пульт подключён"
-                    : "Связь с пультом потеряна"
-                  : "Пульт свободен"}
-              </p>
-              <p className="remote-help">
-                {state.controller?.hasOwner
-                  ? "Новый телефон запросит передачу у активного пульта."
-                  : "Первый телефон получает управление сразу."}
-              </p>
-            </>
-          )}
-          {state.connection === "connected" && state.controller?.hasOwner && (
-            <button className="secondary" onClick={() => bridge.revoke()}>
-              Отключить пульт
-            </button>
-          )}
+      {open && (
+        <div
+          id="display-remote-popover"
+          className="display-remote-popover"
+          role="dialog"
+          aria-label="Пульт с телефона"
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          <button
+            ref={closeRef}
+            className="quiet icon-button remote-panel-close"
+            onClick={() => close()}
+            aria-label="Закрыть QR"
+          >
+            <Icon name="close" />
+          </button>
+          <div className="remote-panel-body">
+            <h2>Пульт на телефоне</h2>
+            <p>Наведите камеру на QR</p>
+            {url && image?.url === url ? (
+              <img
+                src={image.data}
+                width="224"
+                height="224"
+                alt="QR-приглашение для управления этим экраном"
+              />
+            ) : (
+              <div className="qr-unavailable" role="status">
+                {state.error === "incompatible_version"
+                  ? "Версия экрана несовместима с сервером. Обновите страницу после тренировки."
+                  : state.error === "rate_limited"
+                    ? "Слишком много подключений. Повторите попытку позже. Локальный таймер работает."
+                    : state.error === "capacity"
+                      ? "Сервер временно занят. Повторите попытку позже. Локальный таймер работает."
+                      : state.connection === "connected"
+                        ? "Обновляем приглашение…"
+                        : "Нет связи с сервером. Локальный таймер работает."}
+              </div>
+            )}
+            {state.stopped && state.error !== "incompatible_version" && (
+              <button className="secondary" onClick={() => bridge.retry()}>
+                Повторить подключение
+              </button>
+            )}
+            {valid && (
+              <>
+                <p role="status">
+                  {state.controller?.hasOwner
+                    ? state.controller.connected
+                      ? "Пульт подключён"
+                      : "Связь с пультом потеряна"
+                    : "Пульт свободен"}
+                </p>
+                <p className="remote-help">
+                  {state.controller?.hasOwner
+                    ? "Новый телефон запросит передачу у активного пульта."
+                    : "Первый телефон получает управление сразу."}
+                </p>
+              </>
+            )}
+            {state.connection === "connected" && state.controller?.hasOwner && (
+              <button className="secondary" onClick={() => bridge.revoke()}>
+                Отключить пульт
+              </button>
+            )}
+          </div>
         </div>
       )}
-    </aside>
+    </div>
   );
 }

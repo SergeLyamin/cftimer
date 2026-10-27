@@ -29,9 +29,12 @@ function workoutName(config?: TimerConfig) {
 export function RemoteError() {
   return (
     <div className="remote-app">
-      <header>
-        <span className="brand">CF TIMER</span>
-        <span>Пульт</span>
+      <header className="remote-header">
+        <h1>Пульт</h1>
+        <span className="remote-link-status" data-state="disconnected">
+          <span className="status-dot" aria-hidden="true" />
+          Отключён
+        </span>
       </header>
       <main className="remote-content">
         <h1>Приглашение недоступно</h1>
@@ -158,18 +161,40 @@ export function RemoteApp({ runtime }: { runtime: ControllerRuntime }) {
           ? "Ждём ответа активного пульта"
           : "Ожидаем подтверждения экрана…"
       : accessText[state.access];
+  const freshControl =
+    linked &&
+    !fatal &&
+    state.remote &&
+    state.clockOffset !== undefined &&
+    performance.now() + state.clockOffset < state.remote.commandValidUntil;
+  const linkState = freshControl
+    ? "connected"
+    : !fatal &&
+        (state.connection === "connecting" ||
+          (state.connection === "connected" &&
+            ["waiting", "busy", "no-display"].includes(state.access)))
+      ? "waiting"
+      : "disconnected";
   const modeName = workoutName(config);
   return (
     <div className="remote-app">
-      <header>
-        <span className="brand">
-          CF<span>TIMER</span>
+      <header className="remote-header">
+        <h1>Пульт</h1>
+        <span
+          className="remote-link-status"
+          data-state={linkState}
+          role="status"
+        >
+          <span className="status-dot" aria-hidden="true" />
+          {linkState === "connected"
+            ? "Подключён"
+            : linkState === "waiting"
+              ? "Ожидание"
+              : "Отключён"}
         </span>
-        <span className="remote-badge">Пульт</span>
       </header>
       <main className="remote-content">
         <div className="remote-connection">
-          <h1>{state.screenName ?? "Общий экран"}</h1>
           <p role="status">
             {state.connection !== "connected"
               ? fatal

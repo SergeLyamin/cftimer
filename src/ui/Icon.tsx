@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
 
 const shapes = {
+  qr: (
+    <>
+      <rect x="3" y="3" width="6" height="6" rx=".5" />
+      <rect x="15" y="3" width="6" height="6" rx=".5" />
+      <rect x="3" y="15" width="6" height="6" rx=".5" />
+      <path d="M15 15h3v3h3m-6 3h3M21 12v3M12 3v3m0 6H6m6 3v6" />
+    </>
+  ),
   settings: (
     <>
       <path d="m9 3-.5 2-2 1-2-.5-2 3 1.5 1.5v3L2.5 15l2 3 2-.5 2 1 .5 2h4l.5-2 2-1 2 .5 2-3-1.5-1.5v-3L20 9l-2-3-2 .5-2-1-.5-2H9Z" />

@@ -115,6 +115,7 @@ export default function App({
   const dialogRef = useRef<HTMLElement>(null);
   const dialogTrigger = useRef<HTMLElement | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const previewSequence = useRef(0);
   const [pulsePreview, setPulsePreview] = useState(0);
   const [confettiPreview, setConfettiPreview] = useState(0);
@@ -293,6 +294,7 @@ export default function App({
       e.altKey ||
       e.shiftKey ||
       settingsOpen ||
+      qrOpen ||
       confirm
     )
       return;
@@ -444,7 +446,7 @@ export default function App({
     });
   };
   function togglePause() {
-    if (view !== "timer" || settingsOpen || confirm) return;
+    if (view !== "timer" || settingsOpen || qrOpen || confirm) return;
     const status = runtime.getSnapshot().timer.status;
     if (status === "running" || status === "paused")
       action(status === "running" ? "pause" : "resume");
@@ -492,6 +494,9 @@ export default function App({
   const headerActions = (
     <div className="header-actions">
       {!online && <span className="network">Без сети</span>}
+      {bridge && (
+        <DisplayRemotePanel bridge={bridge} open={qrOpen} setOpen={setQrOpen} />
+      )}
       <button
         className="quiet icon-button"
         onClick={(event) => openSettings(event.currentTarget)}
@@ -512,7 +517,7 @@ export default function App({
   );
   return (
     <div
-      className={`app${view === "timer" ? " app-timer" : ""}${bridge && view === "home" ? " app-with-remote" : ""}`}
+      className={`app${view === "timer" ? " app-timer" : ""}`}
       data-phase={view === "timer" ? snapshot.phase?.kind : undefined}
       data-status={view === "timer" ? snapshot.status : undefined}
       style={{ "--timer-footer-height": `${footerHeight}px` } as CSSProperties}
@@ -802,13 +807,6 @@ export default function App({
           </section>
         )}
       </main>
-      {bridge && (
-        <DisplayRemotePanel
-          key={view === "timer" ? "timer" : "local"}
-          bridge={bridge}
-          timer={view === "timer"}
-        />
-      )}
       {limitNotice && (
         <div key={limitNotice.id} className="limit-toast" role="status">
           {limitNotice.message}

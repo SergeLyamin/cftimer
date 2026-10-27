@@ -1180,28 +1180,39 @@ details .field {
 }
 
 /* Optional display pairing and explicitly routed controller. */
-.app-with-remote main {
-  padding-right: 320px;
+.display-remote-control {
+  position: relative;
 }
-.display-remote {
-  position: fixed;
-  right: 4vw;
-  top: 105px;
-  width: 280px;
-  z-index: 5;
-  background: #131518;
-  border: 1px solid #303239;
+.remote-qr-button {
+  position: relative;
+}
+.remote-connected-dot {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #32d975;
+  box-shadow: 0 0 0 3px #101214;
+}
+.display-remote-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 296px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 100px);
+  overflow: auto;
+  z-index: 22;
+  background: radial-gradient(ellipse at top, #242629, #111315 80%);
+  border: 1px solid #41454b;
   border-radius: 16px;
+  box-shadow: 0 18px 65px #000a;
 }
-.display-remote.is-collapsed {
-  width: auto;
-}
-.remote-panel-toggle {
+.remote-panel-close {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-  width: 100%;
+  margin: 4px 4px 0 auto;
 }
 .remote-panel-body {
   padding: 0 24px 24px;
@@ -1224,10 +1235,6 @@ details .field {
   border-radius: 8px;
   margin: 18px auto;
 }
-.remote-panel-body .remote-screen-name {
-  color: #fff;
-  font-weight: 700;
-}
 .remote-panel-body .remote-help {
   font-size: 13px;
 }
@@ -1238,10 +1245,6 @@ details .field {
   color: #b6b8bf;
   line-height: 1.5;
   padding: 20px;
-}
-.display-remote-timer {
-  top: 80px;
-  right: 24px;
 }
 .remote-app {
   min-height: 100dvh;
@@ -1264,11 +1267,47 @@ details .field {
   line-height: 1.5;
   color: #bbbfc7;
 }
-.remote-badge {
-  color: #b6b8bf;
-  border: 1px solid #363941;
-  padding: 7px 14px;
-  border-radius: 20px;
+.remote-header {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 28px 24px 22px;
+  gap: 16px;
+  position: relative;
+}
+.remote-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  right: 24px;
+  border-bottom: 1px solid #3d4045;
+}
+.remote-header h1 {
+  font:
+    700 26px/1.2 Arial,
+    sans-serif;
+  margin: 0;
+}
+.remote-link-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #e3e4e6;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.status-dot {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
+  background: #94989d;
+}
+.remote-link-status[data-state="connected"] .status-dot {
+  background: #32d975;
+}
+.remote-link-status[data-state="waiting"] .status-dot {
+  background: #f1c34a;
 }
 .remote-connection {
   margin-bottom: 28px;
@@ -1382,15 +1421,4 @@ details .field {
 }
 .remote-footer .setting-switch {
   font-size: 14px;
-}
-@media (max-width: 1000px) {
-  .app-with-remote main {
-    padding-right: 0;
-  }
-  .display-remote:not(.display-remote-timer) {
-    position: relative;
-    top: auto;
-    right: auto;
-    margin: 28px auto;
-  }
 }
