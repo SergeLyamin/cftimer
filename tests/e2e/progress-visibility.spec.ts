@@ -82,7 +82,7 @@ for (const viewport of [
     const running = await expectPaintedBar(page, 0.96, "rgb(239, 74, 64)");
     expect(Math.abs(running.fraction - 0.96)).toBeLessThan(0.002);
     await page.screenshot({
-      path: `output/playwright/v014-amrap-24s-${browserName}-${viewport.width}x${viewport.height}.png`,
+      path: `output/playwright/ui27-regression-amrap-24s-${browserName}-${viewport.width}x${viewport.height}.png`,
       fullPage: true,
     });
 

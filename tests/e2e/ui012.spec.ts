@@ -1,4 +1,9 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
+
+const buildVersion = (
+  JSON.parse(readFileSync("package.json", "utf8")) as { version: string }
+).version;
 
 async function paste(input: Locator, value: string) {
   await input.evaluate((node, text) => {
@@ -118,10 +123,16 @@ for (const mode of ["Интервалы", "На время", "AMRAP", "Tabata", 
       [844, 390],
     ]) {
       await page.setViewportSize({ width, height });
-      for (const name of ["Продолжить", "Сброс"]) {
+      for (const name of ["Продолжить", "Сброс", "Редактировать таймер"]) {
         const button = page.getByRole("button", { name, exact: true });
-        await expect(button).toHaveCSS("height", "40px");
-        await expect(button).toHaveCSS("width", "40px");
+        await expect(button).toHaveCSS(
+          "height",
+          name === "Продолжить" ? "56px" : "40px",
+        );
+        await expect(button).toHaveCSS(
+          "width",
+          name === "Продолжить" ? "56px" : "40px",
+        );
         await expect(button).toHaveCSS("border-radius", "50%");
       }
       const metrics = await page.locator(".timer-footer").boundingBox();
@@ -177,7 +188,10 @@ test("hotkeys respect paused reset, dialogs, editing, modifiers and fullscreen",
   await page.clock.runFor(3100);
   await blur(page);
   await page.keyboard.press("Escape");
-  await expect(page.locator(".time")).not.toHaveText("01:00");
+  await expect(page.getByRole("timer")).not.toHaveAttribute(
+    "aria-label",
+    "Время 01:00",
+  );
   await page.keyboard.press("Space");
   await expect(page.locator(".phase")).toHaveText("ПАУЗА");
   const pausedTime = await page.locator(".time").textContent();
@@ -199,7 +213,10 @@ test("hotkeys respect paused reset, dialogs, editing, modifiers and fullscreen",
   await expect(page.locator(".phase")).toHaveText("ПАУЗА");
   await page.clock.runFor(200);
   await page.keyboard.press("Escape");
-  await expect(page.locator(".time")).toHaveText("01:00");
+  await expect(page.getByRole("timer")).toHaveAttribute(
+    "aria-label",
+    "Время 01:00",
+  );
   await expect(
     page.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeFocused();
@@ -208,7 +225,7 @@ test("hotkeys respect paused reset, dialogs, editing, modifiers and fullscreen",
   await expect(page.locator(".timer")).toBeVisible();
 });
 
-test("default completion confetti draws once on finish and returns for a repeated workout", async ({
+test("completion confetti settles, stays static and returns for a repeated workout", async ({
   page,
 }) => {
   await page.clock.install();
@@ -219,7 +236,7 @@ test("default completion confetti draws once on finish and returns for a repeate
   await expect(page.locator(".completion-confetti")).toHaveCount(0);
   for (let run = 0; run < 2; run++) {
     await page.clock.runFor(2100);
-    await expect(page.locator(".phase")).toHaveText("ГОТОВО");
+    await expect(page.locator(".phase")).toHaveText("ТЫ МОЛОДЕЦ! 🏆");
     const canvas = page.locator(".completion-confetti");
     await expect(canvas).toBeAttached();
     expect(
@@ -230,7 +247,34 @@ test("default completion confetti draws once on finish and returns for a repeate
         return false;
       }),
     ).toBe(true);
+    await expect(
+      page.locator(".workout-progress,.workout-timeline"),
+    ).toHaveCount(0);
     if (run === 0) {
+      await page.clock.runFor(5200);
+      const settled = await canvas.evaluate((node: HTMLCanvasElement) => {
+        const pixels = node
+          .getContext("2d")!
+          .getImageData(0, 0, node.width, node.height).data;
+        const floorStart = Math.max(
+          0,
+          node.height - 60 * (node.height / innerHeight),
+        );
+        let total = 0,
+          bottom = 0;
+        for (let i = 3; i < pixels.length; i += 4) {
+          if (!pixels[i]) continue;
+          total++;
+          if (Math.floor(i / 4 / node.width) >= floorStart) bottom++;
+        }
+        return { total, bottom, image: node.toDataURL() };
+      });
+      expect(settled.total).toBeGreaterThan(100);
+      expect(settled.bottom).toBe(settled.total);
+      await page.clock.runFor(1200);
+      expect(
+        await canvas.evaluate((node: HTMLCanvasElement) => node.toDataURL()),
+      ).toBe(settled.image);
       await page
         .getByRole("button", { name: "Повторить", exact: true })
         .click();
@@ -260,7 +304,7 @@ test("turning completion confetti off persists and prevents the finish effect", 
   await setPrep(page, "0000");
   await page.getByRole("button", { name: "Старт", exact: true }).click();
   await page.clock.runFor(2100);
-  await expect(page.locator(".phase")).toHaveText("ГОТОВО");
+  await expect(page.locator(".phase")).toHaveText("ТЫ МОЛОДЕЦ! 🏆");
   await expect(page.locator(".completion-confetti")).toHaveCount(0);
 });
 
@@ -284,7 +328,9 @@ test("settings are unified, persist, expose the build version and reduced motion
   await sound.check();
   await effects.uncheck();
   await confetti.uncheck();
-  await expect(page.getByText("Версия 0.1.4", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(`Версия ${buildVersion}`, { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "GitHub автора →" }),
   ).toHaveAttribute("target", "_blank");
@@ -308,7 +354,7 @@ test("settings are unified, persist, expose the build version and reduced motion
   await page.getByRole("button", { name: "Старт", exact: true }).click();
   await expect(page.locator(".phase-edge-glow")).toHaveCount(0);
   await page.clock.runFor(1100);
-  await expect(page.locator(".phase")).toHaveText("ГОТОВО");
+  await expect(page.locator(".phase")).toHaveText("ТЫ МОЛОДЕЦ! 🏆");
   await expect(page.locator(".completion-confetti")).toHaveCount(0);
 });
 
@@ -326,7 +372,7 @@ test("phase colors, pulse windows and flat timeline follow actual phases", async
   await expect(page.locator(".round-tile")).toHaveCount(0);
   await expect(page.locator(".timeline-segment.work")).toHaveCount(2);
   await expect(page.locator(".timeline-segment.rest")).toHaveCount(1);
-  await expect(page.locator(".workout-timeline")).toHaveCSS("height", "20px");
+  await expect(page.locator(".workout-timeline")).toHaveCSS("height", "3px");
   await expect(page.locator(".timer-meta h1")).toContainText("1 из 2");
   await page.clock.runFor(1100);
   await expect(page.locator(".phase-edge-glow")).toHaveCount(0);
@@ -339,7 +385,7 @@ test("phase colors, pulse windows and flat timeline follow actual phases", async
     }
   });
   await page.screenshot({
-    path: "output/playwright/v013-work-pulse.png",
+    path: "output/playwright/ui27-regression-work-pulse.png",
     fullPage: true,
   });
   await page.clock.fastForward(10000);
@@ -363,7 +409,7 @@ test("phase colors, pulse windows and flat timeline follow actual phases", async
     }
   });
   await page.screenshot({
-    path: "output/playwright/v013-rest-pulse.png",
+    path: "output/playwright/ui27-regression-rest-pulse.png",
     fullPage: true,
   });
   await page.clock.runFor(2100);
@@ -375,9 +421,13 @@ test("phase colors, pulse windows and flat timeline follow actual phases", async
     "Раунд 2 из 2",
   );
   await page.clock.fastForward(13000);
-  for (const fill of await page.locator(".timeline-segment-fill").all()) {
-    await expect(fill).toHaveCSS("transform", "matrix(0, 0, 0, 1, 0, 0)");
-  }
+  await expect(page.locator(".app")).toHaveAttribute(
+    "data-status",
+    "completed",
+  );
+  await expect(page.locator(".workout-timeline,.workout-progress")).toHaveCount(
+    0,
+  );
   await expect(page.locator(".phase-edge-glow")).toHaveCount(0);
 });
 
@@ -395,7 +445,7 @@ test("99 rounds fit in a compact 197-segment timeline without overflow", async (
   await page.getByRole("button", { name: "Пауза", exact: true }).click();
   await expect(page.locator(".round-tile")).toHaveCount(0);
   await expect(page.locator(".timeline-segment")).toHaveCount(197);
-  await expect(page.locator(".workout-timeline")).toHaveCSS("height", "20px");
+  await expect(page.locator(".workout-timeline")).toHaveCSS("height", "3px");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -414,7 +464,7 @@ test("99 rounds fit in a compact 197-segment timeline without overflow", async (
     page.getByRole("button", { name: "Сброс", exact: true }),
   ).toBeInViewport();
   await page.screenshot({
-    path: "output/playwright/v013-99-rounds.png",
+    path: "output/playwright/ui27-regression-99-rounds.png",
     fullPage: true,
   });
 });

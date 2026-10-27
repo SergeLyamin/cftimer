@@ -46,7 +46,7 @@ test("cached restart works offline alongside an active second tab", async ({
   const reopened = await context.newPage();
   await reopened.goto("/");
   await expect(
-    reopened.getByRole("heading", { name: "Выберите режим" }),
+    reopened.getByRole("region", { name: "Выбор режима" }),
   ).toBeVisible();
   for (const asset of [
     "/favicon.svg",
@@ -64,7 +64,7 @@ test("cached restart works offline alongside an active second tab", async ({
   ).toBeVisible();
   await context.close();
 });
-test("responsive screens and About preserve local session", async ({
+test("responsive screens and Settings preserve local session", async ({
   page,
 }) => {
   await page.goto("/");
@@ -76,7 +76,7 @@ test("responsive screens and About preserve local session", async ({
   ]) {
     await page.setViewportSize(size);
     await expect(
-      page.getByRole("heading", { name: "Выберите режим" }),
+      page.getByRole("region", { name: "Выбор режима" }),
     ).toBeVisible();
     expect(
       await page.evaluate(
@@ -84,13 +84,13 @@ test("responsive screens and About preserve local session", async ({
       ),
     ).toBe(true);
     await page.screenshot({
-      path: `output/playwright/v013-home-${size.width}.png`,
+      path: `output/playwright/ui27-regression-home-${size.width}.png`,
       fullPage: true,
     });
   }
   await page.getByRole("button", { name: /Tabata/ }).click();
   await page.screenshot({
-    path: "output/playwright/v013-setup-desktop.png",
+    path: "output/playwright/ui27-regression-setup-desktop.png",
     fullPage: true,
   });
   await page.getByRole("button", { name: /Старт/ }).click();
@@ -101,12 +101,12 @@ test("responsive screens and About preserve local session", async ({
     page.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeVisible();
   await page.screenshot({
-    path: "output/playwright/v013-timer-desktop.png",
+    path: "output/playwright/ui27-regression-timer-desktop.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
-    path: "output/playwright/v013-timer-mobile.png",
+    path: "output/playwright/ui27-regression-timer-mobile.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 844, height: 390 });
@@ -116,7 +116,7 @@ test("responsive screens and About preserve local session", async ({
     ),
   ).toBe(true);
   await page.screenshot({
-    path: "output/playwright/v013-timer-landscape.png",
+    path: "output/playwright/ui27-regression-timer-landscape.png",
     fullPage: true,
   });
 });

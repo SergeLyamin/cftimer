@@ -90,7 +90,7 @@ test("new worker waits while another tab runs, activates only after all tabs clo
       )
       .toBe(true);
     await expect(
-      next.getByRole("heading", { name: "Выберите режим" }),
+      next.getByRole("region", { name: "Выбор режима" }),
     ).toBeVisible();
   } finally {
     await context.close();

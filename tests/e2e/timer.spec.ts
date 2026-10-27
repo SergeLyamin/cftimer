@@ -38,7 +38,10 @@ test("pause, restart and confirmed menu exit preserve the intended workout", asy
   await expect(
     page.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeFocused();
-  await expect(page.locator(".time")).toHaveText("02:00");
+  await expect(page.getByRole("timer")).toHaveAttribute(
+    "aria-label",
+    "Время 02:00",
+  );
   await expect(
     page.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeVisible();
@@ -49,17 +52,17 @@ test("pause, restart and confirmed menu exit preserve the intended workout", asy
     page.getByRole("button", { name: "Пауза", exact: true }),
   ).toBeVisible();
   await page.clock.fastForward(115100);
-  await expect(page.getByText("ГОТОВО", { exact: true })).toBeVisible();
-  await expect(page.getByRole("progressbar")).toHaveAttribute(
-    "aria-valuenow",
-    "0",
-  );
+  await expect(page.getByText("ТЫ МОЛОДЕЦ! 🏆", { exact: true })).toBeVisible();
+  await expect(page.getByRole("progressbar")).toHaveCount(0);
   await page.getByRole("button", { name: "Повторить", exact: true }).click();
-  await expect(page.locator(".time")).toHaveText("02:00");
+  await expect(page.getByRole("timer")).toHaveAttribute(
+    "aria-label",
+    "Время 02:00",
+  );
   await page.getByRole("button", { name: "Все режимы", exact: true }).click();
   await page.getByRole("button", { name: "В меню", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Выберите режим" }),
+    page.getByRole("region", { name: "Выбор режима" }),
   ).toBeVisible();
 });
 test("display reload creates an idle session with mode choice", async ({
@@ -68,7 +71,7 @@ test("display reload creates an idle session with mode choice", async ({
   await setup(page);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Выберите режим" }),
+    page.getByRole("region", { name: "Выбор режима" }),
   ).toBeVisible();
   await expect(page.locator(".timer")).toHaveCount(0);
 });
@@ -80,7 +83,10 @@ test("foreground countdown continues for 60 seconds without network", async ({
   await setup(page);
   await context.setOffline(true);
   await page.clock.runFor(60000);
-  await expect(page.locator(".time")).toHaveText("01:00");
+  await expect(page.getByRole("timer")).toHaveAttribute(
+    "aria-label",
+    "Время 01:00",
+  );
   await expect(page.getByText("Без сети", { exact: true })).toBeVisible();
   await context.setOffline(false);
 });
@@ -102,7 +108,10 @@ test("mobile setup has numeric masks and no remote controls", async ({
   await expect(page.getByText(/QR|Подключить пульт/)).toHaveCount(0);
   await page.getByRole("button", { name: "Старт" }).click();
   await expect(page.locator(".timer")).toBeVisible();
-  await expect(page.locator(".time")).toHaveText("00:10");
+  await expect(page.getByRole("timer")).toHaveAttribute(
+    "aria-label",
+    "Время 00:10",
+  );
 });
 
 test("digits and both progress tracks toggle pause without changing the program", async ({

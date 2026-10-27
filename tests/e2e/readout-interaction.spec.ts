@@ -192,16 +192,20 @@ test("completed readouts expose no toggle and clicks cannot resume them", async 
     "completed",
   );
   await expect(page.locator(".readout-toggle")).toHaveCount(0);
-  const completed = await readoutState(page);
-  for (const selector of [".time", ".workout-progress", ".workout-timeline"]) {
-    await clickVisiblePart(page, page.locator(selector));
-    await expect(page.locator(".app")).toHaveAttribute(
-      "data-status",
-      "completed",
-    );
-  }
+  await expect(page.locator(".workout-progress,.workout-timeline")).toHaveCount(
+    0,
+  );
+  const completed = await page.getByRole("timer").getAttribute("aria-label");
+  await clickVisiblePart(page, page.locator(".time"));
+  await expect(page.locator(".app")).toHaveAttribute(
+    "data-status",
+    "completed",
+  );
   await page.clock.fastForward(5000);
-  expect(await readoutState(page)).toEqual(completed);
+  await expect(page.getByRole("timer")).toHaveAttribute(
+    "aria-label",
+    completed!,
+  );
   await expect(
     page.getByRole("button", { name: "Повторить", exact: true }),
   ).toBeVisible();
