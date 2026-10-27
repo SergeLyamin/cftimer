@@ -1,0 +1,21 @@
+{
+  "version": "0.1.5",
+  "status": "candidate-not-deployed",
+  "source": "d7734a5de0b16ae641afb3fc707555c9c725def6",
+  "previousProduction": "b1ad370cf1543d6185866727d76362787f6d7310",
+  "archive": "/private/tmp/cftimer-0.1.5-d7734a5/cf-timer-0.1.5.tar.gz",
+  "bytes": 188194,
+  "sha256": "6989300b28fc8f66c92204652cbd732de39557b27991d4c00abeb44ac30b1e82",
+  "files": {
+    "assets/index-CETD-MmP.js": "44a659b936ae35f6c963fc833fb480292ed805f90217c09c10b64dfa03a00373",
+    "assets/index-DZkMvtQR.css": "acf4bde89ce8a3f09aab1be4fc538388bde1f5e673ad3a0daf01ddda6575dfac",
+    "favicon.ico": "aee1e0e938426ab98c4c22c785252e311daa1354921bedf286dd077abfd26382",
+    "favicon.svg": "f78d7f76959082792cfe54566191d59d9e2f012909bf14cfb68692b2de356ce2",
+    "fonts/OFL-Oswald.txt": "0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652",
+    "fonts/Oswald-Variable.ttf": "5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817",
+    "icon.svg": "eec81e347616f60e08b352427c987800a99d2e78c102688df3439e8841d5aad9",
+    "index.html": "d273dfede3d9754b5e03a8541f76c6abf2147c1b3a2cc8964e010df9a9a9562d",
+    "manifest.webmanifest": "86f30206ed138dcf9fdc3d421fa52d532a01b18982f16b4bc3cbd25b7b378b4a",
+    "sw.js": "27598e53e72eab5f190f2a243a0e59be6a4973bdbc97957ff038ecc413cef096"
+  }
+}

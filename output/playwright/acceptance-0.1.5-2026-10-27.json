@@ -1,0 +1,282 @@
+{
+  "date": "2026-10-27",
+  "candidate": "0.1.5",
+  "source": "d7734a5de0b16ae641afb3fc707555c9c725def6",
+  "uiApproval": "все нравится. Продолжай",
+  "deployed": false,
+  "checks": {
+    "lint": "passed",
+    "unit": {
+      "passed": 80,
+      "files": 6
+    },
+    "build": "passed",
+    "chromiumE2E": {
+      "passed": 33,
+      "seconds": 54.8
+    },
+    "openspec": {
+      "passed": 4
+    }
+  },
+  "webkitMatrixBuiltVersion": "0.1.4 (same approved UI source; then actual upgrade to0.1.5 checked)",
+  "limitations": [
+    "Physical iPhone13Firefox/Android/PC+TV not verified",
+    "WebKit uses working CLI driver; frozen macOS14 test-runner limitation documented in0.1.4 report",
+    "WebKit offline verified with local origin stopped; setOffline not used"
+  ],
+  "firefox": {
+    "engine": "firefox",
+    "version": "157.0",
+    "results": [
+      {
+        "mode": "Интервалы",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "На время",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "AMRAP",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Tabata",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "EMOM",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Интервалы",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "На время",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "AMRAP",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Tabata",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "EMOM",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Интервалы",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "На время",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "AMRAP",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Tabata",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "EMOM",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      }
+    ],
+    "paper": {
+      "n": 31312,
+      "low": 31312
+    },
+    "javascriptErrors": []
+  },
+  "webkit": {
+    "engine": "webkit",
+    "version": "27.2",
+    "results": [
+      {
+        "mode": "Интервалы",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "На время",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "AMRAP",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Tabata",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "EMOM",
+        "width": 1280,
+        "height": 800,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Интервалы",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "На время",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "AMRAP",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Tabata",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "EMOM",
+        "width": 390,
+        "height": 844,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Интервалы",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "На время",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "AMRAP",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "Tabata",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      },
+      {
+        "mode": "EMOM",
+        "width": 844,
+        "height": 390,
+        "main": 56,
+        "side": 40
+      }
+    ],
+    "paper": {
+      "n": 8219,
+      "low": 8219
+    },
+    "javascriptErrors": []
+  },
+  "firefoxOffline": {
+    "engine": "firefox",
+    "version": "0.1.5",
+    "offlineReload": true,
+    "offlineAssets": true,
+    "offlineEditRestart": true
+  },
+  "webkitOffline": {
+    "engine": "webkit",
+    "version": "0.1.5",
+    "method": "own preview origin stopped (not setOffline)",
+    "offlineReload": true,
+    "offlineAssets": true,
+    "offlineEditRestart": true
+  },
+  "webkitUpdate": {
+    "oldScript": "/assets/index-DqapTAkg.js",
+    "newScript": "/assets/index-CETD-MmP.js",
+    "oldPausedPreserved": true,
+    "version": "0.1.5",
+    "offlineReady": true
+  }
+}
