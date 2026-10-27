@@ -29,7 +29,7 @@
 - **THEN** приложение позволяет настроить и провести тренировку в памяти и сообщает, что настройки после закрытия не сохранятся
 
 ### Requirement: Provide accessible local controls
-Интерактивные элементы SHALL иметь labels, видимый keyboard focus и обычные touch targets не менее 48 CSS px; явно выбранные владельцем круги pause/resume/reset SHALL иметь размер 40×40 CSS px. Space SHALL переключать pause/resume вне полей ввода, интерактивных элементов и открытых диалогов, а случайный клик по фону MUST не менять состояние таймера.
+Интерактивные элементы SHALL иметь labels, видимый keyboard focus и обычные touch targets не менее 48 CSS px; явно выбранные владельцем круги pause/resume SHALL иметь размер 56×56 CSS px, reset/edit — 40×40 CSS px. Space SHALL переключать pause/resume вне полей ввода, интерактивных элементов и открытых диалогов, а случайный клик по фону MUST не менять состояние таймера.
 
 #### Scenario: Editing a field with keyboard
 - **WHEN** фокус находится в поле настройки и пользователь нажимает Space
@@ -44,7 +44,7 @@
 
 #### Scenario: Browser blocks audio
 - **WHEN** браузер запрещает автоматическое воспроизведение
-- **THEN** интерфейс показывает «Нажмите для проверки звука» и не объявляет звук готовым до успешной проверки
+- **THEN** интерфейс объясняет необходимость повторно включить звук и проверить настройки браузера, не объявляя звук готовым до успешной проверки
 
 #### Scenario: Finish signal happens once
 - **WHEN** программа достигла completed и происходят последующие обновления интерфейса
@@ -134,15 +134,19 @@ UI SHALL не зависеть только от звука/цвета, учит
 - **THEN** логотип не занимает шапку, цифры/фаза/раунд и действия не перекрываются и не обрезаются
 
 ### Requirement: Keep icon-only timer actions compact and stationary
-Pause/resume SHALL быть одним кругом 40×40 CSS px только с иконкой и доступным именем. На paused такой же круг reset SHALL выдвигаться справа без сдвига основного действия; вне paused SHALL быть скрыт/недоступен. Reduced motion SHALL отключать анимацию появления. Focus SHALL быть видимым, сброс немедленным с подготовкой; локальная «Завершить» MUST отсутствовать, completed SHALL сохранять repeat.
+Pause/resume SHALL быть неподвижным icon-only кругом 56×56 CSS px. На paused reset справа и edit слева SHALL иметь размер 40×40 с зазором 28 px до основной кнопки; вне paused SHALL быть скрыты/недоступны. Reduced motion SHALL отключать появление. Focus/имена SHALL быть доступны. Reset SHALL повторять с подготовкой, edit открывать текущие параметры. Локальной «Завершить» MUST не быть, completed SHALL сохранять repeat.
 
-#### Scenario: Reveal reset without moving pause
+#### Scenario: Reveal side actions without moving pause
 - **WHEN** таймер поставлен на паузу и затем продолжен
-- **THEN** круг pause/resume сохраняет координаты и размер 40×40; reset появляется справа только на paused с доступным именем, затем скрывается, основная кнопка не сдвигается
+- **THEN** pause/resume сохраняет координаты и размер 56×56; reset/edit появляются только на paused справа/слева с зазором 28 px, понятными именами и размером 40×40, затем скрываются
 
-#### Scenario: Suppress reset motion
+#### Scenario: Suppress side action motion
 - **WHEN** reduced motion включён и таймер поставлен на паузу
-- **THEN** reset доступен сразу без анимации, иконки имеют доступные имена, keyboard focus виден
+- **THEN** reset/edit доступны сразу без анимации, иконки имеют доступные имена, keyboard focus виден
+
+#### Scenario: Edit a paused program
+- **WHEN** на паузе пользователь нажимает кнопку с карандашом
+- **THEN** открывается настройка с прежними параметрами режима, старый runtime сброшен; новый отсчёт начинается с подготовки только после «Старт»
 
 
 ### Requirement: Use a header menu arrow and immediate pause-only restart
@@ -162,11 +166,11 @@ Pause/resume SHALL быть одним кругом 40×40 CSS px только �
 
 
 ### Requirement: Provide unified settings on every view
-Шестерёнка «Настройки» SHALL находиться перед fullscreen на главной, настройке и таймере вместо динамика и i. Диалог SHALL содержать звук/test tone, краевые эффекты, отдельное мягкое конфетти и подсказки клавиш. В «Подготовка» SHALL оставаться только подготовка, без дублирования звука. По умолчанию звук SHALL быть выключен, краевые эффекты и конфетти включены; preferences SHALL храниться локально с fallback в память при недоступном/повреждённом storage. Reduced motion MUST иметь приоритет.
+Шестерёнка SHALL находиться перед fullscreen на всех экранах вместо динамика/i. Диалог SHALL содержать звук, edge effect, confetti с демо при включении и клавиши, без отдельной проверки звука. В форме SHALL оставаться только подготовка. Default SHALL быть sound false, effects true; preferences SHALL храниться локально с fallback в память. Reduced motion MUST иметь приоритет.
 
 #### Scenario: Change settings while timing
-- **WHEN** пользователь открывает шестерёнку и переключает звук/эффекты или проверяет сигнал
-- **THEN** controls доступны с понятными именами/состояниями, test tone требует локального действия, программа продолжает идти и прежних кнопок динамика/i нет
+- **WHEN** пользователь открывает шестерёнку и включает звук/эффекты
+- **THEN** controls доступны с понятными именами/состояниями, включение звука воспроизводит один test tone, включение каждого эффекта запускает конечное демо; snapshot не изменяется, программа продолжает идти и прежних кнопок динамика/i/проверки звука нет
 
 #### Scenario: Restore preferences safely
 - **WHEN** приложение перезагружено после изменения preferences либо storage повреждён/запрещён
@@ -182,14 +186,14 @@ Pause/resume SHALL быть одним кругом 40×40 CSS px только �
 
 
 ### Requirement: Keep the timer glyph positions stable
-Основное время SHALL сохранять локальный Oswald. Цифры и разделитель SHALL занимать фиксированные ячейки, чтобы смена знаков не сдвигала центр/ширину времени; одного font-feature tabular-nums MUST быть недостаточно без фактической стабильности геометрии. Адаптивный размер SHALL не обрезать цифры.
+Основное время SHALL сохранять локальный Oswald. Цифры и невидимый разделитель SHALL занимать прежние фиксированные ячейки; двоеточия крупного времени SHALL не рисоваться, доступное имя SHALL сохранять обычный формат с двоеточиями, чтобы смена знаков не сдвигала центр/ширину времени; одного font-feature tabular-nums MUST быть недостаточно без фактической стабильности геометрии. Адаптивный размер SHALL не обрезать цифры.
 
 #### Scenario: Replace narrow and wide digits
 - **WHEN** время меняется между сочетаниями 11:11, 00:00 и 08:08 на desktop, телефоне portrait или landscape
 - **THEN** одинаковые позиции знаков/разделителя и центр времени сохраняются, Oswald не заменён другим шрифтом
 
 ### Requirement: Display current phase progress
-Прямоугольная полоса высотой 50 CSS px с radius 0 SHALL показывать долю текущей фазы, отдельно preparation/work/rest. Countdown SHALL убывать remaining/duration от 1 до 0, count-up рабочей фазы For Time SHALL расти elapsed/duration от 0 до 1. На paused доля SHALL быть неподвижной; новая фаза SHALL считать от своего начала, естественное завершение SHALL сохранять конечную долю направления. Доля MUST оставаться в пределах 0–1.
+Прямоугольная полоса высотой 50 CSS px с radius 0 SHALL показывать долю текущей фазы, отдельно preparation/work/rest. Countdown SHALL убывать remaining/duration от 1 до 0, count-up рабочей фазы For Time SHALL расти elapsed/duration от 0 до 1. На paused доля SHALL быть неподвижной; новая фаза SHALL считать от своего начала, после завершения полоса SHALL быть скрыта, конечная доля направления сохраняется только внутренним расчётом. Доля MUST оставаться в пределах 0–1.
 
 #### Scenario: Reset the fraction at each phase boundary
 - **WHEN** интервалы имеют подготовку 10 с, работу 20 с и отдых 10 с
@@ -242,7 +246,7 @@ Space SHALL переключать pause/resume, Escape SHALL перезапус
 - **THEN** слово/полоса/разрешённый эффект используют соответствующий общий цвет, белые цифры сохраняют контраст, слова объясняют фазу
 
 ### Requirement: Limit optional edge effects to active phase windows
-Эффект SHALL быть красным в последние 10 с каждой work (всю work короче 10 с) и голубым в первые 20% rest. Цикл SHALL длиться 2 с с низкой alpha, blur SHALL быть ≤100 CSS px и уменьшаться на небольшом viewport. Эффект SHALL отсутствовать при paused/completed/hidden, выключенной опции и reduced motion; SHALL работать только при running и видимой странице.
+Фазовый эффект SHALL быть красным последние 10 с work (всю короткую work), голубым первые 20% rest. Цикл SHALL быть 2 с, alpha низкой, blur ≤100 px с уменьшением на небольшом viewport. Эффект SHALL требовать running/visible/on и отсутствовать при reduced motion. Отдельное конечное демо при включении настройки MAY работать вне фазового окна, без изменения таймера и с теми же motion/visibility guards.
 
 #### Scenario: Bound phase effect windows
 - **WHEN** work 20 с проходит границу 10 с остатка, work 5 с начинается либо rest 10 с проходит первые 2 с
@@ -253,7 +257,7 @@ Space SHALL переключать pause/resume, Escape SHALL перезапус
 - **THEN** подсветка отсутствует, основные цифры/слова/полоса остаются доступны без обязательной анимации
 
 ### Requirement: Display a proportional work and rest timeline
-Интервальная модель SHALL показывать шкалу 20 CSS px без скруглений/рамок с пропорциональными work/rest, без prep/последнего rest; EMOM только work. Красный work/голубой rest SHALL использовать общий серый фон. Countdown SHALL показывать остаток сегментов (future полны, past пусты, current убывает), count-up прошедшее (наоборот). Пауза SHALL фиксировать доли; конец SHALL оставлять 0 для countdown и 1 для count-up.
+Интервальная модель SHALL показывать шкалу 3 CSS px без скруглений/рамок с пропорциональными work/rest, без prep/последнего rest; EMOM только work. Красный work/голубой rest SHALL использовать общий серый фон. Countdown SHALL показывать остаток сегментов (future полны, past пусты, current убывает), count-up прошедшее (наоборот). Пауза SHALL фиксировать доли; после завершения шкала SHALL скрываться; конечные доли 0/1 остаются только внутренним расчётом.
 
 #### Scenario: Advance through a partial rest segment
 - **WHEN** work 20 с завершена и прошли 5 с из rest 10 с
@@ -261,7 +265,7 @@ Space SHALL переключать pause/resume, Escape SHALL перезапус
 
 #### Scenario: Match the count direction
 - **WHEN** шкала получает состояние прямого отсчёта вместо обратного на той же временной позиции
-- **THEN** каждый сегмент показывает прошедшую долю вместо оставшейся; завершение заполняет всю шкалу, а при countdown опустошает её
+- **THEN** каждый сегмент показывает прошедшую долю вместо оставшейся; до завершения соблюдается направление, после завершения шкала скрывается
 
 #### Scenario: Omit preparation and final rest
 - **WHEN** программа имеет подготовку, 3 раунда с работой/отдыхом либо выбрана EMOM
@@ -313,11 +317,11 @@ Countdown SHALL располагать хронологически первый
 - **THEN** SVG/ICO favicon и локальные шрифты доступны, новая тренировка запускается, offline-ready не объявляется при неполном обязательном cache
 
 ### Requirement: Celebrate natural completion once with an optional local effect
-Настройки SHALL иметь независимую persistent опцию мягкого конфетти по умолчанию true с безопасным fallback в память. Собственная локальная анимация SHALL длиться примерно 5 с один раз при естественном completed/лимите, без CDN. Menu exit/reset/manual finish/rerender MUST не запускать её. При off/reduced motion анимация SHALL отсутствовать; результат и кнопки MUST оставаться читаемыми/доступными.
+Независимая persistent опция конфетти SHALL иметь default true и fallback в память. Локальная анимация без CDN SHALL запускаться один раз при естественном completed/лимите: частицы падают, оседают и остаются статичными до ухода/повтора/off, без непрерывного RAF. Menu/reset/manual finish/rerender MUST не запускать её. Off/reduced motion SHALL подавлять эффект; результат/кнопки MUST оставаться доступны.
 
 #### Scenario: Celebrate only a natural finish
 - **WHEN** программа достигает естественного конца или For Time лимита с включённой опцией
-- **THEN** конфетти появляется один раз примерно на 5 с и не перезапускается при последующих render; фоновые зависимости CDN отсутствуют
+- **THEN** конфетти появляется один раз, оседает внизу и остаётся без перезапуска при последующих render; фоновые зависимости CDN отсутствуют
 
 #### Scenario: Suppress celebration on reset and preferences
 - **WHEN** пользователь выходит в меню, сбрасывает занятие, выключает конфетти или ОС требует reduced motion
@@ -344,3 +348,32 @@ Countdown SHALL располагать хронологически первый
 #### Scenario: Avoid announcing every snapshot
 - **WHEN** время/полосы обновляются при running
 - **THEN** доступные toggle-имена не меняются каждую секунду и не создают live announcement каждого кадра; чтение времени/прогресса остаётся доступным по запросу
+
+
+### Requirement: Show a clear uncluttered completion
+Естественный результат SHALL показывать «ТЫ МОЛОДЕЦ! 🏆» вместо «ГОТОВО». После completed обе полосы и их click-поверхности SHALL отсутствовать; крупное итоговое время и повтор SHALL оставаться доступны. Отдельная надпись лимита For Time MAY сохраняться для ясности причины завершения.
+
+#### Scenario: Finish without empty tracks
+- **WHEN** интервалы либо AMRAP естественно завершились
+- **THEN** видны «ТЫ МОЛОДЕЦ! 🏆», итоговое время и повтор; нет пустых прогресс-полос, конфетти не закрывает управление
+
+### Requirement: Preview effects from their switches
+Переход каждого переключателя из off в on SHALL запускать один краткий preview соответствующего эффекта: проверочный сигнал для звука, краевая пульсация для edge effect, конечное конфетти для celebration. Обычное открытие настроек/rerender/загрузка сохранённого on MUST не запускать preview. Preview MUST не менять status/elapsed/runId, выключение эффекта или закрытие настроек SHALL прекращать preview, reduced motion/hidden SHALL подавлять визуальные preview.
+
+#### Scenario: Learn an effect without changing a workout
+- **WHEN** пользователь на главной или во время отсчёта включает один из эффектов в настройках
+- **THEN** кратко демонстрируется именно этот эффект без изменения программы; повторные render не повторяют демо, выключение/закрытие прекращает его
+
+### Requirement: Use semantic setup focus colors
+Focus полей SHALL использовать цвет их смысла: раунды белый, работа #EF4A40, отдых #59B8E8, подготовка #F2A541. Видимая рамка/outline SHALL сохранять keyboard focus и названия полей; цвет MUST не заменять сообщение об ошибке.
+
+#### Scenario: Focus each interval field
+- **WHEN** пользователь кликает или переводит keyboard focus на раунды, работу, отдых и раскрытую подготовку
+- **THEN** focus имеет соответствующий цвет, поля остаются подписанными и редактируемыми, ошибки доступны отдельно
+
+### Requirement: Keep the local mode menu concise
+Главная SHALL показывать пять режимов с иконками без строк «ВАША ТРЕНИРОВКА» и «Выберите режим»; удаление этих видимых строк MUST не лишать выбор режима доступного имени.
+
+#### Scenario: Open the concise menu
+- **WHEN** приложение открывает локальную главную
+- **THEN** доступны все пять режимов и настройки, лишние две вводные строки отсутствуют

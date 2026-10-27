@@ -55,6 +55,7 @@ export function Duration({
   return (
     <label
       className={`field${hideLabel ? " field-unlabelled" : ""}`}
+      data-field-kind={id === "prep" ? "preparation" : id}
       htmlFor={id}
     >
       <span

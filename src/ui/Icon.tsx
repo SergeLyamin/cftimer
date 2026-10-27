@@ -7,6 +7,11 @@ const shapes = {
       <circle cx="11.5" cy="12" r="3" />
     </>
   ),
+  edit: (
+    <>
+      <path d="m15 4 5 5M4 20l5-1L21 7a2.1 2.1 0 0 0-5-5L4 14v6Z" />
+    </>
+  ),
   back: <path d="m14 5-7 7 7 7M7 12h14" />,
   arrow: <path d="M5 12h14m-7-7 7 7-7 7" />,
   info: (

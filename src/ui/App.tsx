@@ -92,6 +92,9 @@ export default function App() {
   const dialogRef = useRef<HTMLElement>(null);
   const dialogTrigger = useRef<HTMLElement | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const previewSequence = useRef(0);
+  const [pulsePreview, setPulsePreview] = useState(0);
+  const [confettiPreview, setConfettiPreview] = useState(0);
   const [confirm, setConfirm] = useState<"menu" | null>(null);
   const [preferences, setPreferences] = useState<Preferences>(() => ({
     ...defaultPreferences,
@@ -139,6 +142,8 @@ export default function App() {
   }
   function closeDialog() {
     setSettingsOpen(false);
+    setPulsePreview(0);
+    setConfettiPreview(0);
     setConfirm(null);
   }
   function backToModes(trigger: HTMLElement) {
@@ -152,8 +157,7 @@ export default function App() {
   function beep() {
     void audio.current.test().then((ready) => {
       setAudioReady(ready);
-      if (!ready)
-        setNotice("Нажмите для проверки звука. Проверьте настройки браузера.");
+      if (!ready) setNotice("Звук недоступен. Проверьте настройки браузера.");
     });
   }
   function updatePreference(key: keyof Preferences, value: boolean) {
@@ -163,14 +167,27 @@ export default function App() {
       setNotice(
         "Настройки доступны до закрытия страницы: браузер запретил сохранение.",
       );
-    if (key === "sound" && value)
-      void audio.current.unlock().then(setAudioReady);
+    if (key === "sound" && value) beep();
+    if (key === "edgePulse")
+      setPulsePreview(value ? ++previewSequence.current : 0);
+    if (key === "confetti")
+      setConfettiPreview(value ? ++previewSequence.current : 0);
   }
   function restart() {
     action("reset");
     action("start");
     requestAnimationFrame(() =>
       document.querySelector<HTMLButtonElement>(".timer-main-action")?.focus(),
+    );
+  }
+  function editWorkout() {
+    if (engine.current.getSnapshot().status !== "paused") return;
+    setConfig({ ...engine.current.getSnapshot().config });
+    action("reset");
+    setErrors({});
+    setView("setup");
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLInputElement>(".setup input")?.focus(),
     );
   }
   function toggleFullscreen() {
@@ -446,7 +463,7 @@ export default function App() {
     snapshot.status === "completed"
       ? config.mode === "for-time" && snapshot.completionReason === "limit"
         ? "ЛИМИТ ВРЕМЕНИ"
-        : "ГОТОВО"
+        : "ТЫ МОЛОДЕЦ! 🏆"
       : snapshot.status === "paused"
         ? "ПАУЗА"
         : snapshot.phase
@@ -480,17 +497,19 @@ export default function App() {
       data-status={view === "timer" ? snapshot.status : undefined}
       style={{ "--timer-footer-height": `${footerHeight}px` } as CSSProperties}
     >
-      {view === "timer" && (
+      {(view === "timer" || settingsOpen) && (
         <CompletionConfetti
           snapshot={snapshot}
+          previewId={confettiPreview}
           enabled={
             preferences.confetti !== false && !reducedMotion && pageVisible
           }
         />
       )}
-      {view === "timer" && (
+      {(view === "timer" || settingsOpen) && (
         <PhaseEffects
           snapshot={snapshot}
+          previewId={pulsePreview}
           enabled={preferences.edgePulse && !reducedMotion && pageVisible}
         />
       )}
@@ -538,9 +557,7 @@ export default function App() {
       )}
       <main>
         {view === "home" ? (
-          <section className="home">
-            <p className="eyebrow">ВАША ТРЕНИРОВКА</p>
-            <h1>Выберите режим</h1>
+          <section className="home" aria-label="Выбор режима">
             <div className="mode-grid">
               {modes.map((mode) => (
                 <button
@@ -566,7 +583,11 @@ export default function App() {
               noValidate
             >
               {(interval || config.mode === "emom") && (
-                <label className="field" htmlFor="rounds">
+                <label
+                  className="field"
+                  data-field-kind="rounds"
+                  htmlFor="rounds"
+                >
                   <span>Раунды</span>
                   <input
                     id="rounds"
@@ -700,6 +721,20 @@ export default function App() {
                     </button>
                   ) : (
                     <>
+                      <div
+                        className="timer-edit-slot"
+                        inert={snapshot.status !== "paused"}
+                      >
+                        <button
+                          className="secondary timer-edit"
+                          aria-label="Редактировать таймер"
+                          title="Редактировать таймер"
+                          disabled={snapshot.status !== "paused"}
+                          onClick={editWorkout}
+                        >
+                          <Icon name="edit" className="action-icon" />
+                        </button>
+                      </div>
                       <button
                         className="primary timer-main-action"
                         aria-label={
@@ -776,13 +811,6 @@ export default function App() {
                   onChange={(e) => updatePreference("sound", e.target.checked)}
                 />
               </label>
-              <button
-                type="button"
-                className="quiet settings-test-sound"
-                onClick={beep}
-              >
-                Проверить звук
-              </button>
               {audioReady && (
                 <p className="settings-note">Звук разрешён браузером</p>
               )}

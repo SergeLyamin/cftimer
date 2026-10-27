@@ -433,8 +433,8 @@ details .field {
   position: relative;
   display: flex;
   align-items: center;
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
 }
 .timer-controls .primary,
 .timer-controls .secondary,
@@ -451,9 +451,9 @@ details .field {
 .timer-controls .timer-main-action {
   position: relative;
   z-index: 2;
-  width: 40px;
-  height: 40px;
-  min-height: 40px;
+  width: 56px;
+  height: 56px;
+  min-height: 56px;
   border-radius: 50%;
   padding: 0;
   flex: none;
@@ -462,40 +462,52 @@ details .field {
   width: auto;
 }
 .timer-controls.is-completed .timer-main-action {
+  height: 40px;
+  min-height: 40px;
   width: auto;
   min-width: 136px;
   padding: 0 18px;
   border-radius: 20px;
   font-size: 15px;
 }
-.timer-reset-slot {
+.timer-reset-slot,
+.timer-edit-slot {
   position: absolute;
-  left: 52px;
-  top: 0;
+  top: 8px;
   width: 40px;
   height: 40px;
   visibility: hidden;
   opacity: 0;
-  transform: translateX(-52px) scale(0.8);
+  transform: translateX(-76px) scale(0.8);
   transition:
     opacity 180ms ease,
     transform 240ms ease,
     visibility 0s 240ms;
 }
-.is-paused .timer-reset-slot {
+.timer-reset-slot {
+  left: 84px;
+}
+.timer-edit-slot {
+  right: 84px;
+  transform: translateX(76px) scale(0.8);
+}
+.is-paused .timer-reset-slot,
+.is-paused .timer-edit-slot {
   visibility: visible;
   opacity: 1;
   transform: translateX(0);
   transition-delay: 0s;
 }
-.timer-reset {
+.timer-reset,
+.timer-edit {
   width: 40px;
   height: 40px;
   min-height: 40px;
   border-radius: 50%;
   padding: 0;
 }
-.timer-reset:focus-visible {
+.timer-reset:focus-visible,
+.timer-edit:focus-visible {
   outline-offset: -5px;
 }
 .action-icon {
@@ -958,15 +970,6 @@ details .field {
   background: #08090a;
   transform: translateX(20px);
 }
-.dialog .settings-test-sound {
-  width: auto;
-  padding-left: 0;
-  margin: 0;
-  text-align: left;
-  font-size: 13px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 .dialog .settings-note {
   font-size: 12px;
   margin: 0 0 8px;
@@ -1059,7 +1062,7 @@ details .field {
 .workout-timeline {
   display: flex;
   width: min(780px, 88%);
-  height: 20px;
+  height: 3px;
   margin-top: 16px;
   flex-shrink: 0;
 }
@@ -1141,4 +1144,37 @@ details .field {
   .workout-timeline {
     width: min(620px, 86%);
   }
+}
+
+/* Phase-aware field focus; invalid input keeps its explicit error text. */
+.field {
+  --field-focus: #f5f5f5;
+}
+.field[data-field-kind="work"] {
+  --field-focus: var(--color-work);
+}
+.field[data-field-kind="rest"] {
+  --field-focus: var(--color-rest);
+}
+.field[data-field-kind="preparation"] {
+  --field-focus: var(--color-preparation);
+}
+.field input:focus {
+  outline: 3px solid var(--field-focus);
+  outline-offset: 5px;
+}
+.timer-controls:not(.is-completed) .timer-main-action .action-icon {
+  width: 26px;
+  height: 26px;
+}
+
+.effect-preview {
+  z-index: 21;
+  pointer-events: none;
+}
+
+.workout-timeline .readout-toggle {
+  top: -10px;
+  bottom: auto;
+  height: 24px;
 }
