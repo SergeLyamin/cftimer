@@ -1,0 +1,21 @@
+{
+  "oldAsset": "/assets/index-BgKQaoxn.js",
+  "newAsset": "/assets/index-CETD-MmP.js",
+  "version": "0.1.5",
+  "controls": {
+    "main": 56,
+    "side": 40
+  },
+  "paper": {
+    "total": 7757,
+    "bottom": 7757
+  },
+  "offline": true,
+  "javascriptErrors": [],
+  "update": "old active remained running while waiting; new version after leaving client",
+  "source": "d7734a5de0b16ae641afb3fc707555c9c725def6",
+  "release": "/home/timer/timer.lyamin.org/releases/d7734a5",
+  "previous": "releases/b1ad370",
+  "backup": "/home/timer/timer.lyamin.org/backups/release-d7734a5",
+  "archiveSha256": "6989300b28fc8f66c92204652cbd732de39557b27991d4c00abeb44ac30b1e82"
+}

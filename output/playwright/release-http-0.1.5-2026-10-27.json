@@ -1,0 +1,293 @@
+{
+  "checkedAt": "2026-10-27T10:43:18.272409+00:00",
+  "version": "0.1.5",
+  "source": "d7734a5de0b16ae641afb3fc707555c9c725def6",
+  "baseUrl": "https://timer.lyamin.org",
+  "cacheBypass": "unique query and Cache-Control/Pragma no-cache; no browser caches changed",
+  "releaseFiles": 10,
+  "passed": 14,
+  "total": 14,
+  "allPassed": true,
+  "results": [
+    {
+      "path": "/assets/index-CETD-MmP.js",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/assets/index-CETD-MmP.js?cf-release-check=1793097795079823000",
+      "expectedStatus": 200,
+      "expectedSha256": "44a659b936ae35f6c963fc833fb480292ed805f90217c09c10b64dfa03a00373",
+      "status": 200,
+      "bytes": 260362,
+      "sha256": "44a659b936ae35f6c963fc833fb480292ed805f90217c09c10b64dfa03a00373",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "ETag": "\"6ae07daa-3f90a\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:15 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/assets/index-DZkMvtQR.css",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/assets/index-DZkMvtQR.css?cf-release-check=1793097795080060000",
+      "expectedStatus": 200,
+      "expectedSha256": "acf4bde89ce8a3f09aab1be4fc538388bde1f5e673ad3a0daf01ddda6575dfac",
+      "status": 200,
+      "bytes": 21874,
+      "sha256": "acf4bde89ce8a3f09aab1be4fc538388bde1f5e673ad3a0daf01ddda6575dfac",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "text/css",
+        "ETag": "\"6ae07daa-5572\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:15 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/favicon.ico",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/favicon.ico?cf-release-check=1793097795080175000",
+      "expectedStatus": 200,
+      "expectedSha256": "aee1e0e938426ab98c4c22c785252e311daa1354921bedf286dd077abfd26382",
+      "status": 200,
+      "bytes": 15086,
+      "sha256": "aee1e0e938426ab98c4c22c785252e311daa1354921bedf286dd077abfd26382",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "image/x-icon",
+        "ETag": "\"6ae07daa-3aee\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:15 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/favicon.svg",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/favicon.svg?cf-release-check=1793097795080249000",
+      "expectedStatus": 200,
+      "expectedSha256": "f78d7f76959082792cfe54566191d59d9e2f012909bf14cfb68692b2de356ce2",
+      "status": 200,
+      "bytes": 262,
+      "sha256": "f78d7f76959082792cfe54566191d59d9e2f012909bf14cfb68692b2de356ce2",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "image/svg+xml",
+        "ETag": "\"6ae07daa-106\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:15 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/fonts/OFL-Oswald.txt",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/fonts/OFL-Oswald.txt?cf-release-check=1793097795690246000",
+      "expectedStatus": 200,
+      "expectedSha256": "0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652",
+      "status": 200,
+      "bytes": 4483,
+      "sha256": "0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "text/plain; charset=utf-8",
+        "ETag": "\"6ae07daa-1183\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:16 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/fonts/Oswald-Variable.ttf",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/fonts/Oswald-Variable.ttf?cf-release-check=1793097795690974000",
+      "expectedStatus": 200,
+      "expectedSha256": "5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817",
+      "status": 200,
+      "bytes": 172088,
+      "sha256": "5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "application/octet-stream",
+        "ETag": "\"6ae07daa-2a038\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:16 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/icon.svg",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/icon.svg?cf-release-check=1793097795828220000",
+      "expectedStatus": 200,
+      "expectedSha256": "eec81e347616f60e08b352427c987800a99d2e78c102688df3439e8841d5aad9",
+      "status": 200,
+      "bytes": 321,
+      "sha256": "eec81e347616f60e08b352427c987800a99d2e78c102688df3439e8841d5aad9",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "image/svg+xml",
+        "ETag": "\"6ae07daa-141\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:16 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/index.html",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/index.html?cf-release-check=1793097796116789000",
+      "expectedStatus": 200,
+      "expectedSha256": "d273dfede3d9754b5e03a8541f76c6abf2147c1b3a2cc8964e010df9a9a9562d",
+      "status": 200,
+      "bytes": 841,
+      "sha256": "d273dfede3d9754b5e03a8541f76c6abf2147c1b3a2cc8964e010df9a9a9562d",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "text/html; charset=utf-8",
+        "ETag": "\"6ae07daa-349\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:16 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/manifest.webmanifest?cf-release-check=1793097796267656000",
+      "expectedStatus": 200,
+      "expectedSha256": "86f30206ed138dcf9fdc3d421fa52d532a01b18982f16b4bc3cbd25b7b378b4a",
+      "status": 200,
+      "bytes": 300,
+      "sha256": "86f30206ed138dcf9fdc3d421fa52d532a01b18982f16b4bc3cbd25b7b378b4a",
+      "headers": {
+        "Cache-Control": null,
+        "Content-Type": "application/manifest+json",
+        "ETag": "\"12c-65ecff5894cd4\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": null,
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/sw.js",
+      "category": "release-file",
+      "url": "https://timer.lyamin.org/sw.js?cf-release-check=1793097796538555000",
+      "expectedStatus": 200,
+      "expectedSha256": "27598e53e72eab5f190f2a243a0e59be6a4973bdbc97957ff038ecc413cef096",
+      "status": 200,
+      "bytes": 18135,
+      "sha256": "27598e53e72eab5f190f2a243a0e59be6a4973bdbc97957ff038ecc413cef096",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "ETag": "\"6ae07dab-46d7\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:11 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:16 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/",
+      "category": "public-entry",
+      "url": "https://timer.lyamin.org/?cf-release-check=1793097796687944000",
+      "expectedStatus": 200,
+      "expectedSha256": "d273dfede3d9754b5e03a8541f76c6abf2147c1b3a2cc8964e010df9a9a9562d",
+      "status": 200,
+      "bytes": 841,
+      "sha256": "d273dfede3d9754b5e03a8541f76c6abf2147c1b3a2cc8964e010df9a9a9562d",
+      "headers": {
+        "Cache-Control": null,
+        "Content-Type": "text/html; charset=utf-8",
+        "ETag": "\"349-65ecff5894c3f\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:32:10 GMT",
+        "Content-Encoding": null,
+        "Expires": null,
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/assets/index-BgKQaoxn.js",
+      "category": "previous-asset",
+      "url": "https://timer.lyamin.org/assets/index-BgKQaoxn.js?cf-release-check=1793097796704924000",
+      "expectedStatus": 200,
+      "expectedSha256": null,
+      "status": 200,
+      "bytes": 258618,
+      "sha256": "870998f80ab7f1eaa954cadefe1bb716ee24463deb0741a6ca602eeba150b87b",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "ETag": "\"6ae08037-3f23a\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:43:03 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:17 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/assets/index-BvySuFq7.css",
+      "category": "previous-asset",
+      "url": "https://timer.lyamin.org/assets/index-BvySuFq7.css?cf-release-check=1793097797081176000",
+      "expectedStatus": 200,
+      "expectedSha256": null,
+      "status": 200,
+      "bytes": 21322,
+      "sha256": "f58db340dda25efd2c5a35bd5332e66dfa9ab379e34be160544f31df842f99ca",
+      "headers": {
+        "Cache-Control": "max-age=2592000",
+        "Content-Type": "text/css",
+        "ETag": "\"6ae08037-534a\"",
+        "Last-Modified": "Tue, 27 Oct 2026 10:43:03 GMT",
+        "Content-Encoding": null,
+        "Expires": "Thu, 26 Nov 2026 10:43:17 GMT",
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    },
+    {
+      "path": "/assets/missing-release-0.1.5-check.js",
+      "category": "missing-asset",
+      "url": "https://timer.lyamin.org/assets/missing-release-0.1.5-check.js?cf-release-check=1793097797118297000",
+      "expectedStatus": 404,
+      "expectedSha256": null,
+      "status": 404,
+      "bytes": 279,
+      "sha256": "77e66009295fe58457621643ee90189af7abaf3406664d546ab663d82786e3d0",
+      "headers": {
+        "Cache-Control": null,
+        "Content-Type": "text/html; charset=iso-8859-1",
+        "ETag": null,
+        "Last-Modified": null,
+        "Content-Encoding": null,
+        "Expires": null,
+        "Server": "nginx/1.22.1"
+      },
+      "passed": true
+    }
+  ]
+}

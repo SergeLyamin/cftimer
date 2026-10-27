@@ -1,8 +1,8 @@
-# Кандидат 0.1.5 — проверки 27.10.2026
+# Релиз 0.1.5 — проверки и публикация 27.10.2026
 
-Владелец просмотрел локальный desktop и подтвердил: **«все нравится. Продолжай»**. Это одобрение UI и продолжения проверок. Production остаётся **0.1.4**, новый выпуск не выполнялся; отдельная отмашка на публикацию 0.1.5 ожидается.
+Владелец просмотрел локальный desktop и подтвердил: **«все нравится. Продолжай»**. После программных проверок владелец отдельно разрешил публикацию ответом **«да»**. **0.1.5 опубликована** на https://timer.lyamin.org/.
 
-Runtime-кандидат: `d7734a5de0b16ae641afb3fc707555c9c725def6`. Изменения и первичный desktop review: [отчёт](ui-desktop-review-2026-10-27.md). [Машинный протокол](../output/playwright/acceptance-0.1.5-2026-10-27.json).
+Runtime source: `d7734a5de0b16ae641afb3fc707555c9c725def6`. Изменения и первичный desktop review: [отчёт](ui-desktop-review-2026-10-27.md). [Машинный протокол](../output/playwright/acceptance-0.1.5-2026-10-27.json).
 
 ## Проверки
 
@@ -16,8 +16,10 @@ Runtime-кандидат: `d7734a5de0b16ae641afb3fc707555c9c725def6`. Измен
 
 Снимки: [Chromium телефон](../output/playwright/ui27-regression-timer-mobile.png), [Chromium landscape](../output/playwright/ui27-regression-timer-landscape.png), [Firefox телефон](../output/playwright/accept27-firefox-intervals-390.png), [WebKit landscape](../output/playwright/accept27-webkit-intervals-844.png), [финал WebKit](../output/playwright/accept27-webkit-completed-phone.png), [настройки Firefox](../output/playwright/accept27-firefox-settings-phone.png), [обновлённый WebKit](../output/playwright/accept27-webkit-upgraded.png), [WebKit offline](../output/playwright/accept27-webkit-offline.png).
 
-## Подготовленный артефакт
+## Артефакт и публикация
 
-[Manifest с SHA256 всех файлов](../output/playwright/release-candidate-0.1.5-2026-10-27.json): 10 файлов dist, 11 precache entries. Локальный tar.gz — **188194 байта**, SHA256 `6989300b28fc8f66c92204652cbd732de39557b27991d4c00abeb44ac30b1e82`. Архив сохранён в `/private/tmp/cftimer-0.1.5-d7734a5/`; он не передавался на сервер.
+[Manifest с SHA256 всех файлов](../output/playwright/release-candidate-0.1.5-2026-10-27.json): 10 файлов dist, 11 precache entries. Локальный tar.gz — **188194 байта**, SHA256 `6989300b28fc8f66c92204652cbd732de39557b27991d4c00abeb44ac30b1e82`. Архив сохранён в `/private/tmp/cftimer-0.1.5-d7734a5/`; проверенная копия передана на сервер и сохранена в `backups/release-d7734a5/`.
 
-После разрешения публикации: повторно проверить актуальный `www`, сохранить предыдущий релиз целиком и его hash-assets, сверить архив/каждый новый файл, атомарно переключить symlink, провести HTTPS/live/PWA smoke и записать фактический откат. Последний опубликованный runtime — `b1ad370` (0.1.4); его сохранность и путь проверяются на сервере непосредственно перед выпуском.
+`www` атомарно переключён с `releases/b1ad370` на `releases/d7734a5`; предыдущий каталог и все его hash-assets сохранены. [HTTPS-протокол](../output/playwright/release-http-0.1.5-2026-10-27.json): **14/14**, новые файлы совпадают по SHA256, прежние JS/CSS доступны, отсутствующий JS404. [Live smoke](../output/playwright/release-browser-0.1.5-2026-10-27.json) подтвердил новый UI, финал/конфетти, offline и обновление активного клиента0.1.4 без прерывания.
+
+Production-снимки: [пауза](../output/playwright/live015-paused-phone.png), [финал](../output/playwright/live015-completed-phone.png), [offline](../output/playwright/live015-offline-phone.png), [ожидание обновления](../output/playwright/live015-update-waiting.png), [обновлённая PWA](../output/playwright/live015-upgraded-pwa.png). Процедура и [откат](deployment.md#релиз-015--27102026) записаны. Ограничения кэширования хостинга сохраняются.
