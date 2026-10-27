@@ -1,0 +1,109 @@
+{
+  "time": "2026-10-27T16:11:12.907Z",
+  "version": "0.2.0",
+  "commit": "cb1f2e0a6f364a82de62509051a1bc7a568fff14",
+  "checks": [
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "max-age=2592000",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "assets/index-CO8G2hjU.css",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "public, max-age=31536000, immutable",
+      "contentType": "text/css"
+    },
+    {
+      "path": "assets/index-CR95gO2v.js",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "public, max-age=31536000, immutable",
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "favicon.ico",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "max-age=2592000",
+      "contentType": "image/x-icon"
+    },
+    {
+      "path": "favicon.svg",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "max-age=2592000",
+      "contentType": "image/svg+xml"
+    },
+    {
+      "path": "fonts/OFL-Oswald.txt",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "max-age=2592000",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "fonts/Oswald-Variable.ttf",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "max-age=2592000",
+      "contentType": "application/octet-stream"
+    },
+    {
+      "path": "icon.svg",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "max-age=2592000",
+      "contentType": "image/svg+xml"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "no-cache",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "no-cache",
+      "contentType": "application/manifest+json"
+    },
+    {
+      "path": "remote/index.html",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "no-cache",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "path": "sw.js",
+      "status": 200,
+      "hashMatches": true,
+      "cacheControl": "no-cache",
+      "contentType": "application/javascript; charset=utf-8"
+    }
+  ],
+  "missingStatus": 404,
+  "oldAssets": [
+    {
+      "name": "index-CETD-MmP.js",
+      "status": 200
+    }
+  ],
+  "root": {
+    "status": 200,
+    "cacheControl": "no-cache",
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' wss://timer.lyamin.org; worker-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  },
+  "remote": {
+    "status": 200,
+    "cacheControl": "no-cache"
+  },
+  "passed": true,
+  "headerFollowupVerified": true
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-27T16:09:21.411Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "health",
+      "passed": true,
+      "elapsedMs": 497
+    },
+    {
+      "name": "foreign_origin_rejected",
+      "passed": true,
+      "elapsedMs": 497
+    },
+    {
+      "name": "rooms_A_B_created",
+      "passed": true,
+      "elapsedMs": 706
+    },
+    {
+      "name": "first_controllers_A_B_ready",
+      "passed": true,
+      "elapsedMs": 1116
+    },
+    {
+      "name": "room_A_start_ack_room_B_unchanged",
+      "passed": true,
+      "elapsedMs": 313
+    },
+    {
+      "name": "room_A_pause_ack_room_B_unchanged",
+      "passed": true,
+      "elapsedMs": 308
+    },
+    {
+      "name": "room_A_resume_ack_room_B_unchanged",
+      "passed": true,
+      "elapsedMs": 312
+    },
+    {
+      "name": "phone_A_reload_keeps_display_running",
+      "passed": true,
+      "elapsedMs": 1098
+    }
+  ],
+  "elapsedMs": 4855
+}

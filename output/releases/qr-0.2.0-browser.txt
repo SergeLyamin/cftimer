@@ -1,0 +1,6 @@
+CF Timer 0.2.0 production live Chromium check
+PASS live QR pair, clean fragment, start/pause/resume/edit/restart/confirmed-menu ACK reflected on own display
+PASS offline remote controls disabled, no local-timer fallback
+PASS cached standalone offline countdown/reload + saved duration and progress opacity37%
+PASS no page errors or online console/CSP errors (expected offline network failures excluded)
+COMPLETE all live smoke checks passed; own contexts closed only

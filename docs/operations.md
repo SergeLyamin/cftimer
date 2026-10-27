@@ -44,3 +44,15 @@
 ## Конфиденциальность перед включением сбора
 
 [BL-02 и проект политики](privacy-policy-draft.md) требуют инвентаризации не только application events, но и access/error logs прокси, хостинга, CDN, cookies и browser storage. Несекретный session ID не доказывает анонимность. Сроки 14 дней/1 GiB и очередь 200/24 ч — предложения до проверки реализации и оснований обработки. Метрика/GA подключаются отдельным шагом после определения юрисдикции, состава данных и выполнения применимых требований; отказ от аналитики не блокирует таймер или пульт. Не передавать внешним счётчикам credentials, QR URL и идентификаторы управления.
+
+## Техническая диагностика опубликованного relay0.2.0
+
+На dev7 отдельный сервис `cf-timer-relay`, приватный runtime `/home/timer/timer.lyamin.org/relay/current`, Node 24 через `/home/timer/.local/node24`. Под timer (группаadm) доступны:
+
+```sh
+systemctl status cf-timer-relay --no-pager
+journalctl -u cf-timer-relay --since '1 hour ago' --no-pager
+curl --fail http://127.0.0.1:43980/healthz
+```
+
+`systemctl show cf-timer-relay -p MemoryCurrent -p NRestarts` помогает отличить рост памяти/рестарты от сетевых проблем. Не публиковать journal целиком без проверки; технический allowlist не включает credentials/QRURLs/IP, но runtime логи содержат несекретныеroom IDs. Процесс имеет MemoryMax256M и lograte100/30с. Hostjournal retention не равен предложенной политике продуктовых данных; eventqueue/usageCLI ещё не реализованы. Публичный `/healthz` возвращает только status ok, административнойHTTPпанели нет.

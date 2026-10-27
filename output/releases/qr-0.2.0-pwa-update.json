@@ -1,0 +1,50 @@
+{
+  "result": "PASS",
+  "scope": "Production PWA transition; isolated own browser context and own workout only",
+  "production": "https://timer.lyamin.org/",
+  "old": {
+    "version": "0.1.5",
+    "asset": "/assets/index-CETD-MmP.js",
+    "offlineReadinessConfirmed": true,
+    "controllerBeforeDeployment": true,
+    "workout": "AMRAP 60:00 with 00:10 preparation",
+    "startedAt": "2026-10-27T16:04:45.130Z"
+  },
+  "afterSwitchWhileRunning": {
+    "observedAtEpochMs": 1793117484611,
+    "elapsedSinceStartMs": 399481,
+    "time": "53:31",
+    "running": true,
+    "asset": "/assets/index-CETD-MmP.js",
+    "oldControllerState": "activated",
+    "newWorkerWaitingState": "installed",
+    "notice": "Обновление готово. После тренировки закройте все вкладки приложения и откройте снова."
+  },
+  "transition": {
+    "ownWorkoutEndedByConfirmedMenu": true,
+    "navigatedToAboutBlank": true,
+    "skipWaitingCalled": false,
+    "unregisterCalled": false,
+    "cacheCleared": false,
+    "otherUserContextsTouched": false,
+    "registrationUpdateRequested": true
+  },
+  "new": {
+    "version": "0.2.0",
+    "asset": "/assets/index-CR95gO2v.js",
+    "observedAt": "2026-10-27T16:11:55.249Z",
+    "activeState": "activated",
+    "waiting": false,
+    "controlled": true,
+    "controllerState": "activated",
+    "homeVisible": true,
+    "qrVisible": true,
+    "remoteFree": true
+  },
+  "leftOpen": "Own production home with current QR, headed browser brought to front",
+  "notes": [
+    "Initial old-app navigation had installed active worker but no controller; before baseline only our test page was reloaded, then our workout started again under old controller.",
+    "An initial observation raced with worker state change and was retried with null-safe reads; stable waiting installed was then observed while old timer continued.",
+    "No tokens or credentials recorded."
+  ]
+}
